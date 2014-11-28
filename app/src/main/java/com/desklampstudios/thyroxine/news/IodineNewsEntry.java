@@ -5,7 +5,6 @@ import android.text.Html;
 import android.text.Spanned;
 
 import com.desklampstudios.thyroxine.ListTagHandler;
-import com.desklampstudios.thyroxine.db.ThyroxineContract;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,15 +39,6 @@ class IodineNewsEntry implements Serializable {
     public String toString() {
         return String.format("Title: %s\nPublished: %s\nLink: %s\nContent: %s\n",
                 this.link, this.title, new Date(this.published), this.contentSnippet);
-    }
-
-    public ContentValues toContentValues() {
-        ContentValues values = new ContentValues();
-        values.put(ThyroxineContract.NewsEntry.COLUMN_LINK, this.link);
-        values.put(ThyroxineContract.NewsEntry.COLUMN_TITLE, this.title);
-        values.put(ThyroxineContract.NewsEntry.COLUMN_DATE, this.published);
-        values.put(ThyroxineContract.NewsEntry.COLUMN_CONTENT, this.contentRaw);
-        return values;
     }
 
     // Override default serialization handling

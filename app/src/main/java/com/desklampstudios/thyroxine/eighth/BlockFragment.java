@@ -65,7 +65,7 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
         }
 
         mAdapter = new BlockListAdapter(new ArrayList<IodineEighthActv>(), this);
-        mAdapter.add(new IodineEighthActv(-1, "<Activity name>", "<Activity description>", new BitSet()));
+        mAdapter.add(new IodineEighthActv(-1, "<Activity name>", "<Activity description>", "<Activity comment>"));
 
         // load blocks
         getBlock();

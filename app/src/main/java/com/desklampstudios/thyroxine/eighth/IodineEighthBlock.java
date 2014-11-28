@@ -9,6 +9,7 @@ class IodineEighthBlock {
     public final String type;
 
     public Boolean locked = null;
+    public IodineEighthActv currentActv = null;
 
     public IodineEighthBlock(int bid, long date, String type) {
         this.bid = bid;
@@ -20,6 +21,7 @@ class IodineEighthBlock {
         this(bid, date, type);
 
         this.locked = locked;
+        this.currentActv = currentActv;
     }
 
     @Override

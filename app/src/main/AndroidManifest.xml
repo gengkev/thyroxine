@@ -3,9 +3,6 @@
     package="com.desklampstudios.thyroxine" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
     <application
         android:allowBackup="true"
@@ -34,35 +31,11 @@
             android:label="@string/title_activity_entry_detail"
             android:parentActivityName=".MainActivity" />
 
-        <provider
-            android:name=".db.ThyroxineProvider"
-            android:authorities="com.desklampstudios.thyroxine.news" />
-
         <activity
             android:name=".eighth.BlockActivity"
             android:label="@string/title_activity_block"
             android:parentActivityName=".MainActivity" />
 
-        <service
-            android:name=".IodineAuthenticatorService">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
-
-        <service
-            android:name=".SyncService"
-            android:exported="true"
-            android:process=":sync">
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
-            </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
-        </service>
     </application>
 
 </manifest>

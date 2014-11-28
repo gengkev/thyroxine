@@ -40,7 +40,7 @@ public class NewsFragment extends Fragment implements NewsListAdapter.EntryClick
 
     private boolean loggedIn;
 
-    private FetchNewsTask mRetrieveNewsTask;
+    private RetrieveNewsTask mRetrieveNewsTask;
     private RecyclerView mRecyclerView;
     private NewsListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -150,11 +150,11 @@ public class NewsFragment extends Fragment implements NewsListAdapter.EntryClick
         mAdapter.clear();
 
         // Load stuff async
-        mRetrieveNewsTask = new FetchNewsTask(getActivity());
+        mRetrieveNewsTask = new RetrieveNewsTask();
         mRetrieveNewsTask.execute();
     }
 
-    /*
+
     private class RetrieveNewsTask extends AsyncTask<Void, IodineNewsEntry, List<IodineNewsEntry>> {
         private Exception exception = null;
 
@@ -242,5 +242,5 @@ public class NewsFragment extends Fragment implements NewsListAdapter.EntryClick
             mRetrieveNewsTask = null;
         }
     }
-    */
+
 }

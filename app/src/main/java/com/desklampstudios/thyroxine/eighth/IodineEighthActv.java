@@ -70,7 +70,7 @@ class IodineEighthActv {
         public static ActivityFlag fromTag(String tag) {
             if (tag == null) return null;
             for (ActivityFlag flag : ActivityFlag.values()) {
-                if (flag.tag.equals(tag))
+                if (flag.tag != null && flag.tag.equals(tag))
                     return flag;
             }
             return null;

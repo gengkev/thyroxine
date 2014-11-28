@@ -30,15 +30,6 @@ public class MainActivity extends ActionBarActivity
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final String PREFS_NAME = "SessionPrefs";
 
-    // The authority for the sync adapter's content provider
-    public static final String AUTHORITY = "com.desklampstudios.thyroxine.provider";
-    // An account type, in the form of a domain name
-    public static final String ACCOUNT_TYPE = "iodine.tjhsst.edu";
-    // The account name
-    public static final String ACCOUNT = "dummyaccount";
-
-
-    private Account mAccount;
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private CharSequence mTitle; // Last title for restoreActionBar()
 
@@ -60,13 +51,6 @@ public class MainActivity extends ActionBarActivity
         IodineApiHelper.setCookies(cookies);
 
 
-        // Create the dummy sync account
-        mAccount = createSyncAccount(this);
-
-        // Turn on automatic syncing for the default account and authority
-        ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
-
-
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -75,28 +59,6 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-    }
-
-    /**
-     * Create a new dummy account for the sync adapter
-     *
-     * @param context The application context
-     */
-    public static Account createSyncAccount(Context context) {
-        // Create the account type and default account
-        Account newAccount = new Account(ACCOUNT, ACCOUNT_TYPE);
-
-        // Get an instance of the Android account manager
-        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
-
-        // Add the account and account type, no password or user data
-        // If successful, return the Account object, otherwise report an error.
-        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            return newAccount;
-        } else {
-            // The account exists or some other error occurred.
-            throw new RuntimeException();
-        }
     }
 
     @Override
