@@ -4,7 +4,7 @@
     tools:context=".MyActivity" >
 
     <item android:id="@+id/action_refresh_news"
-        android:title="Refresh"
+        android:title="@string/refresh"
         app:showAsAction="ifRoom" />
 
 </menu>

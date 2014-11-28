@@ -20,16 +20,16 @@ class IodineEighthActv {
 
     public IodineEighthActv(int aid, String name, String description, String comment) {
         this.aid = aid;
-        this.name = name;
-        this.description = description;
-        this.comment = comment;
+        this.name = (name == null ? null : name.trim());
+        this.description = (description == null ? null : description.trim());
+        this.comment = (comment == null ? null : comment.trim());
     }
 
     public IodineEighthActv(int aid, String name, String description, String comment,
                             BitSet flags, String roomsStr, Integer memberCount, Integer capacity) {
         this(aid, name, description, comment);
         this.flags = flags;
-        this.roomsStr = roomsStr;
+        this.roomsStr = (roomsStr == null ? null : roomsStr.trim());
         this.memberCount = memberCount;
         this.capacity = capacity;
     }

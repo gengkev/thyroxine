@@ -38,9 +38,7 @@ public class MainActivity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private int mDrawerSelectedPosition = 0;
-    private String[] mNavTitles = new String[] {
-            "News", "Eighth"
-    };
+    private String[] mNavTitles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

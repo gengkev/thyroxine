@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.desklampstudios.thyroxine.R;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -55,23 +56,25 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
         holder.mBlockView.setText("Block " + block.type);
         holder.mActivityNameView.setText(block.currentActv.name);
 
+        ArrayList<String> statuses = new ArrayList<String>();
         if (actv.getFlag(IodineEighthActv.ActivityFlag.CANCELLED)) {
             // cancelled
-            holder.mStatusView.setVisibility(View.VISIBLE);
-            holder.mStatusView.setText("CANCELLED");
-        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
+            statuses.add("CANCELLED");
+        }
+        if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
             // room changed
-            holder.mStatusView.setVisibility(View.VISIBLE);
-            holder.mStatusView.setText("ROOM CHANGED");
-        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.RESTRICTED)) {
-            // restricted
-            holder.mStatusView.setText("RESTRICTED");
-        } else if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
-            // not selected
-            holder.mStatusView.setVisibility(View.VISIBLE);
-            holder.mStatusView.setText("NOT SELECTED");
+            statuses.add("ROOM CHANGED");
+        }
+        if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
+            // not selected (mainly for testing)
+            statuses.add("NOT SELECTED");
+        }
+
+        if (statuses.size() > 0) {
+            holder.mStatusView.setPaddingRelative(0, 0, 8, 0);
+            holder.mStatusView.setText(statuses.toString().replaceAll("[\\[\\]]", ""));
         } else {
-            holder.mStatusView.setVisibility(View.INVISIBLE);
+            holder.mStatusView.setPaddingRelative(0, 0, 0, 0);
             holder.mStatusView.setText("");
         }
     }
@@ -112,10 +115,10 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
         public ViewHolder(View v) {
             super(v);
             mView = v;
-            mDateView = (TextView) v.findViewById(R.id.iodine_eighth_date);
-            mBlockView = (TextView) v.findViewById(R.id.iodine_eighth_block);
-            mActivityNameView = (TextView) v.findViewById(R.id.iodine_eighth_activity_name);
-            mStatusView = (TextView) v.findViewById(R.id.iodine_eighth_activity_status);
+            mDateView = (TextView) v.findViewById(R.id.eighth_date);
+            mBlockView = (TextView) v.findViewById(R.id.eighth_block);
+            mActivityNameView = (TextView) v.findViewById(R.id.eighth_activity_name);
+            mStatusView = (TextView) v.findViewById(R.id.eighth_activity_status);
         }
     }
 

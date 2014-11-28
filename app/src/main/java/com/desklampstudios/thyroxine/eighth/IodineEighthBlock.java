@@ -14,7 +14,7 @@ class IodineEighthBlock {
     public IodineEighthBlock(int bid, long date, String type) {
         this.bid = bid;
         this.date = date;
-        this.type = type;
+        this.type = (type == null ? null : type.trim());
     }
 
     public IodineEighthBlock(int bid, long date, String type,

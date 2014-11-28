@@ -34,7 +34,6 @@ public class LoginActivity extends ActionBarActivity {
     private UserLoginTask mAuthTask = null;
 
     // UI references
-    private TextView mErrorView;
     private EditText mUsernameView;
     private EditText mPasswordView;
     private View mProgressView;
@@ -53,7 +52,6 @@ public class LoginActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Set up the login form
-        mErrorView = (TextView) findViewById(R.id.error_display);
         mUsernameView = (EditText) findViewById(R.id.username);
         mPasswordView = (EditText) findViewById(R.id.password);
 
@@ -94,7 +92,6 @@ public class LoginActivity extends ActionBarActivity {
         boolean rememberMe = ((CheckBox) findViewById(R.id.checkbox)).isChecked();
 
         // Reset errors.
-        mErrorView.setText("");
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 

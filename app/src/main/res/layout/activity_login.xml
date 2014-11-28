@@ -43,6 +43,13 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/login_instructions"
+                        android:layout_marginBottom="16dp"
+                        android:textSize="16sp" />
+
                     <EditText
                         android:id="@+id/username"
                         android:layout_width="match_parent"
@@ -56,31 +63,30 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/prompt_password"
                         android:imeActionId="@+id/login"
-                        android:imeActionLabel="@string/action_sign_in_short"
                         android:imeOptions="actionUnspecified"
                         android:inputType="textPassword" />
 
                     <CheckBox android:id="@+id/checkbox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Remember me" />
+                        android:text="@string/prompt_rememberme" />
 
                     <Button
                         android:id="@+id/sign_in_button"
-                        style="?android:textAppearanceSmall"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
+                        android:textSize="16sp"
                         android:text="@string/action_sign_in"
-                        android:background="?attr/colorAccent"
-                        android:textStyle="bold" />
+                        android:textColor="@android:color/white"
+                        android:background="?attr/colorAccent" />
 
                     <TextView
-                        android:id="@+id/error_display"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:text="@string/login_disclaimer"
                         android:layout_marginTop="16dp"
-                        android:textColor="#FF0000" />
+                        android:textSize="12sp" />
 
                 </LinearLayout>
             </ScrollView>

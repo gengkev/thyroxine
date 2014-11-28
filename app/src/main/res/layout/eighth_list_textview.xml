@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/linear_layout1">
 
-        <TextView android:id="@+id/iodine_eighth_date"
+        <TextView android:id="@+id/eighth_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -25,7 +25,7 @@
             android:lines="1"
             android:ellipsize="end" />
 
-        <TextView android:id="@+id/iodine_eighth_block"
+        <TextView android:id="@+id/eighth_block"
             android:paddingLeft="8dp"
             android:paddingRight="0dp"
             android:layout_width="wrap_content"
@@ -40,18 +40,16 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/linear_layout1">
 
-        <TextView android:id="@+id/iodine_eighth_activity_status"
+        <TextView android:id="@+id/eighth_activity_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="0dp"
-            android:paddingRight="8dp"
             android:textSize="14sp"
             android:lineSpacingExtra="2dp"
             android:background="?android:textColorHighlight"
             android:lines="1"
             android:ellipsize="end" />
 
-        <TextView android:id="@+id/iodine_eighth_activity_name"
+        <TextView android:id="@+id/eighth_activity_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
