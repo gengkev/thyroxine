@@ -13,6 +13,7 @@ https://developer.android.com/training/implementing-navigation/nav-drawer.html
     android:background="@color/primaryDark"
     android:fitsSystemWindows="true"
     tools:context="com.desklampstudios.thyroxine.MainActivity">
+
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
@@ -34,16 +35,21 @@ https://developer.android.com/training/implementing-navigation/nav-drawer.html
                 android:background="@color/background_material_light" />
         </LinearLayout>
 
-
-        <!-- The drawer is given a fixed width in dp and extends the full height of
-             the container. -->
-
-        <fragment android:id="@+id/navigation_drawer"
+        <!-- Drawer -->
+        <RelativeLayout android:id="@+id/left_drawer"
             android:layout_width="@dimen/navigation_drawer_width"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:name="com.desklampstudios.thyroxine.NavigationDrawerFragment"
-            tools:layout="@layout/fragment_navigation_drawer" />
+            android:background="@color/background_material_dark">
+
+            <ListView android:id="@+id/left_drawer_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:choiceMode="singleChoice"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0dp" />
+
+        </RelativeLayout>
 
     </android.support.v4.widget.DrawerLayout>
 </FrameLayout>
