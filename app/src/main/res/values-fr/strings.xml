@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Paramètres</string>
+
+    <!-- Navigation drawer strings -->
+    <string name="navigation_drawer_open">Ouvrir le tiroir de navigation</string>
+    <string name="navigation_drawer_close">Fermer le tiroir de navigation</string>
+
+    <string-array name="nav_titles">
+        <item>Nouvelles</item>
+        <item>Huitième</item>
+        <item>Horaire scolaire</item>
+        <item>Liens</item>
+    </string-array>
+
+    <!-- Login strings -->
+    <string name="title_activity_iodine_login">Connectez-vous</string>
+
+    <string name="login_instructions">
+        Connectez-vous ci-dessous avec votre compte TJHSST Iodine. Si vous avez d\'autres sessions
+        ouvertes d\'Iodine, elles seront déconnectées.
+    </string>
+    <string name="login_disclaimer">
+        Cette application aura accès à toutes vos données Iodine, donc si vous ne faites pas
+        confiance au programmeur de cette application, ne vous connectez pas.
+        (C\'est-à-dire, s\'il vous plaît ne me poursuivez pas!)
+    </string>
+
+    <string name="prompt_username">Nom d\'utilisateur</string>
+    <string name="prompt_password">Mot de passe</string>
+    <string name="prompt_rememberme">Rester connecté(e)</string>
+    <string name="action_sign_in">Se connecter à Iodine</string>
+    <string name="action_sign_in_short">Se connecter</string>
+
+    <string name="error_incorrect_username">Nom d\'utilisateur incorrect</string>
+    <string name="error_incorrect_password">Mot de passe incorrect</string>
+    <string name="error_field_required">Champ obligatoire</string>
+    <string name="error_tjhsst_edu_suffix">Enlever le suffixe @tjhsst.edu</string>
+
+    <!-- News strings -->
+    <string name="title_activity_news">Nouvelles</string>
+    <string name="refresh">Rafraîchir</string>
+    <string name="title_activity_entry_detail">Détails de l\'entrée</string>
+
+    <!-- Eighth strings -->
+    <string name="title_activity_eighth">Huitième</string>
+    <string name="title_activity_block">Bloc</string>
+
+</resources>
