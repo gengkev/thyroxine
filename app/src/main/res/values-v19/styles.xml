@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="AppTheme.Base">
+        <!-- Thoughts on translucent status bars:
+        http://stackoverflow.com/q/19746943/689161
+        http://stackoverflow.com/q/26440879/689161
+        http://www.google.com/design/spec/patterns/navigation-drawer.html
+        -->
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+</resources>

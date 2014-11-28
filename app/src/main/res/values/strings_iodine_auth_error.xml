@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="iodine_auth_error">
+        <!-- 0: unknown -->
+        <item>An unidentified error has occurred.  Please contact the Intranetmaster and tell him you received this error message.</item>
+        <!-- 1: bad_password -->
+        <item>Your login failed.  Maybe your password is incorrect?</item>
+        <!-- 2: not_in_database -->
+        <item>Your password and username were correct, but you don\'t appear to exist in our database.  If this is a mistake, please contact the intranetmaster about it.</item>
+        <!-- 3: bad_username -->
+        <item>Your login failed. Maybe your username is incorrect?</item>
+        <!-- 4: tj_email_suffix -->
+        <item>Your TJ email address is not your username! Remove the @tjhsst.edu suffix.</item>
+        <!-- 5: not_yet_active -->
+        <item>Your account is not yet active for use on Intranet. Patience, young freshman.</item>
+    </string-array>
+
+</resources>

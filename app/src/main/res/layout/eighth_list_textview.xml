@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="20dp"
+    android:minHeight="72dip"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linear_layout1">
+
+        <TextView android:id="@+id/iodine_eighth_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:lineSpacingExtra="2dp"
+            android:textColor="?android:textColorPrimary"
+            android:lines="1"
+            android:ellipsize="end" />
+
+        <TextView android:id="@+id/iodine_eighth_block"
+            android:paddingLeft="8dp"
+            android:paddingRight="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="?android:textColorPrimary" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linear_layout1">
+
+        <TextView android:id="@+id/iodine_eighth_activity_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="0dp"
+            android:paddingRight="8dp"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp"
+            android:background="?android:textColorHighlight"
+            android:lines="1"
+            android:ellipsize="end" />
+
+        <TextView android:id="@+id/iodine_eighth_activity_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp"
+            android:textColor="?android:textColorSecondary"
+            android:lines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+</RelativeLayout>

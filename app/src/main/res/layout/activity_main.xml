@@ -1,0 +1,49 @@
+
+<!-- Thoughts on drawers
+http://stackoverflow.com/q/26476837/689161
+http://www.androidhive.info/2013/11/android-sliding-menu-using-navigation-drawer/
+https://developer.android.com/training/implementing-navigation/nav-drawer.html
+-->
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryDark"
+    android:fitsSystemWindows="true"
+    tools:context="com.desklampstudios.thyroxine.MainActivity">
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/default_toolbar" />
+
+            <!-- main content view -->
+            <FrameLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/background_material_light" />
+        </LinearLayout>
+
+
+        <!-- The drawer is given a fixed width in dp and extends the full height of
+             the container. -->
+
+        <fragment android:id="@+id/navigation_drawer"
+            android:layout_width="@dimen/navigation_drawer_width"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:name="com.desklampstudios.thyroxine.NavigationDrawerFragment"
+            tools:layout="@layout/fragment_navigation_drawer" />
+
+    </android.support.v4.widget.DrawerLayout>
+</FrameLayout>

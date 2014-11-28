@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="primary" type="color">#673AB7</item> <!-- Deep Purple 500 -->
+    <item name="primaryDark" type="color">#512DA8</item> <!-- Deep Purple 700 -->
+    <item name="colorAccent" type="color">#64FFDA</item> <!-- Teal A200 -->
+
+    <item name="background" type="color">@color/background_material_light</item>
+</resources>
