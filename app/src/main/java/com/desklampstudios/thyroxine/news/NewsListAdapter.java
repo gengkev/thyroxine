@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.ViewHolderClickListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -32,13 +31,17 @@ class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
                 .inflate(R.layout.news_list_textview, parent, false);
 
         // set the view's size, margins, paddings and layout parameters
-        return new ViewHolder(v, new ViewHolderClickListener() {
+
+        final ViewHolder vh = new ViewHolder(v);
+        vh.mView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v, int pos) {
+            public void onClick(View v) {
+                int pos = vh.getPosition();
                 IodineNewsEntry entry = mDataset.get(pos);
                 mListener.onItemClick(entry);
             }
         });
+        return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -46,21 +49,23 @@ class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         IodineNewsEntry entry = mDataset.get(position);
 
-        holder.titleView.setText(entry.title);
-        holder.publishedView.setText(DATE_FORMAT.format(entry.published));
-        holder.contentView.setText(entry.contentSnippet);
+        holder.mTitleView.setText(entry.title);
+        holder.mPublishedView.setText(DATE_FORMAT.format(entry.published));
+        holder.mContentView.setText(entry.contentSnippet);
     }
 
     public void add(IodineNewsEntry entry) {
         add(mDataset.size(), entry);
     }
+
     public void add(int pos, IodineNewsEntry entry) {
         mDataset.add(pos, entry);
         notifyItemInserted(pos);
     }
+
     public void clear() {
         int size = mDataset.size();
-        for (int i = size-1; i >= 0; i--) {
+        for (int i = size - 1; i >= 0; i--) {
             mDataset.remove(i);
         }
         notifyItemRangeRemoved(0, size);
@@ -73,27 +78,18 @@ class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHolder> {
     }
 
     // Provide a reference to the views for each data item
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public View view;
-        public TextView titleView;
-        public TextView publishedView;
-        public TextView contentView;
-        public ViewHolderClickListener mListener;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public View mView;
+        public TextView mTitleView;
+        public TextView mPublishedView;
+        public TextView mContentView;
 
-        public ViewHolder(View v, ViewHolderClickListener listener) {
+        public ViewHolder(View v) {
             super(v);
-            view = v;
-            titleView = (TextView) v.findViewById(R.id.iodine_news_feed_title);
-            publishedView = (TextView) v.findViewById(R.id.iodine_news_feed_published);
-            contentView = (TextView) v.findViewById(R.id.iodine_news_feed_content);
-
-            mListener = listener;
-            v.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            mListener.onClick(v, getPosition());
+            mView = v;
+            mTitleView = (TextView) v.findViewById(R.id.iodine_news_feed_title);
+            mPublishedView = (TextView) v.findViewById(R.id.iodine_news_feed_published);
+            mContentView = (TextView) v.findViewById(R.id.iodine_news_feed_content);
         }
     }
 

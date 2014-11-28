@@ -193,8 +193,7 @@ class IodineEighthParser extends AbstractXMLParser {
         try {
             Date date = BASIC_DATE_FORMAT.parse(dateStr);
             dateLong = date.getTime();
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             Log.e(TAG, "datetime parse exception: " + dateStr + ", " + e.toString());
         }
         return dateLong;

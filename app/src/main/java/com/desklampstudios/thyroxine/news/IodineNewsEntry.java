@@ -1,6 +1,5 @@
 package com.desklampstudios.thyroxine.news;
 
-import android.content.ContentValues;
 import android.text.Html;
 import android.text.Spanned;
 
@@ -54,7 +53,6 @@ class IodineNewsEntry implements Serializable {
 
 
     // Helper methods to parse raw content
-
     private static Spanned parseContent(String contentRaw) {
         return Html.fromHtml(contentRaw, null, new ListTagHandler());
     }

@@ -20,14 +20,12 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link BlockFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class BlockFragment extends Fragment implements BlockListAdapter.ActvClickListener {
     private static final String TAG = BlockFragment.class.getSimpleName();
@@ -39,6 +37,9 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
     private RecyclerView mRecyclerView;
     private BlockListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    public BlockFragment() {
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -54,8 +55,6 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
         fragment.setArguments(args);
         return fragment;
     }
-    public BlockFragment() {
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,7 +64,8 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
         }
 
         mAdapter = new BlockListAdapter(new ArrayList<IodineEighthActv>(), this);
-        mAdapter.add(new IodineEighthActv(-1, "<Activity name>", "<Activity description>", "<Activity comment>"));
+        mAdapter.add(new IodineEighthActv(-1, "<Activity name>", "<Activity description>",
+                "<Activity comment>"));
 
         // load blocks
         getBlock();
@@ -147,20 +147,18 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
                     eighthActivities.add(actv);
                 }
 
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "Connection error: " + e.toString());
                 exception = e;
                 return null;
-            }
-            catch (XmlPullParserException e) {
+            } catch (XmlPullParserException e) {
                 Log.e(TAG, "XML error: " + e.toString());
                 exception = e;
                 return null;
-            }
-            finally {
-                try { if (stream != null) stream.close(); }
-                catch (IOException e) {
+            } finally {
+                try {
+                    if (stream != null) stream.close();
+                } catch (IOException e) {
                     Log.e(TAG, "IOException when closing stream: " + e);
                 }
             }

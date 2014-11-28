@@ -16,6 +16,7 @@ class IodineEighthBlock {
         this.date = date;
         this.type = type;
     }
+
     public IodineEighthBlock(int bid, long date, String type,
                              Boolean locked, IodineEighthActv currentActv) {
         this(bid, date, type);

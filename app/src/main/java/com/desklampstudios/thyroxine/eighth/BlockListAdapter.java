@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.ViewHolderClickListener;
 
 import java.util.List;
 
@@ -28,13 +27,17 @@ public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.View
                 .inflate(R.layout.activity_list_textview, parent, false);
 
         // set the view's size, margins, paddings and layout parameters
-        return new ViewHolder(v, new ViewHolderClickListener() {
+
+        final ViewHolder vh = new ViewHolder(v);
+        vh.mView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v, int pos) {
+            public void onClick(View view) {
+                int pos = vh.getPosition();
                 IodineEighthActv actv = mDataset.get(pos);
                 mListener.onActvClick(actv);
             }
         });
+        return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -50,23 +53,19 @@ public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.View
             // cancelled
             holder.mStatusView.setText("CANCELLED");
             holder.mStatusView.setVisibility(View.VISIBLE);
-        }
-        else if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
+        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
             // room changed
             holder.mStatusView.setText("ROOM CHANGED");
             holder.mStatusView.setVisibility(View.VISIBLE);
-        }
-        else if (actv.getFlag(IodineEighthActv.ActivityFlag.RESTRICTED)) {
+        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.RESTRICTED)) {
             // restricted
             holder.mStatusView.setText("(R)");
             holder.mStatusView.setVisibility(View.VISIBLE);
-        }
-        else if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
+        } else if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
             // not selected
             holder.mStatusView.setText("(S)");
             holder.mStatusView.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             holder.mStatusView.setVisibility(View.INVISIBLE);
             holder.mStatusView.setText("");
         }
@@ -76,13 +75,15 @@ public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.View
     public void add(IodineEighthActv actv) {
         add(mDataset.size(), actv);
     }
+
     public void add(int pos, IodineEighthActv actv) {
         mDataset.add(pos, actv);
         notifyItemInserted(pos);
     }
+
     public void clear() {
         int size = mDataset.size();
-        for (int i = size-1; i >= 0; i--) {
+        for (int i = size - 1; i >= 0; i--) {
             mDataset.remove(i);
         }
         notifyItemRangeRemoved(0, size);
@@ -97,28 +98,20 @@ public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.View
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public View mView;
         public TextView mNameView;
         public TextView mRoomView;
         public TextView mDescriptionView;
         public TextView mStatusView;
-        public ViewHolderClickListener mListener;
 
-        public ViewHolder(View v, ViewHolderClickListener listener) {
+        public ViewHolder(View v) {
             super(v);
             mView = v;
             mNameView = (TextView) v.findViewById(R.id.iodine_eighth_activity_name);
             mRoomView = (TextView) v.findViewById(R.id.iodine_eighth_activity_room);
             mDescriptionView = (TextView) v.findViewById(R.id.iodine_eighth_activity_description);
             mStatusView = (TextView) v.findViewById(R.id.iodine_eighth_activity_status);
-
-            mListener = listener;
-        }
-
-        @Override
-        public void onClick(View v) {
-            mListener.onClick(v, getPosition());
         }
     }
 

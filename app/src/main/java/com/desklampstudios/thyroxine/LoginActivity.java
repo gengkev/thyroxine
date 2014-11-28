@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 /**
  * A login screen that offers login via username/password.
-
  */
 public class LoginActivity extends ActionBarActivity {
     private final static String TAG = LoginActivity.class.getSimpleName();
@@ -193,8 +192,7 @@ public class LoginActivity extends ActionBarActivity {
                 IodineApiHelper.attemptLogin(mUsername, mPassword);
                 Log.i(TAG, "attemptLogin succeeded");
                 return true;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 mException = e;
                 Log.w(TAG, "attemptLogin threw exception: " + e);
                 return false;

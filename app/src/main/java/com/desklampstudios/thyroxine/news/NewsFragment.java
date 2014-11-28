@@ -31,19 +31,20 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  * Use the {@link NewsFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class NewsFragment extends Fragment implements NewsListAdapter.EntryClickListener {
     private static final String TAG = NewsFragment.class.getSimpleName();
     public static final String EXTRA_ENTRY = "com.desklampstudios.thyroxine.ENTRY";
     public static final String ARG_LOGGED_IN = "loggedIn";
-
     private boolean loggedIn;
 
     private RetrieveNewsTask mRetrieveNewsTask;
     private RecyclerView mRecyclerView;
     private NewsListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    public NewsFragment() {
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -59,9 +60,6 @@ public class NewsFragment extends Fragment implements NewsListAdapter.EntryClick
         fragment.setArguments(args);
 
         return fragment;
-    }
-    public NewsFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -184,23 +182,18 @@ public class NewsFragment extends Fragment implements NewsListAdapter.EntryClick
                     entries.add(entry);
                 }
 
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "Connection error: " + e.toString());
                 exception = e;
                 return null;
-            }
-            catch (XmlPullParserException e) {
+            } catch (XmlPullParserException e) {
                 Log.e(TAG, "XML error: " + e.toString());
                 exception = e;
                 return null;
-            }
-            finally {
+            } finally {
                 try {
-                    if (stream != null)
-                        stream.close();
-                }
-                catch (IOException e) {
+                    if (stream != null) stream.close();
+                } catch (IOException e) {
                     Log.e(TAG, "IOException when closing stream: " + e);
                 }
             }
@@ -242,5 +235,4 @@ public class NewsFragment extends Fragment implements NewsListAdapter.EntryClick
             mRetrieveNewsTask = null;
         }
     }
-
 }

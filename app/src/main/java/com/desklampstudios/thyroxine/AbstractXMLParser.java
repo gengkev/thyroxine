@@ -42,8 +42,7 @@ public abstract class AbstractXMLParser {
         Integer integer = null;
         try {
             integer = Integer.parseInt(str);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             Log.e(TAG, "readInt parse exception for int: " + str + ", " + e.toString());
         }
         return integer;

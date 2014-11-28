@@ -24,6 +24,7 @@ class IodineEighthActv {
         this.description = description;
         this.comment = comment;
     }
+
     public IodineEighthActv(int aid, String name, String description, String comment,
                             BitSet flags, String roomsStr, Integer memberCount, Integer capacity) {
         this(aid, name, description, comment);
@@ -33,13 +34,14 @@ class IodineEighthActv {
         this.capacity = capacity;
     }
 
-    public void setFlag(ActivityFlag flag, boolean bool) {
-        if (flags == null) flags = new BitSet();
-        flags.set(flag.pos, bool);
-    }
     public boolean getFlag(ActivityFlag flag) {
         if (flags == null) return false;
         return flags.get(flag.pos);
+    }
+
+    public void setFlag(ActivityFlag flag, boolean bool) {
+        if (flags == null) flags = new BitSet();
+        flags.set(flag.pos, bool);
     }
 
     @Override
@@ -63,10 +65,12 @@ class IodineEighthActv {
 
         public final int pos;
         public final String tag;
+
         ActivityFlag(int pos, String tag) {
             this.pos = pos;
             this.tag = tag;
         }
+
         public static ActivityFlag fromTag(String tag) {
             if (tag == null) return null;
             for (ActivityFlag flag : ActivityFlag.values()) {

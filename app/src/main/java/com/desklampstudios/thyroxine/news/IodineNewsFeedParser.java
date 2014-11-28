@@ -14,8 +14,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 class IodineNewsFeedParser extends AbstractXMLParser {
     private static final String TAG = IodineNewsFeedParser.class.getSimpleName();
@@ -109,12 +107,10 @@ class IodineNewsFeedParser extends AbstractXMLParser {
         try {
             Date date = FEED_DATE_FORMAT.parse(publishedStr);
             published = date.getTime();
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             Log.e(TAG, "datetime parse exception: " + publishedStr + ", " + e.toString());
         }
         return published;
     }
-
 }
 

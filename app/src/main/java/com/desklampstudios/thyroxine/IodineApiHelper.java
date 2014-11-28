@@ -55,6 +55,21 @@ public class IodineApiHelper {
         Log.d(TAG, "Clearing cookies: " + cookieStore.get(IODINE_BASE_URI));
     }
 
+    public static String getCookies() {
+        CookieManager cookieManager = getCookieManager();
+        CookieStore cookieStore = cookieManager.getCookieStore();
+
+        String sessionId = "", passVector = "";
+        for (HttpCookie cookie : cookieStore.get(IODINE_BASE_URI)) {
+            if (cookie.getName().equals(SESSION_ID_COOKIE)) {
+                sessionId = cookie.getValue();
+            } else if (cookie.getName().equals(PASS_VECTOR_COOKIE)) {
+                passVector = cookie.getValue();
+            }
+        }
+        return new IodineCookieState(sessionId, passVector).stringify();
+    }
+
     public static void setCookies(String in) {
         if (in.isEmpty()) return;
         CookieManager cookieManager = getCookieManager();
@@ -74,49 +89,6 @@ public class IodineApiHelper {
         cookieStore.add(IODINE_BASE_URI, passVectorCookie);
 
         Log.d(TAG, "Setting cookies: " + cookieStore.get(IODINE_BASE_URI));
-    }
-    public static String getCookies() {
-        CookieManager cookieManager = getCookieManager();
-        CookieStore cookieStore = cookieManager.getCookieStore();
-
-        String sessionId = "", passVector = "";
-        for (HttpCookie cookie : cookieStore.get(IODINE_BASE_URI)) {
-            if (cookie.getName().equals(SESSION_ID_COOKIE)) {
-                sessionId = cookie.getValue();
-            } else if (cookie.getName().equals(PASS_VECTOR_COOKIE)) {
-                passVector = cookie.getValue();
-            }
-        }
-        return new IodineCookieState(sessionId, passVector).stringify();
-    }
-
-    public static class IodineCookieState {
-        public final String sessionId;
-        public final String passVector;
-        public IodineCookieState(String sessionId, String passVector) {
-            this.sessionId = sessionId;
-            this.passVector = passVector;
-        }
-        public IodineCookieState(String in) {
-            try {
-                String[] split = in.split("\\|", 2); // fricking regexes
-                this.sessionId = URLDecoder.decode(split[0], "UTF-8");
-                this.passVector = URLDecoder.decode(split[1], "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                Log.wtf(TAG, "UTF-8 not supported", e);
-                throw new RuntimeException(e);
-            }
-        }
-        public String stringify() {
-            try {
-                String sessionIdEnc = URLEncoder.encode(this.sessionId, "UTF-8");
-                String passVectorEnc = URLEncoder.encode(this.passVector, "UTF-8");
-                return sessionIdEnc + "|" + passVectorEnc;
-            } catch (UnsupportedEncodingException e) {
-                Log.wtf(TAG, "UTF-8 not supported", e);
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     public static InputStream getPrivateNewsFeed() throws IOException {
@@ -227,5 +199,37 @@ public class IodineApiHelper {
         // Stupid Scanner tricks
         // https://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner.html
         return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
+    }
+
+    public static class IodineCookieState {
+        public final String sessionId;
+        public final String passVector;
+
+        public IodineCookieState(String sessionId, String passVector) {
+            this.sessionId = sessionId;
+            this.passVector = passVector;
+        }
+
+        public IodineCookieState(String in) {
+            try {
+                String[] split = in.split("\\|", 2); // fricking regexes
+                this.sessionId = URLDecoder.decode(split[0], "UTF-8");
+                this.passVector = URLDecoder.decode(split[1], "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                Log.wtf(TAG, "UTF-8 not supported", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        public String stringify() {
+            try {
+                String sessionIdEnc = URLEncoder.encode(this.sessionId, "UTF-8");
+                String passVectorEnc = URLEncoder.encode(this.passVector, "UTF-8");
+                return sessionIdEnc + "|" + passVectorEnc;
+            } catch (UnsupportedEncodingException e) {
+                Log.wtf(TAG, "UTF-8 not supported", e);
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

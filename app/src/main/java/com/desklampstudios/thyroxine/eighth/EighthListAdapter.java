@@ -7,12 +7,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.ViewHolderClickListener;
 
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolder> {
     private static final String TAG = EighthListAdapter.class.getSimpleName();
@@ -34,13 +32,17 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
                 .inflate(R.layout.eighth_list_textview, parent, false);
 
         // set the view's size, margins, paddings and layout parameters
-        return new ViewHolder(v, new ViewHolderClickListener() {
+
+        final ViewHolder vh = new ViewHolder(v);
+        vh.mView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v, int pos) {
+            public void onClick(View view) {
+                int pos = vh.getPosition();
                 IodineEighthBlock block = mDataset.get(pos);
                 mListener.onBlockClick(block);
             }
         });
+        return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -49,30 +51,26 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
         IodineEighthBlock block = mDataset.get(position);
         IodineEighthActv actv = block.currentActv;
 
-        holder.dateView.setText(DATE_FORMAT.format(new Date(block.date)));
-        holder.blockView.setText("Block " + block.type);
-        holder.activityNameView.setText(block.currentActv.name);
+        holder.mDateView.setText(DATE_FORMAT.format(new Date(block.date)));
+        holder.mBlockView.setText("Block " + block.type);
+        holder.mActivityNameView.setText(block.currentActv.name);
 
         if (actv.getFlag(IodineEighthActv.ActivityFlag.CANCELLED)) {
             // cancelled
             holder.mStatusView.setVisibility(View.VISIBLE);
             holder.mStatusView.setText("CANCELLED");
-        }
-        else if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
+        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
             // room changed
             holder.mStatusView.setVisibility(View.VISIBLE);
             holder.mStatusView.setText("ROOM CHANGED");
-        }
-        else if (actv.getFlag(IodineEighthActv.ActivityFlag.RESTRICTED)) {
+        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.RESTRICTED)) {
             // restricted
             holder.mStatusView.setText("RESTRICTED");
-        }
-        else if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
+        } else if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
             // not selected
             holder.mStatusView.setVisibility(View.VISIBLE);
             holder.mStatusView.setText("NOT SELECTED");
-        }
-        else {
+        } else {
             holder.mStatusView.setVisibility(View.INVISIBLE);
             holder.mStatusView.setText("");
         }
@@ -81,13 +79,15 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
     public void add(IodineEighthBlock block) {
         add(mDataset.size(), block);
     }
+
     public void add(int pos, IodineEighthBlock block) {
         mDataset.add(pos, block);
         notifyItemInserted(pos);
     }
+
     public void clear() {
         int size = mDataset.size();
-        for (int i = size-1; i >= 0; i--) {
+        for (int i = size - 1; i >= 0; i--) {
             mDataset.remove(i);
         }
         notifyItemRangeRemoved(0, size);
@@ -102,29 +102,20 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public View view;
-        public TextView dateView;
-        public TextView blockView;
-        public TextView activityNameView;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public View mView;
+        public TextView mDateView;
+        public TextView mBlockView;
+        public TextView mActivityNameView;
         public TextView mStatusView;
-        public ViewHolderClickListener mListener;
 
-        public ViewHolder(View v, ViewHolderClickListener listener) {
+        public ViewHolder(View v) {
             super(v);
-            view = v;
-            dateView = (TextView) v.findViewById(R.id.iodine_eighth_date);
-            blockView = (TextView) v.findViewById(R.id.iodine_eighth_block);
-            activityNameView = (TextView) v.findViewById(R.id.iodine_eighth_activity_name);
+            mView = v;
+            mDateView = (TextView) v.findViewById(R.id.iodine_eighth_date);
+            mBlockView = (TextView) v.findViewById(R.id.iodine_eighth_block);
+            mActivityNameView = (TextView) v.findViewById(R.id.iodine_eighth_activity_name);
             mStatusView = (TextView) v.findViewById(R.id.iodine_eighth_activity_status);
-
-            mListener = listener;
-            v.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            mListener.onClick(v, getPosition());
         }
     }
 

@@ -1,9 +1,9 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,7 +28,6 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  * Use the {@link EighthFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class EighthFragment extends Fragment implements EighthListAdapter.BlockClickListener {
     private static final String TAG = EighthFragment.class.getSimpleName();
@@ -154,20 +153,18 @@ public class EighthFragment extends Fragment implements EighthListAdapter.BlockC
                     blocks.add(block);
                 }
 
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "Connection error: " + e.toString());
                 exception = e;
                 return null;
-            }
-            catch (XmlPullParserException e) {
+            } catch (XmlPullParserException e) {
                 Log.e(TAG, "XML error: " + e.toString());
                 exception = e;
                 return null;
-            }
-            finally {
-                try { if (stream != null) stream.close(); }
-                catch (IOException e) {
+            } finally {
+                try {
+                    if (stream != null) stream.close();
+                } catch (IOException e) {
                     Log.e(TAG, "IOException when closing stream: " + e);
                 }
             }
