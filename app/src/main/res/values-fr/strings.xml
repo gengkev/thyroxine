@@ -17,8 +17,7 @@
     <string name="title_activity_iodine_login">Connectez-vous</string>
 
     <string name="login_instructions">
-        Connectez-vous ci-dessous avec votre compte TJHSST Iodine. Si vous avez d\'autres sessions
-        ouvertes d\'Iodine, elles seront déconnectées.
+        Connectez-vous ci-dessous avec votre compte TJHSST Iodine.
     </string>
     <string name="login_disclaimer">
         Cette application aura accès à toutes vos données Iodine, donc si vous ne faites pas

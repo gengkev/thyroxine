@@ -19,8 +19,7 @@
     <string name="title_activity_iodine_login">Sign in</string>
 
     <string name="login_instructions">
-        Sign in below with your TJHSST Iodine account. If you have any other open sessions of
-        Iodine, they will be logged out.
+        Sign in below with your TJHSST Iodine account.
     </string>
     <string name="login_disclaimer">
         This application will have access to all of your Iodine data, so if you do not trust the
