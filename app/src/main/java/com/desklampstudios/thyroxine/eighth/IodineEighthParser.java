@@ -13,11 +13,8 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.BitSet;
 import java.util.Date;
 import java.util.Locale;
-
-import static com.desklampstudios.thyroxine.eighth.IodineEighthActv.ActivityFlag;
 
 class IodineEighthParser extends AbstractXMLParser {
     private static final String TAG = IodineEighthParser.class.getSimpleName();
@@ -51,7 +48,7 @@ class IodineEighthParser extends AbstractXMLParser {
     }
 
     // after this, call getActivity until it returns null
-    public IodineEighthBlock beginGetBlock(InputStream in)
+    public EighthBlock beginGetBlock(InputStream in)
             throws XmlPullParserException, IOException {
         if (parsingBegun) {
             stopParse();
@@ -67,7 +64,7 @@ class IodineEighthParser extends AbstractXMLParser {
         // getBlock API begins w/ currently selected block, then all activities
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "block");
-        IodineEighthBlock curBlock = readBlock(mParser);
+        EighthBlock curBlock = readBlock(mParser);
 
         // advance to activities
         mParser.nextTag();
@@ -76,7 +73,7 @@ class IodineEighthParser extends AbstractXMLParser {
         return curBlock;
     }
 
-    public IodineEighthBlock nextBlock() throws XmlPullParserException, IOException {
+    public EighthBlock nextBlock() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
         }
@@ -98,7 +95,7 @@ class IodineEighthParser extends AbstractXMLParser {
         return null;
     }
 
-    public IodineEighthActv nextActivity() throws XmlPullParserException, IOException {
+    public EighthActvInstance nextActivity() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
         }
@@ -120,7 +117,7 @@ class IodineEighthParser extends AbstractXMLParser {
         return null;
     }
 
-    private static IodineEighthBlock readBlock(XmlPullParser parser)
+    private static EighthBlock readBlock(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "block");
 
@@ -128,7 +125,7 @@ class IodineEighthParser extends AbstractXMLParser {
         long date = 0;
         String type = "";
 
-        IodineEighthActv curActivity = null;
+        EighthActvInstance curActivity = null;
         Boolean locked = null;
 
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -138,15 +135,20 @@ class IodineEighthParser extends AbstractXMLParser {
             String name = parser.getName();
             if (name.equals("bid")) {
                 bid = readInt(parser, "bid");
-            } else if (name.equals("date")) {
+            }
+            else if (name.equals("date")) {
                 date = readBasicDate(parser);
-            } else if (name.equals("type")) {
+            }
+            else if (name.equals("type")) {
                 type = readText(parser, "type");
-            } else if (name.equals("block")) {
+            }
+            else if (name.equals("block")) {
                 type = readText(parser, "block");
-            } else if (name.equals("activity")) {
+            }
+            else if (name.equals("activity")) {
                 curActivity = readActivity(parser);
-            } else if (name.equals("locked")) {
+            }
+            else if (name.equals("locked")) {
                 locked = readInt(parser, "locked") != 0;
             } else {
                 skip(parser);
@@ -160,7 +162,7 @@ class IodineEighthParser extends AbstractXMLParser {
                     bid, date, type));
         }
 
-        return new IodineEighthBlock(bid, date, type, locked, curActivity);
+        return new EighthBlock(bid, date, type, locked, curActivity);
     }
 
     private static Long readBasicDate(XmlPullParser parser)
@@ -199,7 +201,7 @@ class IodineEighthParser extends AbstractXMLParser {
         return dateLong;
     }
 
-    private static IodineEighthActv readActivity(XmlPullParser parser)
+    private static EighthActvInstance readActivity(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "activity");
 
@@ -207,11 +209,10 @@ class IodineEighthParser extends AbstractXMLParser {
         String aName = null;
         String description = null;
         String comment = null;
-
-        BitSet flags = new BitSet();
+        long flags = 0;
 
         String roomsStr = null;
-        Integer memberCount = null;
+        Integer signedUp = null;
         Integer capacity = null;
 
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -219,25 +220,53 @@ class IodineEighthParser extends AbstractXMLParser {
                 continue;
             }
             String name = parser.getName();
-            ActivityFlag flag = ActivityFlag.fromTag(name);
 
+            // fields
             if (name.equals("aid")) {
                 aid = readInt(parser, "aid");
-            } else if (name.equals("name")) {
-                aName = Html.fromHtml(readText(parser, "name")).toString();
-            } else if (name.equals("description")) {
-                description = readText(parser, "description");
-            } else if (name.equals("comment")) {
-                comment = readText(parser, "comment");
-            } else if (name.equals("block_rooms_comma")) {
-                roomsStr = readText(parser, "block_rooms_comma");
-            } else if (name.equals("memberCount")) {
-                memberCount = readInt(parser, "memberCount");
-            } else if (name.equals("capacity")) {
+            }
+            else if (name.equals("name")) {
+                aName = cleanHtml(readText(parser, "name"));
+            }
+            else if (name.equals("description")) {
+                description = cleanHtml(readText(parser, "description"));
+            }
+            else if (name.equals("comment")) {
+                comment = cleanHtml(readText(parser, "comment"));
+            }
+            else if (name.equals("block_rooms_comma")) {
+                roomsStr = cleanHtml(readText(parser, "block_rooms_comma"));
+            }
+            else if (name.equals("member_count")) {
+                signedUp = readInt(parser, "member_count");
+            }
+            else if (name.equals("capacity")) {
                 capacity = readInt(parser, "capacity");
-            } else if (flag != null) {
-                flags.set(flag.pos, readInt(parser, flag.tag) != 0);
-            } else {
+            }
+            // EighthActv flags
+            else if (name.equals("restricted")) {
+                if (readInt(parser, "restricted") != 0)
+                    flags |= EighthActv.FLAG_RESTRICTED;
+            }
+            else if (name.equals("sticky")) {
+                if (readInt(parser, "sticky") != 0)
+                    flags |= EighthActv.FLAG_STICKY;
+            }
+            else if (name.equals("special")) {
+                if (readInt(parser, "special") != 0)
+                    flags |= EighthActv.FLAG_SPECIAL;
+            }
+            // EighthActvInstance flags
+            else if (name.equals("attendancetaken")) {
+                if (readInt(parser, "attendancetaken") != 0)
+                    flags |= EighthActvInstance.FLAG_ATTENDANCETAKEN;
+            }
+            else if (name.equals("cancelled")) {
+                if (readInt(parser, "cancelled") != 0)
+                    flags |= EighthActvInstance.FLAG_CANCELLED;
+            }
+            // else
+            else {
                 skip(parser);
             }
         }
@@ -245,11 +274,24 @@ class IodineEighthParser extends AbstractXMLParser {
         parser.require(XmlPullParser.END_TAG, ns, "activity");
 
         if (aid == -1 || aName == null || description == null) {
-            Log.w(TAG, String.format("readActivity: aid (%d) or aName (%s) or description (%s) bad",
-                    aid, aName, description));
+            Log.w(TAG, String.format("readActivity: EighthActv aid (%d) or name (%s) " +
+                    "or description (%s) empty", aid, aName, description));
+            aName = (aName == null) ? "" : aName;
+            description = (description == null) ? "" : description;
+        }
+        if (comment == null) {
+            Log.w(TAG, String.format("readActivity: EighthActvInstance comment (%s) " +
+                    "empty", comment));
+            comment = (comment == null) ? "" : comment;
         }
 
-        return new IodineEighthActv(aid, aName, description, comment,
-                flags, roomsStr, memberCount, capacity);
+        EighthActv actv = new EighthActv(aid, aName, description, flags & EighthActv.FLAG_ALL);
+
+        return new EighthActvInstance(actv, comment,
+                flags & EighthActvInstance.FLAG_ALL, roomsStr, signedUp, capacity);
+    }
+
+    private static String cleanHtml(String in) {
+        return Html.fromHtml(in).toString().trim();
     }
 }

@@ -1,6 +1,5 @@
 package com.desklampstudios.thyroxine;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -8,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -23,7 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.desklampstudios.thyroxine.eighth.EighthFragment;
+import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
 
 
@@ -104,7 +102,7 @@ public class MainActivity extends ActionBarActivity {
                 fragment = NewsFragment.newInstance(false);
                 break;
             case 1:
-                fragment = EighthFragment.newInstance(true);
+                fragment = ScheduleFragment.newInstance();
                 break;
             default:
                 fragment = PlaceholderFragment.newInstance(

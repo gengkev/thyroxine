@@ -33,13 +33,14 @@ public class IodineApiHelper {
     private static final String BLOCK_LIST_URL = IODINE_BASE_URL + "/api/eighth/list_blocks";
     private static final String BLOCK_GET_URL = IODINE_BASE_URL + "/api/eighth/get_block/%d";
 
-    private static final URI IODINE_BASE_URI = URI.create("iodine.tjhsst.edu");
+    private static final URI IODINE_BASE_URI = URI.create(IODINE_BASE_URL);
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
 
     private static CookieManager getCookieManager() {
         CookieManager cookieManager = (CookieManager) CookieHandler.getDefault();
         if (cookieManager == null) {
+            Log.d(TAG, "Creating new CookieManager (was null)");
             cookieManager = new CookieManager();
             CookieHandler.setDefault(cookieManager);
         }
@@ -50,9 +51,9 @@ public class IodineApiHelper {
         CookieManager cookieManager = getCookieManager();
         CookieStore cookieStore = cookieManager.getCookieStore();
 
+        Log.v(TAG, "Clearing cookies (before): " + cookieStore.get(IODINE_BASE_URI));
         cookieStore.removeAll();
-
-        Log.d(TAG, "Clearing cookies: " + cookieStore.get(IODINE_BASE_URI));
+        Log.v(TAG, "Clearing cookies (after): " + cookieStore.get(IODINE_BASE_URI));
     }
 
     public static String getCookies() {
@@ -109,7 +110,7 @@ public class IodineApiHelper {
     public static InputStream getBlock(int bid) throws IOException {
         // log cookies
         CookieStore cookieStore = getCookieManager().getCookieStore();
-        Log.d(TAG, "Cookies: " + cookieStore.get(IODINE_BASE_URI));
+        Log.v(TAG, "Cookies: " + cookieStore.get(IODINE_BASE_URI));
 
         URL url = new URL(String.format(BLOCK_GET_URL, bid));
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -124,7 +125,7 @@ public class IodineApiHelper {
     public static InputStream getBlockList() throws IOException {
         // log cookies
         CookieStore cookieStore = getCookieManager().getCookieStore();
-        Log.d(TAG, "Cookies: " + cookieStore.get(IODINE_BASE_URI));
+        Log.v(TAG, "Cookies: " + cookieStore.get(IODINE_BASE_URI));
 
         URL url = new URL(BLOCK_LIST_URL);
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -181,7 +182,7 @@ public class IodineApiHelper {
         // cookies yum yum
         CookieStore cookieStore = cookieManager.getCookieStore();
         List<HttpCookie> cookies = cookieStore.get(IODINE_BASE_URI);
-        Log.d(TAG, "Cookies: " + cookies);
+        Log.v(TAG, "Cookies: " + cookies);
 
         for (HttpCookie cookie : cookies) {
             if (cookie.getName().equals("PHPSESSID")) {
@@ -191,7 +192,8 @@ public class IodineApiHelper {
 
         // uh oh, wheres cookie :(
         Log.e(TAG, "Auth error: couldn't find cookie in response");
-        Log.i(TAG, "Reading auth input stream: " + readInputStream(conn.getInputStream()));
+        Log.v(TAG, "Reading auth input stream: " + readInputStream(conn.getInputStream()));
+        Log.v(TAG, "Reading headers: " + conn.getHeaderFields());
         throw new IOException("Couldn't find cookie in response");
     }
 

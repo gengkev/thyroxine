@@ -26,34 +26,26 @@ import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link EighthFragment#newInstance} factory method to
+ * Use the {@link ScheduleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class EighthFragment extends Fragment implements EighthListAdapter.BlockClickListener {
-    private static final String TAG = EighthFragment.class.getSimpleName();
+public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockClickListener {
+    private static final String TAG = ScheduleFragment.class.getSimpleName();
     private static final String ARG_LOGGED_IN = "loggedIn";
 
     private boolean loggedIn;
 
     private RetrieveBlocksTask mRetrieveBlocksTask;
     private RecyclerView mRecyclerView;
-    private EighthListAdapter mAdapter;
+    private ScheduleAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    public EighthFragment() {
+    public ScheduleFragment() {
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @return A new instance of fragment EighthFragment.
-     */
-    public static EighthFragment newInstance(boolean param1) {
-        EighthFragment fragment = new EighthFragment();
+    public static ScheduleFragment newInstance() {
+        ScheduleFragment fragment = new ScheduleFragment();
         Bundle args = new Bundle();
-        args.putBoolean(ARG_LOGGED_IN, param1);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,12 +53,14 @@ public class EighthFragment extends Fragment implements EighthListAdapter.BlockC
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /*
         if (getArguments() != null) {
             loggedIn = getArguments().getBoolean(ARG_LOGGED_IN);
         }
+        */
 
-        mAdapter = new EighthListAdapter(new ArrayList<IodineEighthBlock>(), this);
-        mAdapter.add(new IodineEighthBlock(-1, 0L, "Z"));
+        mAdapter = new ScheduleAdapter(new ArrayList<EighthBlock>(), this);
+        mAdapter.add(new EighthBlock(-1, 0L, "Z"));
 
         // load blocks
         retrieveBlocks();
@@ -77,7 +71,7 @@ public class EighthFragment extends Fragment implements EighthListAdapter.BlockC
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_eighth, container, false);
+        View view = inflater.inflate(R.layout.fragment_eighth_schedule, container, false);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.my_recycler_view);
         mRecyclerView.setAdapter(mAdapter);
@@ -97,7 +91,7 @@ public class EighthFragment extends Fragment implements EighthListAdapter.BlockC
 
     // Called when an item in the adapter is clicked
     @Override
-    public void onBlockClick(IodineEighthBlock block) {
+    public void onBlockClick(EighthBlock block) {
         //Toast.makeText(getActivity(), "Block: " + block, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), BlockActivity.class);
@@ -121,28 +115,28 @@ public class EighthFragment extends Fragment implements EighthListAdapter.BlockC
         mRetrieveBlocksTask.execute();
     }
 
-    private class RetrieveBlocksTask extends AsyncTask<Void, IodineEighthBlock, List<IodineEighthBlock>> {
+    private class RetrieveBlocksTask extends AsyncTask<Void, EighthBlock, List<EighthBlock>> {
         private Exception exception = null;
 
         @Override
-        protected List<IodineEighthBlock> doInBackground(Void... params) {
+        protected List<EighthBlock> doInBackground(Void... params) {
             InputStream stream = null;
             IodineEighthParser parser;
-            List<IodineEighthBlock> blocks = new ArrayList<IodineEighthBlock>();
+            List<EighthBlock> blocks = new ArrayList<EighthBlock>();
 
             try {
-                if (loggedIn) {
-                    stream = IodineApiHelper.getBlockList();
-                } else {
-                    throw new IOException("Not logged in");
-                }
+                //if (loggedIn) {
+                stream = IodineApiHelper.getBlockList();
+                //} else {
+                //    throw new IOException("Not logged in");
+                //}
 
                 //Log.i(TAG, IodineApiHelper.readInputStream(stream));
 
                 parser = new IodineEighthParser();
                 parser.beginListBlocks(stream);
 
-                IodineEighthBlock block;
+                EighthBlock block;
                 while (!isCancelled()) {
                     block = parser.nextBlock();
 
@@ -173,13 +167,13 @@ public class EighthFragment extends Fragment implements EighthListAdapter.BlockC
         }
 
         @Override
-        protected void onProgressUpdate(IodineEighthBlock... entries) {
+        protected void onProgressUpdate(EighthBlock... entries) {
             mAdapter.add(entries[0]);
             // Log.i(TAG, "Adding entry: " + entries[0]);
         }
 
         @Override
-        protected void onPostExecute(List<IodineEighthBlock> entries) {
+        protected void onPostExecute(List<EighthBlock> entries) {
             mRetrieveBlocksTask = null;
             if (exception != null) {
                 Log.e(TAG, "RetrieveBlocksTask error: " + exception);

@@ -1,6 +1,7 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,14 +9,15 @@ import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.ViewHolder> {
-    private List<IodineEighthActv> mDataset;
+public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
+    private List<EighthActvInstance> mDataset;
     private ActvClickListener mListener;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public BlockListAdapter(List<IodineEighthActv> dataset, ActvClickListener listener) {
+    public BlockAdapter(List<EighthActvInstance> dataset, ActvClickListener listener) {
         this.mDataset = dataset;
         this.mListener = listener;
     }
@@ -33,7 +35,7 @@ public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.View
             @Override
             public void onClick(View view) {
                 int pos = vh.getPosition();
-                IodineEighthActv actv = mDataset.get(pos);
+                EighthActvInstance actv = mDataset.get(pos);
                 mListener.onActvClick(actv);
             }
         });
@@ -43,40 +45,54 @@ public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.View
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        IodineEighthActv actv = mDataset.get(position);
+        EighthActvInstance actvInstance = mDataset.get(position);
 
-        holder.mNameView.setText(actv.name);
-        holder.mRoomView.setText(actv.roomsStr);
-        holder.mDescriptionView.setText(actv.description);
+        holder.mNameView.setText(actvInstance.actv.name);
+        holder.mRoomView.setText(actvInstance.roomsStr);
+        holder.mDescriptionView.setText((
+                actvInstance.comment + " " +
+                actvInstance.actv.description).trim());
 
-        if (actv.getFlag(IodineEighthActv.ActivityFlag.CANCELLED)) {
-            // cancelled
-            holder.mStatusView.setText("CANCELLED");
-            holder.mStatusView.setVisibility(View.VISIBLE);
-        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
-            // room changed
-            holder.mStatusView.setText("ROOM CHANGED");
-            holder.mStatusView.setVisibility(View.VISIBLE);
-        } else if (actv.getFlag(IodineEighthActv.ActivityFlag.RESTRICTED)) {
-            // restricted
-            holder.mStatusView.setText("(R)");
-            holder.mStatusView.setVisibility(View.VISIBLE);
-        } else if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
-            // not selected
-            holder.mStatusView.setText("(S)");
-            holder.mStatusView.setVisibility(View.VISIBLE);
+        ArrayList<String> statuses = new ArrayList<String>();
+        int color = (position % 2 == 0) ? 0x7FF8F8F8 : 0x7FFAFAFA;
+
+        // restricted
+        if ((actvInstance.getFlags() & EighthActv.FLAG_RESTRICTED) != 0) {
+            statuses.add("(R)");
+            color = (position % 2 == 0) ? 0x7FFFCCAA : 0x7FFDC5A0;
+        }
+        // sticky
+        if ((actvInstance.getFlags() & EighthActv.FLAG_STICKY) != 0) {
+            statuses.add("(S)");
+        }
+        // capacity full
+        if (actvInstance.signedUp != null && actvInstance.capacity != null &&
+                actvInstance.signedUp >= actvInstance.capacity) {
+            statuses.add("<font color=\"#0000FF\">FULL</font>");
+        }
+        // cancelled
+        if ((actvInstance.getFlags() & EighthActvInstance.FLAG_CANCELLED) != 0) {
+            statuses.add("<font color=\"#FF0000\">CANCELLED</font>");
+            color = (position % 2 == 0) ? 0x7FCF0000 : 0x7FCA0000;
+        }
+
+        // display statuses
+        if (statuses.size() > 0) {
+            String statusText = statuses.toString().replaceAll("[\\[\\]]", "");
+            holder.mStatusView.setText(Html.fromHtml(statusText));
         } else {
-            holder.mStatusView.setVisibility(View.INVISIBLE);
             holder.mStatusView.setText("");
         }
 
+        // set background color
+        holder.mView.setBackgroundColor(color);
     }
 
-    public void add(IodineEighthActv actv) {
+    public void add(EighthActvInstance actv) {
         add(mDataset.size(), actv);
     }
 
-    public void add(int pos, IodineEighthActv actv) {
+    public void add(int pos, EighthActvInstance actv) {
         mDataset.add(pos, actv);
         notifyItemInserted(pos);
     }
@@ -116,6 +132,6 @@ public class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.View
     }
 
     public static interface ActvClickListener {
-        public void onActvClick(IodineEighthActv actv);
+        public void onActvClick(EighthActvInstance actv);
     }
 }

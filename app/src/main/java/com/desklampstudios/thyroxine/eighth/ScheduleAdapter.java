@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolder> {
-    private static final String TAG = EighthListAdapter.class.getSimpleName();
+class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
+    private static final String TAG = ScheduleAdapter.class.getSimpleName();
     private static DateFormat DATE_FORMAT =
             DateFormat.getDateInstance(DateFormat.FULL); // default locale OK
 
-    private List<IodineEighthBlock> mDataset;
+    private List<EighthBlock> mDataset;
     private BlockClickListener mListener;
 
-    public EighthListAdapter(List<IodineEighthBlock> dataset, BlockClickListener listener) {
+    public ScheduleAdapter(List<EighthBlock> dataset, BlockClickListener listener) {
         this.mDataset = dataset;
         this.mListener = listener;
     }
@@ -30,7 +30,7 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.eighth_list_textview, parent, false);
+                .inflate(R.layout.block_list_textview, parent, false);
 
         // set the view's size, margins, paddings and layout parameters
 
@@ -39,7 +39,7 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
             @Override
             public void onClick(View view) {
                 int pos = vh.getPosition();
-                IodineEighthBlock block = mDataset.get(pos);
+                EighthBlock block = mDataset.get(pos);
                 mListener.onBlockClick(block);
             }
         });
@@ -49,27 +49,24 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        IodineEighthBlock block = mDataset.get(position);
-        IodineEighthActv actv = block.currentActv;
+        EighthBlock block = mDataset.get(position);
+        EighthActvInstance actvInstance = block.selectedActv;
 
         holder.mDateView.setText(DATE_FORMAT.format(new Date(block.date)));
         holder.mBlockView.setText("Block " + block.type);
-        holder.mActivityNameView.setText(block.currentActv.name);
+        holder.mActivityNameView.setText(block.selectedActv.actv.name);
 
         ArrayList<String> statuses = new ArrayList<String>();
-        if (actv.getFlag(IodineEighthActv.ActivityFlag.CANCELLED)) {
-            // cancelled
+        // cancelled
+        if ((actvInstance.getFlags() & EighthActvInstance.FLAG_CANCELLED) != 0) {
             statuses.add("CANCELLED");
         }
-        if (actv.getFlag(IodineEighthActv.ActivityFlag.ROOMCHANGED)) {
-            // room changed
-            statuses.add("ROOM CHANGED");
-        }
-        if (actv.aid == IodineEighthActv.NOT_SELECTED_AID) {
-            // not selected (mainly for testing)
+        // not selected
+        if (actvInstance.actv.aid == EighthActv.NOT_SELECTED_AID) {
             statuses.add("NOT SELECTED");
         }
 
+        // display statuses
         if (statuses.size() > 0) {
             holder.mStatusView.setPaddingRelative(0, 0, 8, 0);
             holder.mStatusView.setText(statuses.toString().replaceAll("[\\[\\]]", ""));
@@ -79,11 +76,11 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
         }
     }
 
-    public void add(IodineEighthBlock block) {
+    public void add(EighthBlock block) {
         add(mDataset.size(), block);
     }
 
-    public void add(int pos, IodineEighthBlock block) {
+    public void add(int pos, EighthBlock block) {
         mDataset.add(pos, block);
         notifyItemInserted(pos);
     }
@@ -123,6 +120,6 @@ class EighthListAdapter extends RecyclerView.Adapter<EighthListAdapter.ViewHolde
     }
 
     public static interface BlockClickListener {
-        public void onBlockClick(IodineEighthBlock block);
+        public void onBlockClick(EighthBlock block);
     }
 }

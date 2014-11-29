@@ -19,6 +19,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ import java.util.List;
  * Use the {@link BlockFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BlockFragment extends Fragment implements BlockListAdapter.ActvClickListener {
+public class BlockFragment extends Fragment implements BlockAdapter.ActvClickListener {
     private static final String TAG = BlockFragment.class.getSimpleName();
     public static final String ARG_BID = "com.desklampstudios.thyroxine.BID";
 
@@ -35,23 +36,18 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
 
     private GetBlockTask mGetBlockTask;
     private RecyclerView mRecyclerView;
-    private BlockListAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private BlockAdapter mAdapter;
+
+    private RecyclerView mSelectedActvRecyclerView;
+    private BlockAdapter mSelectedActvAdapter;
 
     public BlockFragment() {
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @return A new instance of fragment BlockFragment.
-     */
-    public static BlockFragment newInstance(int param1) {
+    public static BlockFragment newInstance(int bid) {
         BlockFragment fragment = new BlockFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_BID, param1);
+        args.putInt(ARG_BID, bid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -63,9 +59,16 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
             bid = getArguments().getInt(ARG_BID);
         }
 
-        mAdapter = new BlockListAdapter(new ArrayList<IodineEighthActv>(), this);
-        mAdapter.add(new IodineEighthActv(-1, "<Activity name>", "<Activity description>",
-                "<Activity comment>"));
+        mAdapter = new BlockAdapter( new ArrayList<EighthActvInstance>(), this );
+        mAdapter.add( new EighthActvInstance(
+                new EighthActv(-1, "<Actv name>", "<Actv desc>", 0),
+                "<Actv comment>", 0));
+
+
+        mSelectedActvAdapter = new BlockAdapter( new ArrayList<EighthActvInstance>(), this );
+        mAdapter.add( new EighthActvInstance(
+                new EighthActv(-1, "<Actv name>", "<Actv desc>", 0),
+                "<Actv comment>", 0));
 
         // load blocks
         getBlock();
@@ -76,27 +79,34 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_block, container, false);
+        View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
+        // recyclerview!
         mRecyclerView = (RecyclerView) view.findViewById(R.id.my_recycler_view);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true); // changes in content don't change layout size
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(layoutManager);
 
         // item decorations??
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
                 getActivity(), DividerItemDecoration.VERTICAL_LIST);
         mRecyclerView.addItemDecoration(itemDecoration);
 
+        // selected activity recycler view
+        mSelectedActvRecyclerView = (RecyclerView) view.findViewById(R.id.selected_actv_recycler_view);
+        mSelectedActvRecyclerView.setAdapter(mSelectedActvAdapter);
+        mSelectedActvRecyclerView.setHasFixedSize(false);
+        mSelectedActvRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
         return view;
     }
 
     // Called when an item in the adapter is clicked
     @Override
-    public void onActvClick(IodineEighthActv actv) {
+    public void onActvClick(EighthActvInstance actv) {
         Toast.makeText(getActivity(), "Activity: " + actv, Toast.LENGTH_LONG).show();
     }
 
@@ -116,27 +126,33 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
         mGetBlockTask.execute();
     }
 
-    private void displayBlock(IodineEighthBlock block) {
+    private void displayBlock(EighthBlock block) {
         Log.d(TAG, "block: " + block);
+
+        mSelectedActvAdapter.clear();
+        mSelectedActvAdapter.add(block.selectedActv);
+
+
+        DateFormat DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM); // default locale OK
+        getActivity().setTitle(DATE_FORMAT.format(block.date) + " Block " + block.type);
     }
 
-    private class GetBlockTask extends AsyncTask<Void, IodineEighthActv, List<IodineEighthActv>> {
+    private class GetBlockTask extends AsyncTask<Void, EighthActvInstance, EighthBlock> {
         private Exception exception = null;
 
         @Override
-        protected List<IodineEighthActv> doInBackground(Void... params) {
+        protected EighthBlock doInBackground(Void... params) {
             InputStream stream = null;
             IodineEighthParser parser;
-            List<IodineEighthActv> eighthActivities = new ArrayList<IodineEighthActv>();
+            EighthBlock block;
 
             try {
                 stream = IodineApiHelper.getBlock(bid);
 
                 parser = new IodineEighthParser();
-                IodineEighthBlock block = parser.beginGetBlock(stream);
-                displayBlock(block);
+                block = parser.beginGetBlock(stream);
 
-                IodineEighthActv actv;
+                EighthActvInstance actv;
                 while (!isCancelled()) {
                     actv = parser.nextActivity();
 
@@ -144,7 +160,6 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
                         break;
 
                     publishProgress(actv);
-                    eighthActivities.add(actv);
                 }
 
             } catch (IOException e) {
@@ -163,17 +178,17 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
                 }
             }
 
-            return eighthActivities;
+            return block;
         }
 
         @Override
-        protected void onProgressUpdate(IodineEighthActv... entries) {
+        protected void onProgressUpdate(EighthActvInstance... entries) {
             mAdapter.add(entries[0]);
             // Log.i(TAG, "Adding entry: " + entries[0]);
         }
 
         @Override
-        protected void onPostExecute(List<IodineEighthActv> entries) {
+        protected void onPostExecute(EighthBlock block) {
             mGetBlockTask = null;
             if (exception != null) {
                 Log.e(TAG, "GetBlockTask error: " + exception);
@@ -186,6 +201,8 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
                 return;
             }
 
+            displayBlock(block);
+            /*
             Log.i(TAG, "Got activities (" + entries.size() + " activities)");
 
             if (getActivity() != null) {
@@ -193,6 +210,7 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
                         "Got activities (" + entries.size() + " activities)",
                         Toast.LENGTH_SHORT).show();
             }
+            */
         }
 
         @Override
