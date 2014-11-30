@@ -35,6 +35,11 @@
             android:name=".eighth.BlockActivity"
             android:label="@string/title_activity_block"
             android:parentActivityName=".MainActivity" />
+        
+        <provider
+            android:authorities="com.desklampstudios.thyroxine.news.provider"
+            android:name=".news.NewsProvider"
+            android:exported="false" />
 
     </application>
 

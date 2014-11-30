@@ -41,7 +41,12 @@
     <!-- News strings -->
     <string name="title_activity_news">News</string>
     <string name="refresh">Refresh</string>
-    <string name="title_activity_entry_detail">Entry details</string>
+
+    <string name="title_activity_entry_detail">Post details</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="share">Share</string>
+    <string name="news_entry_share_subject">%1$s</string>
+    <string name="news_entry_share_body">%1$s\n%2$s</string>
 
     <!-- Eighth strings -->
     <string name="title_activity_eighth">Eighth</string>

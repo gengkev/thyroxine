@@ -66,8 +66,8 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> 
             statuses.add("(S)");
         }
         // capacity full
-        if (actvInstance.signedUp != null && actvInstance.capacity != null &&
-                actvInstance.signedUp >= actvInstance.capacity) {
+        if (actvInstance.memberCount != null && actvInstance.capacity != null &&
+                actvInstance.memberCount >= actvInstance.capacity) {
             statuses.add("<font color=\"#0000FF\">FULL</font>");
         }
         // cancelled
