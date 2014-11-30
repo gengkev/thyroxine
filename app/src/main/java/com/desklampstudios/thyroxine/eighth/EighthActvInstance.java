@@ -12,7 +12,7 @@ class EighthActvInstance {
     /* @NotNull */ public long flags;
 
     public String roomsStr = null;
-    public Integer signedUp = null;
+    public Integer memberCount = null;
     public Integer capacity = null;
 
     public EighthActvInstance(EighthActv actv, String comment, long flags) {
@@ -23,10 +23,10 @@ class EighthActvInstance {
     }
 
     public EighthActvInstance(EighthActv actv, String comment, long flags,
-                              String roomsStr, Integer signedUp, Integer capacity) {
+                              String roomsStr, Integer memberCount, Integer capacity) {
         this(actv, comment, flags);
         this.roomsStr = roomsStr;
-        this.signedUp = signedUp;
+        this.memberCount = memberCount;
         this.capacity = capacity;
     }
 
@@ -37,6 +37,6 @@ class EighthActvInstance {
     @Override
     public String toString() {
         return String.format("[ActvInstance actv: %s, comment: %s, flags: %s, rooms: %s, " +
-                "signed up: %s/%s]", actv.toString(), comment, flags, roomsStr, signedUp, capacity);
+                "signed up: %s/%s]", actv.toString(), comment, flags, roomsStr, memberCount, capacity);
     }
 }

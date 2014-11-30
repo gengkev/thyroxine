@@ -80,13 +80,13 @@ class IodineNewsFeedParser extends AbstractXMLParser {
             }
             String name = parser.getName();
             if (name.equals("title")) {
-                title = readText(parser, "title").trim();
+                title = Utils.cleanHtml(readText(parser, "title"));
             } else if (name.equals("pubDate")) {
                 published = readPublished(parser);
             } else if (name.equals("link")) {
-                link = readText(parser, "link").trim();
+                link = Utils.cleanHtml(readText(parser, "link"));
             } else if (name.equals("description")) {
-                content = readText(parser, "description").trim();
+                content = readText(parser, "description");
             } else {
                 skip(parser);
             }
@@ -103,7 +103,7 @@ class IodineNewsFeedParser extends AbstractXMLParser {
             content = (content == null) ? "" : content;
         }
 
-        String snippet = Utils.getSnippet(Html.fromHtml(content), 300);
+        String snippet = Utils.getSnippet(content, 300);
 
         return new NewsEntry(link, title, published, content, snippet);
     }

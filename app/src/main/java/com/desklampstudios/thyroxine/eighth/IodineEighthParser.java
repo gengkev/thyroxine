@@ -4,6 +4,7 @@ import android.text.Html;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
+import com.desklampstudios.thyroxine.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -212,7 +213,7 @@ class IodineEighthParser extends AbstractXMLParser {
         long flags = 0;
 
         String roomsStr = null;
-        Integer signedUp = null;
+        Integer memberCount = null;
         Integer capacity = null;
 
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -226,19 +227,19 @@ class IodineEighthParser extends AbstractXMLParser {
                 aid = readInt(parser, "aid");
             }
             else if (name.equals("name")) {
-                aName = cleanHtml(readText(parser, "name"));
+                aName = Utils.cleanHtml(readText(parser, "name"));
             }
             else if (name.equals("description")) {
-                description = cleanHtml(readText(parser, "description"));
+                description = Utils.cleanHtml(readText(parser, "description"));
             }
             else if (name.equals("comment")) {
-                comment = cleanHtml(readText(parser, "comment"));
+                comment = Utils.cleanHtml(readText(parser, "comment"));
             }
             else if (name.equals("block_rooms_comma")) {
-                roomsStr = cleanHtml(readText(parser, "block_rooms_comma"));
+                roomsStr = Utils.cleanHtml(readText(parser, "block_rooms_comma"));
             }
             else if (name.equals("member_count")) {
-                signedUp = readInt(parser, "member_count");
+                memberCount = readInt(parser, "member_count");
             }
             else if (name.equals("capacity")) {
                 capacity = readInt(parser, "capacity");
@@ -287,11 +288,7 @@ class IodineEighthParser extends AbstractXMLParser {
 
         EighthActv actv = new EighthActv(aid, aName, description, flags & EighthActv.FLAG_ALL);
 
-        return new EighthActvInstance(actv, comment,
-                flags & EighthActvInstance.FLAG_ALL, roomsStr, signedUp, capacity);
-    }
-
-    private static String cleanHtml(String in) {
-        return Html.fromHtml(in).toString().trim();
+        return new EighthActvInstance(actv, comment, flags & EighthActvInstance.FLAG_ALL,
+                roomsStr, memberCount, capacity);
     }
 }
