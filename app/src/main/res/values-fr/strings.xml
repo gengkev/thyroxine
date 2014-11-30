@@ -39,7 +39,10 @@
     <!-- News strings -->
     <string name="title_activity_news">Nouvelles</string>
     <string name="refresh">Rafraîchir</string>
-    <string name="title_activity_entry_detail">Détails de l\'entrée</string>
+
+    <string name="title_activity_entry_detail">Détails du post</string>
+    <string name="open_in_browser">Ouvrir dans le navigateur</string>
+    <string name="share">Partager</string>
 
     <!-- Eighth strings -->
     <string name="title_activity_eighth">Huitième</string>

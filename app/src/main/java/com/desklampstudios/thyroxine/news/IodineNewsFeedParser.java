@@ -1,8 +1,10 @@
 package com.desklampstudios.thyroxine.news;
 
+import android.text.Html;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
+import com.desklampstudios.thyroxine.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -40,7 +42,7 @@ class IodineNewsFeedParser extends AbstractXMLParser {
         parsingBegun = true;
     }
 
-    public IodineNewsEntry nextEntry() throws XmlPullParserException, IOException {
+    public NewsEntry nextEntry() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
         }
@@ -64,7 +66,7 @@ class IodineNewsFeedParser extends AbstractXMLParser {
 
     // Parses the contents of an entry. If it encounters a title, published, link, or content tag,
     // those are handed off to their respective "read" methods. Other tags are ignored.
-    private static IodineNewsEntry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private static NewsEntry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "item");
 
         String title = null;
@@ -78,13 +80,13 @@ class IodineNewsFeedParser extends AbstractXMLParser {
             }
             String name = parser.getName();
             if (name.equals("title")) {
-                title = readText(parser, "title");
+                title = readText(parser, "title").trim();
             } else if (name.equals("pubDate")) {
                 published = readPublished(parser);
             } else if (name.equals("link")) {
-                link = readText(parser, "link");
+                link = readText(parser, "link").trim();
             } else if (name.equals("description")) {
-                content = readText(parser, "description");
+                content = readText(parser, "description").trim();
             } else {
                 skip(parser);
             }
@@ -93,11 +95,17 @@ class IodineNewsFeedParser extends AbstractXMLParser {
         parser.require(XmlPullParser.END_TAG, ns, "item");
 
         if (title == null || published == 0 || link == null || content == null) {
-            Log.w(TAG, String.format("readEntry: title (%s) or published (%s) or link (%s) or content (%s) bad",
-                    title, published, link, content));
+            Log.w(TAG, String.format("readEntry: title (%s) or published (%s) or link (%s) " +
+                    "or content (%s) empty", title, published, link, content));
+
+            title = (title == null) ? "" : title;
+            link = (link == null) ? "" : link;
+            content = (content == null) ? "" : content;
         }
 
-        return new IodineNewsEntry(link, title, published, content);
+        String snippet = Utils.getSnippet(Html.fromHtml(content), 300);
+
+        return new NewsEntry(link, title, published, content, snippet);
     }
 
     // Process published tags in the feed.

@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/linear_layout1">
 
-        <TextView android:id="@+id/iodine_news_feed_title"
+        <TextView android:id="@+id/news_entry_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -25,7 +25,9 @@
             android:lines="1"
             android:ellipsize="end" />
 
-        <TextView android:id="@+id/iodine_news_feed_published"
+        <TextView android:id="@+id/news_entry_published"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
             android:paddingLeft="8dp"
             android:paddingRight="0dp"
             android:layout_width="wrap_content"
@@ -35,7 +37,7 @@
 
         </LinearLayout>
 
-    <TextView android:id="@+id/iodine_news_feed_content"
+    <TextView android:id="@+id/news_entry_snippet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/linear_layout1"

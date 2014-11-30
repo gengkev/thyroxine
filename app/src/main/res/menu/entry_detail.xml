@@ -2,10 +2,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.desklampstudios.thyroxine.news.NewsDetailActivity" >
-    <!--
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
-        -->
+
+    <item android:id="@+id/menu_item_share"
+        app:showAsAction="ifRoom"
+        android:title="@string/share"
+        app:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
+
+    <item android:id="@+id/news_entry_browser"
+        app:showAsAction="never"
+        android:title="@string/open_in_browser" />
+
 </menu>
