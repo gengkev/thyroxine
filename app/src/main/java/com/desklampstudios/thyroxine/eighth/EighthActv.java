@@ -1,6 +1,6 @@
 package com.desklampstudios.thyroxine.eighth;
 
-public class EighthActv {
+class EighthActv {
     public static final int NOT_SELECTED_AID = 999;
 
     public static final int FLAG_ALL = 127;

@@ -15,11 +15,11 @@ import java.util.List;
 
 class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
     private static final String TAG = ScheduleAdapter.class.getSimpleName();
-    private static DateFormat DATE_FORMAT =
+    private static final DateFormat DATE_FORMAT =
             DateFormat.getDateInstance(DateFormat.FULL); // default locale OK
 
-    private List<EighthBlock> mDataset;
-    private BlockClickListener mListener;
+    private final List<EighthBlock> mDataset;
+    private final BlockClickListener mListener;
 
     public ScheduleAdapter(List<EighthBlock> dataset, BlockClickListener listener) {
         this.mDataset = dataset;
@@ -103,11 +103,11 @@ class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public View mView;
-        public TextView mDateView;
-        public TextView mBlockView;
-        public TextView mActivityNameView;
-        public TextView mStatusView;
+        public final View mView;
+        public final TextView mDateView;
+        public final TextView mBlockView;
+        public final TextView mActivityNameView;
+        public final TextView mStatusView;
 
         public ViewHolder(View v) {
             super(v);

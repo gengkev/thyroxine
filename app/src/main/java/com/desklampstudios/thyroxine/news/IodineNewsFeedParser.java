@@ -1,6 +1,5 @@
 package com.desklampstudios.thyroxine.news;
 
-import android.text.Html;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
@@ -96,7 +95,7 @@ class IodineNewsFeedParser extends AbstractXMLParser {
 
         if (title == null || published == 0 || link == null || content == null) {
             Log.w(TAG, String.format("readEntry: title (%s) or published (%s) or link (%s) " +
-                    "or content (%s) empty", title, published, link, content));
+                    "or content (%s) not found", title, published, link, content));
 
             title = (title == null) ? "" : title;
             link = (link == null) ? "" : link;

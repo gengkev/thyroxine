@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Thyroxine</string>
     <string name="action_settings">Paramètres</string>
 
     <!-- Navigation drawer strings -->
@@ -7,8 +8,8 @@
     <string name="navigation_drawer_close">Fermer le tiroir de navigation</string>
 
     <string-array name="nav_titles">
-        <item>Nouvelles</item>
-        <item>Huitième</item>
+        <item>@string/title_fragment_news</item>
+        <item>@string/title_fragment_eighth</item>
         <item>Horaire scolaire</item>
         <item>Liens</item>
     </string-array>
@@ -37,15 +38,18 @@
     <string name="error_tjhsst_edu_suffix">Enlever le suffixe @tjhsst.edu</string>
 
     <!-- News strings -->
-    <string name="title_activity_news">Nouvelles</string>
+    <string name="title_fragment_news">Nouvelles</string>
     <string name="refresh">Rafraîchir</string>
+    <string name="news_provider_name">Thyroxine: Nouvelles</string>
 
     <string name="title_activity_entry_detail">Détails du post</string>
+    <string name="news_entry_published">Publié</string>
+    <string name="news_entry_title">Titre</string>
     <string name="open_in_browser">Ouvrir dans le navigateur</string>
     <string name="share">Partager</string>
 
     <!-- Eighth strings -->
-    <string name="title_activity_eighth">Huitième</string>
+    <string name="title_fragment_eighth">Huitième</string>
     <string name="title_activity_block">Bloc</string>
 
 </resources>

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -111,7 +110,7 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
     }
 
     // Starts RetrieveBlocksTask
-    public void getBlock() {
+    private void getBlock() {
         if (mGetBlockTask != null) {
             return;
         }

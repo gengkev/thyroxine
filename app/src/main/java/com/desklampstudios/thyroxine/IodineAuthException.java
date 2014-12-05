@@ -1,7 +1,7 @@
 package com.desklampstudios.thyroxine;
 
 public class IodineAuthException extends Exception {
-    public static final int MAX_ERRCODE = 5;
+    private static final int MAX_ERRCODE = 5;
     public final int errCode;
 
     public IodineAuthException(Integer errCode) {

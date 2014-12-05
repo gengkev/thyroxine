@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class NewsDbHelper extends SQLiteOpenHelper {
+class NewsDbHelper extends SQLiteOpenHelper {
     private static final String TAG = NewsDbHelper.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 3;

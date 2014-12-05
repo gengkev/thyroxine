@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ import java.text.SimpleDateFormat;
 
 class NewsListAdapter extends CursorAdapter {
     private static final String TAG = NewsListAdapter.class.getSimpleName();
-    private static DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM");
 
     public NewsListAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
@@ -54,10 +53,10 @@ class NewsListAdapter extends CursorAdapter {
     // Provide a reference to the views for each data item
     // There is a 0.000% need to continue extending RecyclerView.ViewHolder but why not.
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public View mView;
-        public TextView mTitleView;
-        public TextView mPublishedView;
-        public TextView mSnippetView;
+        public final View mView;
+        public final TextView mTitleView;
+        public final TextView mPublishedView;
+        public final TextView mSnippetView;
 
         public ViewHolder(View v) {
             super(v);

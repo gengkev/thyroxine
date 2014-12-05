@@ -1,6 +1,5 @@
 package com.desklampstudios.thyroxine.eighth;
 
-import android.text.Html;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
@@ -276,13 +275,13 @@ class IodineEighthParser extends AbstractXMLParser {
 
         if (aid == -1 || aName == null || description == null) {
             Log.w(TAG, String.format("readActivity: EighthActv aid (%d) or name (%s) " +
-                    "or description (%s) empty", aid, aName, description));
+                    "or description (%s) not found", aid, aName, description));
             aName = (aName == null) ? "" : aName;
             description = (description == null) ? "" : description;
         }
         if (comment == null) {
             Log.w(TAG, String.format("readActivity: EighthActvInstance comment (%s) " +
-                    "empty", comment));
+                    "not found", comment));
             comment = (comment == null) ? "" : comment;
         }
 

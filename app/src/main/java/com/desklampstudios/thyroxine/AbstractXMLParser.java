@@ -13,18 +13,18 @@ public abstract class AbstractXMLParser {
     private static final String TAG = AbstractXMLParser.class.getSimpleName();
     protected static final String ns = null; // don't use namespaces
 
-    protected XmlPullParser mParser;
+    protected final XmlPullParser mParser;
     protected InputStream mInputStream;
     protected boolean parsingBegun = false;
 
-    public AbstractXMLParser() throws XmlPullParserException {
+    protected AbstractXMLParser() throws XmlPullParserException {
         mParser = Xml.newPullParser();
         mParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
         mParser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, false);
         mParser.setFeature(Xml.FEATURE_RELAXED, true);
     }
 
-    public void stopParse() throws XmlPullParserException {
+    protected void stopParse() throws XmlPullParserException {
         parsingBegun = false;
         mParser.setInput(null);
         mInputStream = null;

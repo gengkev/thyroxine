@@ -18,11 +18,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
-// Don't even THINK about touching this class if you're in the UI thread!
 public class IodineApiHelper {
     private static final String TAG = IodineApiHelper.class.getSimpleName();
     private static final String IODINE_DOMAIN = "iodine.tjhsst.edu";
@@ -192,15 +190,9 @@ public class IodineApiHelper {
 
         // uh oh, wheres cookie :(
         Log.e(TAG, "Auth error: couldn't find cookie in response");
-        Log.v(TAG, "Reading auth input stream: " + readInputStream(conn.getInputStream()));
+        Log.v(TAG, "Reading auth input stream: " + Utils.readInputStream(conn.getInputStream()));
         Log.v(TAG, "Reading headers: " + conn.getHeaderFields());
         throw new IOException("Couldn't find cookie in response");
-    }
-
-    public static String readInputStream(InputStream is) throws IOException {
-        // Stupid Scanner tricks
-        // https://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner.html
-        return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
     }
 
     public static class IodineCookieState {

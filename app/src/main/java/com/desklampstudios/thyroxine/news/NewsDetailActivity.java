@@ -9,7 +9,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +33,7 @@ public class NewsDetailActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_entry_detail);
+        setContentView(R.layout.activity_news_detail);
 
         // use Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -96,10 +95,8 @@ public class NewsDetailActivity extends ActionBarActivity {
         if (mNewsEntry == null)
             return null;
 
-        String shareSubject = getResources().getString(
-                R.string.news_entry_share_subject, mNewsEntry.title);
-        String shareMessage = getResources().getString(
-                R.string.news_entry_share_body, mNewsEntry.title, mNewsEntry.link);
+        String shareSubject = mNewsEntry.title;
+        String shareMessage = mNewsEntry.title + "\n" + mNewsEntry.link;
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");

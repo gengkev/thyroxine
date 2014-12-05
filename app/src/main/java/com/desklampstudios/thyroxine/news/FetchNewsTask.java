@@ -21,8 +21,8 @@ class FetchNewsTask extends AsyncTask<Void, NewsEntry, List<NewsEntry>> {
     private static final String TAG = FetchNewsTask.class.getSimpleName();
 
     private Exception exception = null;
-    private boolean loggedIn;
-    private ContentResolver mResolver;
+    private final boolean loggedIn;
+    private final ContentResolver mResolver;
 
     public FetchNewsTask(boolean loggedIn, ContentResolver resolver) {
         this.loggedIn = loggedIn;

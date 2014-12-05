@@ -31,9 +31,6 @@ import java.util.List;
  */
 public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockClickListener {
     private static final String TAG = ScheduleFragment.class.getSimpleName();
-    private static final String ARG_LOGGED_IN = "loggedIn";
-
-    private boolean loggedIn;
 
     private RetrieveBlocksTask mRetrieveBlocksTask;
     private RecyclerView mRecyclerView;
@@ -100,7 +97,7 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
     }
 
     // Starts RetrieveBlocksTask
-    public void retrieveBlocks() {
+    private void retrieveBlocks() {
         if (mRetrieveBlocksTask != null) {
             return;
         }

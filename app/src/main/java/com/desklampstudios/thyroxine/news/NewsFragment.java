@@ -103,7 +103,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         setHasOptionsMenu(true);
 
         // start loader
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(NEWS_LOADER, null, this);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     // Called when an item in the adapter is clicked
-    public void openNewsDetailActivity(long id) {
+    private void openNewsDetailActivity(long id) {
         // Toast.makeText(getApplicationContext(), "Entry: " + entry, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), NewsDetailActivity.class);
@@ -134,7 +134,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     // Starts retrieveNewsTask
-    public void retrieveNews() {
+    private void retrieveNews() {
         if (mFetchNewsTask != null) {
             return;
         }
@@ -148,6 +148,9 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+        if (id != NEWS_LOADER)
+            throw new IllegalStateException();
+
         return new CursorLoader(
                 getActivity(),
                 NewsProvider.CONTENT_URI_NEWS,

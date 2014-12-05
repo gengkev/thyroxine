@@ -12,7 +12,7 @@ import com.desklampstudios.thyroxine.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
+class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
     private List<EighthActvInstance> mDataset;
     private ActvClickListener mListener;
 
@@ -26,7 +26,7 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.activity_list_textview, parent, false);
+                .inflate(R.layout.actv_list_textview, parent, false);
 
         // set the view's size, margins, paddings and layout parameters
 

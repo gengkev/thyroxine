@@ -39,7 +39,8 @@
         <provider
             android:authorities="com.desklampstudios.thyroxine.news.provider"
             android:name=".news.NewsProvider"
-            android:exported="false" />
+            android:exported="false"
+            android:label="@string/news_provider_name" />
 
     </application>
 

@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primaryDark"
     android:fitsSystemWindows="true"
     tools:context="com.desklampstudios.thyroxine.news.NewsDetailActivity">
     <LinearLayout
@@ -29,7 +28,7 @@
                 android:paddingRight="16dp">
 
                 <TextView
-                    android:text="Title"
+                    android:text="@string/news_entry_title"
                     android:id="@+id/news_entry_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -37,7 +36,7 @@
                     android:textSize="32sp" />
 
                 <TextView
-                    android:text="Published"
+                    android:text="@string/news_entry_published"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/news_entry_published"
@@ -68,14 +67,14 @@
             android:paddingRight="16dp">
 
             <TextView android:id="@+id/news_entry_title"
-                android:text="Title"
+                android:text="@string/news_entry_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:textSize="24sp" />
 
             <TextView android:id="@+id/news_entry_published"
-                android:text="Published"
+                android:text="@string/news_entry_published"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
