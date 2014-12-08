@@ -23,6 +23,8 @@ import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
+import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
+import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -52,12 +54,8 @@ public class MainActivity extends ActionBarActivity {
             mDrawerSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
-        // Load cookies?
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String cookies = settings.getString("cookies", "");
-
-        Log.d(TAG, "Retrieving cookies: " + cookies);
-        IodineApiHelper.setCookies(cookies);
+        loadCookies();
+        initializeSyncAdapters();
 
         // Navigation Drawer
         mNavTitles = getResources().getStringArray(R.array.nav_titles);
@@ -90,6 +88,19 @@ public class MainActivity extends ActionBarActivity {
 
         // select an item in drawer
         selectItem(mDrawerSelectedPosition);
+    }
+
+    public void loadCookies() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        String cookies = settings.getString("cookies", "");
+
+        Log.d(TAG, "Retrieving cookies: " + cookies);
+        IodineApiHelper.setCookies(cookies);
+    }
+
+    public void initializeSyncAdapters() {
+        // Make sure stub account exists (if not, initializes NewsSyncAdapter)
+        StubAuthenticator.getSyncAccount(this);
     }
 
     /** Swaps fragments in the main content view */

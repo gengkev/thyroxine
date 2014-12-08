@@ -14,7 +14,8 @@ public class NewsProvider extends ContentProvider {
     private static final int NEWS = 100;
     private static final int NEWS_ID = 101;
 
-    private static final String CONTENT_AUTHORITY = "com.desklampstudios.thyroxine.news.provider";
+    // Warning: for now, also declared in strings.xml
+    private static final String CONTENT_AUTHORITY = "com.desklampstudios.thyroxine.news";
 
     private static final String PATH_NEWS = "news";
     public static final Uri CONTENT_URI_NEWS = Uri.parse("content://" + CONTENT_AUTHORITY + "/" + PATH_NEWS);

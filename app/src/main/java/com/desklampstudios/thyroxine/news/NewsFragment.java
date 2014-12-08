@@ -36,8 +36,6 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     private CursorAdapter mAdapter;
     private ListView mListView;
 
-    private FetchNewsTask mFetchNewsTask;
-
     public NewsFragment() {
     }
 
@@ -66,10 +64,6 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         // create entries list
         mAdapter = new NewsListAdapter(getActivity(), null, 0);
-
-        // load feed
-        retrieveNews();
-
     }
 
     @Override
@@ -135,15 +129,10 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Starts retrieveNewsTask
     private void retrieveNews() {
-        if (mFetchNewsTask != null) {
-            return;
-        }
-
         Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
 
-        // Load stuff async
-        mFetchNewsTask = new FetchNewsTask(false, getActivity().getContentResolver());
-        mFetchNewsTask.execute();
+        // Start sync
+        NewsSyncAdapter.syncImmediately(getActivity());
     }
 
     @Override

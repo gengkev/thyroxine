@@ -7,12 +7,9 @@
     <string name="navigation_drawer_open">Ouvrir le tiroir de navigation</string>
     <string name="navigation_drawer_close">Fermer le tiroir de navigation</string>
 
-    <string-array name="nav_titles">
-        <item>@string/title_fragment_news</item>
-        <item>@string/title_fragment_eighth</item>
-        <item>Horaire scolaire</item>
-        <item>Liens</item>
-    </string-array>
+    <!-- Temporary nav strings -->
+    <string name="title_fragment_bell_schedule">Horaire scolaire</string>
+    <string name="title_fragment_links">Liens</string>
 
     <!-- Login strings -->
     <string name="title_activity_iodine_login">Connectez-vous</string>
