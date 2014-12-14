@@ -1,5 +1,10 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +19,7 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.DividerItemDecoration;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -39,6 +45,8 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
 
     private RecyclerView mSelectedActvRecyclerView;
     private BlockAdapter mSelectedActvAdapter;
+
+    private Account mAccount = null;
 
     public BlockFragment() {
     }
@@ -120,6 +128,22 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
         // Reset adapter
         mAdapter.clear();
 
+        // Check login state
+        final AccountManager am = AccountManager.get(getActivity());
+        Account[] accounts = am.getAccountsByType(IodineAuthenticator.ACCOUNT_TYPE);
+
+        if (accounts.length == 0) { // not logged in
+            Log.e(TAG, "No accounts found (not logged in)");
+            Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
+            am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
+                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
+                    null, null, getActivity(), null, null);
+            return;
+        }
+        else {
+            mAccount = accounts[0];
+        }
+
         // Load stuff async
         mGetBlockTask = new GetBlockTask();
         mGetBlockTask.execute();
@@ -141,12 +165,31 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
 
         @Override
         protected EighthBlock doInBackground(Void... params) {
+            final AccountManager am = AccountManager.get(getActivity());
+            AccountManagerFuture<Bundle> future = am.getAuthToken(mAccount,
+                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, Bundle.EMPTY, getActivity(), null, null);
+
+            String authToken;
+            try {
+                Bundle bundle = future.getResult();
+                authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+                Log.v(TAG, "Got bundle: " + bundle);
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error: "+ e.toString());
+                exception = e;
+                return null;
+            } catch (OperationCanceledException | AuthenticatorException e) {
+                Log.e(TAG, "Authentication error: " + e.toString());
+                exception = e;
+                return null;
+            }
+
             InputStream stream = null;
             IodineEighthParser parser;
             EighthBlock block;
 
             try {
-                stream = IodineApiHelper.getBlock(bid);
+                stream = IodineApiHelper.getBlock(bid, authToken);
 
                 parser = new IodineEighthParser();
                 block = parser.beginGetBlock(stream);

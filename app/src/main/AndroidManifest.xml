@@ -9,6 +9,11 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
+    <!-- Cool authentication stuff -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -26,9 +31,8 @@
         </activity>
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".sync.IodineAuthenticatorActivity"
             android:label="@string/title_activity_iodine_login"
-            android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize|stateVisible" />
 
         <activity
@@ -56,6 +60,17 @@
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/stub_authenticator" />
+        </service>
+
+        <!-- Authenticator service for Iodine login -->
+        <service android:name=".sync.IodineAuthenticatorService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/iodine_authenticator" />
         </service>
 
         <!-- SyncAdapter service for News -->

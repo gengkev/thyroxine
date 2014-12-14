@@ -1,5 +1,11 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -15,6 +21,7 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.DividerItemDecoration;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -37,6 +44,8 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
     private ScheduleAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    private Account mAccount;
+
     public ScheduleFragment() {
     }
 
@@ -57,7 +66,9 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
         */
 
         mAdapter = new ScheduleAdapter(new ArrayList<EighthBlock>(), this);
-        mAdapter.add(new EighthBlock(-1, 0L, "Z"));
+        mAdapter.add(new EighthBlock(-1, 0L, "Z", false,
+                new EighthActvInstance(
+                        new EighthActv(-1, "<name>", "<description>", 0L), "<comment>", 0L)));
 
         // load blocks
         retrieveBlocks();
@@ -107,6 +118,27 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
         // Reset adapter
         mAdapter.clear();
 
+        // Check login state
+        final AccountManager am = AccountManager.get(getActivity());
+        Account[] accounts = am.getAccountsByType(IodineAuthenticator.ACCOUNT_TYPE);
+
+        if (accounts.length == 0) { // not logged in
+            Log.e(TAG, "No accounts found (not logged in)");
+            Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
+            am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
+                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
+                    null, null, getActivity(), new AccountManagerCallback<Bundle>() {
+                        @Override
+                        public void run(AccountManagerFuture<Bundle> future) {
+                            retrieveBlocks();
+                        }
+                    }, null);
+            return;
+        }
+        else {
+            mAccount = accounts[0];
+        }
+
         // Load stuff async
         mRetrieveBlocksTask = new RetrieveBlocksTask();
         mRetrieveBlocksTask.execute();
@@ -117,18 +149,31 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
 
         @Override
         protected List<EighthBlock> doInBackground(Void... params) {
+            final AccountManager am = AccountManager.get(getActivity());
+            AccountManagerFuture<Bundle> future = am.getAuthToken(mAccount,
+                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, Bundle.EMPTY, getActivity(), null, null);
+
+            String authToken;
+            try {
+                Bundle bundle = future.getResult();
+                authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+                Log.v(TAG, "Got bundle: " + bundle);
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error: "+ e.toString());
+                exception = e;
+                return null;
+            } catch (OperationCanceledException | AuthenticatorException e) {
+                Log.e(TAG, "Authentication error: " + e.toString());
+                exception = e;
+                return null;
+            }
+
             InputStream stream = null;
             IodineEighthParser parser;
             List<EighthBlock> blocks = new ArrayList<EighthBlock>();
 
             try {
-                //if (loggedIn) {
-                stream = IodineApiHelper.getBlockList();
-                //} else {
-                //    throw new IOException("Not logged in");
-                //}
-
-                //Log.i(TAG, IodineApiHelper.readInputStream(stream));
+                stream = IodineApiHelper.getBlockList(authToken);
 
                 parser = new IodineEighthParser();
                 parser.beginListBlocks(stream);
@@ -173,8 +218,6 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
         protected void onPostExecute(List<EighthBlock> entries) {
             mRetrieveBlocksTask = null;
             if (exception != null) {
-                Log.e(TAG, "RetrieveBlocksTask error: " + exception);
-
                 if (getActivity() != null) {
                     Toast.makeText(getActivity(),
                             "RetrieveBlocksTask error: " + exception,

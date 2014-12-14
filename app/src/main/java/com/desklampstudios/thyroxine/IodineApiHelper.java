@@ -8,15 +8,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookieStore;
 import java.net.HttpCookie;
-import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -31,68 +26,8 @@ public class IodineApiHelper {
     private static final String BLOCK_LIST_URL = IODINE_BASE_URL + "/api/eighth/list_blocks";
     private static final String BLOCK_GET_URL = IODINE_BASE_URL + "/api/eighth/get_block/%d";
 
-    private static final URI IODINE_BASE_URI = URI.create(IODINE_BASE_URL);
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
-
-    private static CookieManager getCookieManager() {
-        CookieManager cookieManager = (CookieManager) CookieHandler.getDefault();
-        if (cookieManager == null) {
-            Log.d(TAG, "Creating new CookieManager (was null)");
-            cookieManager = new CookieManager();
-            CookieHandler.setDefault(cookieManager);
-        }
-        return cookieManager;
-    }
-
-    public static void clearCookies() {
-        CookieManager cookieManager = getCookieManager();
-        CookieStore cookieStore = cookieManager.getCookieStore();
-
-        Log.v(TAG, "Clearing cookies (before): " + cookieStore.get(IODINE_BASE_URI));
-        cookieStore.removeAll();
-        Log.v(TAG, "Clearing cookies (after): " + cookieStore.get(IODINE_BASE_URI));
-    }
-
-    public static String getCookies() {
-        CookieManager cookieManager = getCookieManager();
-        CookieStore cookieStore = cookieManager.getCookieStore();
-
-        String sessionId = "", passVector = "";
-        for (HttpCookie cookie : cookieStore.get(IODINE_BASE_URI)) {
-            if (cookie.getName().equals(SESSION_ID_COOKIE)) {
-                sessionId = cookie.getValue();
-            } else if (cookie.getName().equals(PASS_VECTOR_COOKIE)) {
-                passVector = cookie.getValue();
-            }
-        }
-        return new IodineCookieState(sessionId, passVector).stringify();
-    }
-
-    public static void setCookies(String in) {
-        if (in.isEmpty()) return;
-        CookieManager cookieManager = getCookieManager();
-        CookieStore cookieStore = cookieManager.getCookieStore();
-        IodineCookieState cookies = new IodineCookieState(in);
-
-        HttpCookie sessionIdCookie = new HttpCookie(SESSION_ID_COOKIE, cookies.sessionId);
-        HttpCookie passVectorCookie = new HttpCookie(PASS_VECTOR_COOKIE, cookies.passVector);
-        sessionIdCookie.setDomain(IODINE_DOMAIN);
-        passVectorCookie.setDomain(IODINE_DOMAIN);
-        sessionIdCookie.setPath("/");
-        passVectorCookie.setPath("/");
-        sessionIdCookie.setVersion(0);
-        passVectorCookie.setVersion(0);
-
-        cookieStore.add(IODINE_BASE_URI, sessionIdCookie);
-        cookieStore.add(IODINE_BASE_URI, passVectorCookie);
-
-        Log.d(TAG, "Setting cookies: " + cookieStore.get(IODINE_BASE_URI));
-    }
-
-    public static InputStream getPrivateNewsFeed() throws IOException {
-        return getPublicNewsFeed();
-    }
 
     public static InputStream getPublicNewsFeed() throws IOException {
         URL url = new URL(PUBLIC_NEWS_FEED_URL);
@@ -105,14 +40,13 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
-    public static InputStream getBlock(int bid) throws IOException {
-        // log cookies
-        CookieStore cookieStore = getCookieManager().getCookieStore();
-        Log.v(TAG, "Cookies: " + cookieStore.get(IODINE_BASE_URI));
+    public static InputStream getBlock(int bid, String cookieHeader) throws IOException {
+        Log.v(TAG, "Cookies: " + cookieHeader);
 
         URL url = new URL(String.format(BLOCK_GET_URL, bid));
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
+        conn.setRequestProperty("Cookie", cookieHeader);
 
         if (conn.getResponseCode() != 200) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
@@ -120,14 +54,13 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
-    public static InputStream getBlockList() throws IOException {
-        // log cookies
-        CookieStore cookieStore = getCookieManager().getCookieStore();
-        Log.v(TAG, "Cookies: " + cookieStore.get(IODINE_BASE_URI));
+    public static InputStream getBlockList(String cookieHeader) throws IOException {
+        Log.v(TAG, "Cookies: " + cookieHeader);
 
         URL url = new URL(BLOCK_LIST_URL);
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
+        conn.setRequestProperty("Cookie", cookieHeader);
 
         if (conn.getResponseCode() != 200) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
@@ -135,15 +68,12 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
-    public static void attemptLogin(String username, String password)
+    public static String attemptLogin(String username, String password)
             throws IodineAuthException, IOException, XmlPullParserException {
 
         // create query params
         String query = "login_username=" + URLEncoder.encode(username, "UTF-8") +
                 "&login_password=" + URLEncoder.encode(password, "UTF-8");
-
-        // prepare cookies yum
-        CookieManager cookieManager = getCookieManager();
 
         // create request
         URL url = new URL(LOGIN_URL);
@@ -178,52 +108,36 @@ public class IodineApiHelper {
         Log.i(TAG, "Login succeeded: status " + conn.getResponseCode());
 
         // cookies yum yum
-        CookieStore cookieStore = cookieManager.getCookieStore();
-        List<HttpCookie> cookies = cookieStore.get(IODINE_BASE_URI);
+        List<HttpCookie> cookies = new ArrayList<HttpCookie>();
+        List<String> cookieHeaders = conn.getHeaderFields().get("Set-Cookie");
+        for (String header : cookieHeaders) {
+            cookies.addAll(HttpCookie.parse(header));
+        }
+
+        Log.v(TAG, "Cookie headers: " + cookieHeaders);
         Log.v(TAG, "Cookies: " + cookies);
 
+        HttpCookie sessionId = null, passVector = null;
+
         for (HttpCookie cookie : cookies) {
-            if (cookie.getName().equals("PHPSESSID")) {
-                return;
+            if (!cookie.hasExpired()) {
+                if (cookie.getName().equals(SESSION_ID_COOKIE)) {
+                    sessionId = cookie;
+                } else if (cookie.getName().equals(PASS_VECTOR_COOKIE)) {
+                    passVector = cookie;
+                }
             }
         }
 
         // uh oh, wheres cookie :(
-        Log.e(TAG, "Auth error: couldn't find cookie in response");
-        Log.v(TAG, "Reading auth input stream: " + Utils.readInputStream(conn.getInputStream()));
-        Log.v(TAG, "Reading headers: " + conn.getHeaderFields());
-        throw new IOException("Couldn't find cookie in response");
-    }
-
-    public static class IodineCookieState {
-        public final String sessionId;
-        public final String passVector;
-
-        public IodineCookieState(String sessionId, String passVector) {
-            this.sessionId = sessionId;
-            this.passVector = passVector;
+        if (sessionId == null || passVector == null) {
+            Log.e(TAG, "Auth error: couldn't find cookie in response");
+            Log.v(TAG, "Reading auth input stream: " + Utils.readInputStream(conn.getInputStream()));
+            throw new IOException("Couldn't find cookie in response");
         }
 
-        public IodineCookieState(String in) {
-            try {
-                String[] split = in.split("\\|", 2); // fricking regexes
-                this.sessionId = URLDecoder.decode(split[0], "UTF-8");
-                this.passVector = URLDecoder.decode(split[1], "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                Log.wtf(TAG, "UTF-8 not supported", e);
-                throw new RuntimeException(e);
-            }
-        }
-
-        public String stringify() {
-            try {
-                String sessionIdEnc = URLEncoder.encode(this.sessionId, "UTF-8");
-                String passVectorEnc = URLEncoder.encode(this.passVector, "UTF-8");
-                return sessionIdEnc + "|" + passVectorEnc;
-            } catch (UnsupportedEncodingException e) {
-                Log.wtf(TAG, "UTF-8 not supported", e);
-                throw new RuntimeException(e);
-            }
-        }
+        String cookieString = sessionId + "; " + passVector;
+        Log.v(TAG, "Generated cookie string: " + cookieString);
+        return cookieString;
     }
 }

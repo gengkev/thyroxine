@@ -1,13 +1,14 @@
-package com.desklampstudios.thyroxine;
+package com.desklampstudios.thyroxine.sync;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,17 +17,23 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.desklampstudios.thyroxine.IodineApiHelper;
+import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.R;
 
 /**
  * A login screen that offers login via username/password.
  */
-public class LoginActivity extends ActionBarActivity {
-    private final static String TAG = LoginActivity.class.getSimpleName();
+public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
+    private final static String TAG = IodineAuthenticatorActivity.class.getSimpleName();
+    public final static String ARG_ACCOUNT_TYPE = "ACCOUNT_TYPE";
+    public final static String ARG_AUTH_TOKEN_TYPE = "AUTH_TOKEN_TYPE";
+    public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_NEW_ACCOUNT";
+    private static final String PARAM_USER_PASS = "USER_PASS";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -42,14 +49,11 @@ public class LoginActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_iodine_authenticator);
 
         // use toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // enable Up button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Set up the login form
         mUsernameView = (EditText) findViewById(R.id.username);
@@ -58,7 +62,7 @@ public class LoginActivity extends ActionBarActivity {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if (id == R.id.login_ime || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
                 }
@@ -76,6 +80,9 @@ public class LoginActivity extends ActionBarActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        // Ignore account / auth token types passed in intent
+        // This activity handles only one combination
     }
 
 
@@ -88,8 +95,6 @@ public class LoginActivity extends ActionBarActivity {
         if (mAuthTask != null) {
             return;
         }
-
-        boolean rememberMe = ((CheckBox) findViewById(R.id.checkbox)).isChecked();
 
         // Reset errors.
         mUsernameView.setError(null);
@@ -106,23 +111,48 @@ public class LoginActivity extends ActionBarActivity {
             return;
         }
 
+        String emailSuffix = getResources().getString(R.string.tjhsst_edu_suffix);
         // Check for a valid username
         if (TextUtils.isEmpty(username)) {
             mUsernameView.setError(getString(R.string.error_field_required));
             mUsernameView.requestFocus();
             return;
-        } else if (username.endsWith("@tjhsst.edu")) {
-            mUsernameView.setError(getString(R.string.error_tjhsst_edu_suffix));
-            mUsernameView.requestFocus();
-            return;
+        } else if (username.endsWith(emailSuffix)) {
+            username = username.substring(0, username.length() - emailSuffix.length());
+            mUsernameView.setText(username);
+            Toast.makeText(this, R.string.error_tjhsst_edu_suffix, Toast.LENGTH_SHORT).show();
         }
 
         // Show a progress spinner, and kick off a background task to
         // perform the user login attempt.
         showProgress(true);
-        mAuthTask = new UserLoginTask(username, password, rememberMe);
+        mAuthTask = new UserLoginTask(username, password);
         mAuthTask.execute((Void) null);
 
+    }
+
+    private void finishLogin(Intent intent) {
+        String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+        String accountPassword = intent.getStringExtra(PARAM_USER_PASS);
+        String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+
+        final AccountManager am = AccountManager.get(IodineAuthenticatorActivity.this);
+        final Account account = new Account(accountName, IodineAuthenticator.ACCOUNT_TYPE);
+
+        if (getIntent().getBooleanExtra(ARG_IS_ADDING_NEW_ACCOUNT, false)) {
+            // Create the account on the device
+            am.addAccountExplicitly(account, accountPassword, null);
+        } else {
+            // Change account password
+            am.setPassword(account, accountPassword);
+        }
+
+        // Update the auth token (to prevent an extra round-trip)
+        am.setAuthToken(account, IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, authToken);
+
+        // Set the result
+        setAccountAuthenticatorResult(intent.getExtras());
+        setResult(RESULT_OK, intent);
     }
 
 
@@ -167,41 +197,43 @@ public class LoginActivity extends ActionBarActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, Intent> {
         private final String mUsername;
         private final String mPassword;
-        private final boolean mRememberMe;
 
         private Exception mException;
 
-        UserLoginTask(String username, String password, boolean rememberMe) {
+        UserLoginTask(String username, String password) {
             mUsername = username;
             mPassword = password;
-            mRememberMe = rememberMe;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // Clear cookies to log in fresh.
-            IodineApiHelper.clearCookies();
-
+        protected Intent doInBackground(Void... params) {
             try {
-                IodineApiHelper.attemptLogin(mUsername, mPassword);
-                Log.i(TAG, "attemptLogin succeeded");
-                return true;
+                String authToken = IodineApiHelper.attemptLogin(mUsername, mPassword);
+                Log.d(TAG, "attemptLogin succeeded, authToken: " + authToken);
+
+                final Intent res = new Intent();
+                res.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername);
+                res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, IodineAuthenticator.ACCOUNT_TYPE);
+                res.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
+                res.putExtra(PARAM_USER_PASS, mPassword);
+
+                return res;
             } catch (Exception e) {
                 mException = e;
                 Log.w(TAG, "attemptLogin threw exception: " + e);
-                return false;
+                return null;
             }
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final Intent intent) {
             mAuthTask = null;
             showProgress(false);
 
-            if (!success) {
+            if (intent == null) {
                 if (mException instanceof IodineAuthException) {
                     IodineAuthException authErr = (IodineAuthException) mException;
 
@@ -216,28 +248,23 @@ public class LoginActivity extends ActionBarActivity {
                     }
 
                     String[] authErrString = getResources().getStringArray(R.array.iodine_auth_error);
-                    Toast.makeText(LoginActivity.this,
+                    Toast.makeText(IodineAuthenticatorActivity.this,
                             "Iodine auth error:\n" + authErrString[authErr.errCode],
-                            Toast.LENGTH_LONG
-                    ).show();
+                            Toast.LENGTH_LONG).show();
                     return;
                 } else {
-                    Toast.makeText(LoginActivity.this,
+                    Toast.makeText(IodineAuthenticatorActivity.this,
                             "Unexpected error:\n" + mException,
-                            Toast.LENGTH_LONG
-                    ).show();
+                            Toast.LENGTH_LONG).show();
                     return;
                 }
             }
 
-            String cookies = IodineApiHelper.getCookies();
-            Log.d(TAG, "Storing cookies: " + cookies);
+            // Success!
+            finishLogin(intent);
+            Log.d(TAG, "Closing IodineAuthenticatorActivity.");
 
-            SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, 0);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString("cookies", cookies);
-            editor.apply();
-
+            // Close the activity
             finish();
         }
 

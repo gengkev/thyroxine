@@ -2,7 +2,6 @@ package com.desklampstudios.thyroxine.news;
 
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
-import android.content.ContentProvider;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -40,18 +39,17 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
 
-        boolean cancelled = false;
         InputStream stream = null;
         IodineNewsFeedParser parser;
         //List<NewsEntry> entries = new ArrayList<NewsEntry>();
 
         try {
-            stream = IodineApiHelper.getPrivateNewsFeed();
+            stream = IodineApiHelper.getPublicNewsFeed();
             parser = new IodineNewsFeedParser();
             parser.beginFeed(stream);
 
             NewsEntry entry = parser.nextEntry();
-            while (entry != null && !cancelled) {
+            while (entry != null) {
                 try {
                     updateDatabase(entry, provider);
                 } catch (RemoteException e) {
@@ -132,7 +130,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(StubAuthenticator.getSyncAccount(context),
+        ContentResolver.requestSync(StubAuthenticator.getStubAccount(context),
                 context.getString(R.string.news_content_authority), bundle);
     }
 

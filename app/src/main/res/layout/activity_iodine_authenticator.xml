@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context="com.desklampstudios.thyroxine.LoginActivity">
+    tools:context="com.desklampstudios.thyroxine.sync.IodineAuthenticatorActivity">
 
     <include layout="@layout/default_toolbar" />
 
@@ -58,14 +58,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_password"
-                    android:imeActionId="@+id/login"
+                    android:imeActionId="@+id/login_ime"
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword" />
-
-                <CheckBox android:id="@+id/checkbox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/prompt_rememberme" />
 
                 <Button
                     android:id="@+id/sign_in_button"

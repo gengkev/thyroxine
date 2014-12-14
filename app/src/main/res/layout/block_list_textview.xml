@@ -26,8 +26,6 @@
             android:ellipsize="end" />
 
         <TextView android:id="@+id/eighth_block"
-            android:paddingStart="8dp"
-            android:paddingEnd="0dp"
             android:paddingLeft="8dp"
             android:paddingRight="0dp"
             android:layout_width="wrap_content"

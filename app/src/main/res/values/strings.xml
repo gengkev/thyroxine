@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
-
     <string name="app_name">Thyroxine</string>
+
     <string name="action_settings">Settings</string>
 
     <!-- Navigation drawer strings -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string-array name="nav_titles">
+    <string-array name="nav_titles" translatable="false">
         <item>@string/title_fragment_news</item>
         <item>@string/title_fragment_eighth</item>
         <item>@string/title_fragment_bell_schedule</item>
@@ -20,34 +20,34 @@
     <string name="title_fragment_links">Links</string>
 
     <!-- Login strings -->
-    <string name="title_activity_iodine_login">Sign in</string>
+    <string name="title_activity_iodine_login">Add account</string>
 
     <string name="login_instructions">
         Sign in below with your TJHSST Iodine account.
     </string>
     <string name="login_disclaimer">
-        This application will have access to all of your Iodine data, so if you do not trust the
-        creator of this application, please don\'t sign in.
+        This application will have access to all of your Iodine data, so if you do not
+        trust the creator of this application, please don\'t sign in.
         (Basically, please don\'t sue me!)
     </string>
 
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
-    <string name="prompt_rememberme">Remember me</string>
-    <string name="action_sign_in">Sign in to Iodine</string>
+    <string name="action_sign_in">Sign in to Thyroxine with Iodine</string>
     <string name="action_sign_in_short">Sign in</string>
 
     <string name="error_incorrect_username">This username is incorrect</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="error_tjhsst_edu_suffix">Remove the @tjhsst.edu suffix</string>
+    <string name="tjhsst_edu_suffix" translatable="false">"@tjhsst.edu"</string>
+    <string name="error_tjhsst_edu_suffix">The @tjhsst.edu suffix is not necessary</string>
 
     <!-- News strings -->
     <string name="title_fragment_news">News</string>
     <string name="refresh">Refresh</string>
     <string name="news_provider_name">Thyroxine: News</string>
-    <!-- Warning: for now, content authority declared in NewsProvider -->
-    <string name="news_content_authority">com.desklampstudios.thyroxine.news</string>
+    <!-- Warning: also declared in NewsProvider -->
+    <string name="news_content_authority" translatable="false">com.desklampstudios.thyroxine.news</string>
 
     <string name="title_activity_entry_detail">Post details</string>
     <string name="news_entry_title">Title</string>
@@ -60,7 +60,19 @@
     <string name="title_activity_block">Block</string>
 
     <!-- SyncAdapter related strings -->
-    <string name="stub_sync_account_type">stub.thyroxine.desklampstudios.com</string>
-    <string name="stub_sync_fake_account_name">thyroxine</string>
-    <string name="stub_authenticator_name">Thyroxine (Stub)</string>
+    <!-- Warning: sync account types also declared in IodineAuthenticator -->
+    <string name="stub_account_type" translatable="false">stub.thyroxine.desklampstudios.com</string>
+    <string name="stub_sync_fake_account_name" translatable="false">thyroxine</string>
+    <string name="stub_authenticator_name">Thyroxine (Sync)</string>
+    <string name="stub_account_cannot_create">
+        This type of account cannot be created.
+    </string>
+
+    <string name="iodine_account_type" translatable="false">iodine.thyroxine.desklampstudios.com</string>
+    <string name="iodine_authenticator_name">Thyroxine (Iodine)</string>
+    <string name="iodine_account_only_one">
+        Only one Iodine account can exist at a time. To add another, remove the current one first.
+        This can be done in the device settings under the Accounts section.
+    </string>
+    <string name="iodine_cookie_auth_token_label">TJHSST Iodine Account</string>
 </resources>

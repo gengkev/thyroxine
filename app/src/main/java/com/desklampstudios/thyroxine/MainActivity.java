@@ -1,16 +1,14 @@
 package com.desklampstudios.thyroxine;
 
+import android.accounts.AccountManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,13 +21,12 @@ import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
-import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
-    public static final String PREFS_NAME = "SessionPrefs";
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
 
     private DrawerLayout mDrawerLayout;
@@ -54,7 +51,6 @@ public class MainActivity extends ActionBarActivity {
             mDrawerSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
-        loadCookies();
         initializeSyncAdapters();
 
         // Navigation Drawer
@@ -90,17 +86,9 @@ public class MainActivity extends ActionBarActivity {
         selectItem(mDrawerSelectedPosition);
     }
 
-    public void loadCookies() {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String cookies = settings.getString("cookies", "");
-
-        Log.d(TAG, "Retrieving cookies: " + cookies);
-        IodineApiHelper.setCookies(cookies);
-    }
-
     public void initializeSyncAdapters() {
         // Make sure stub account exists (if not, initializes NewsSyncAdapter)
-        StubAuthenticator.getSyncAccount(this);
+        StubAuthenticator.getStubAccount(this);
     }
 
     /** Swaps fragments in the main content view */
@@ -148,8 +136,10 @@ public class MainActivity extends ActionBarActivity {
 
         switch (item.getItemId()) {
             case R.id.action_login:
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
+                final AccountManager am = AccountManager.get(this);
+                am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
+                        IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
+                        null, null, this, null, null);
                 return true;
         }
         return super.onOptionsItemSelected(item);
