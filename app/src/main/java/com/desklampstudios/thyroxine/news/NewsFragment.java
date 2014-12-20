@@ -136,23 +136,25 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-        if (id != NEWS_LOADER)
-            throw new IllegalStateException();
-
-        return new CursorLoader(
-                getActivity(),
-                NewsProvider.CONTENT_URI_NEWS,
-                new String[] { // columns
-                        NewsDbHelper.KEY_NEWS_ID,
-                        NewsDbHelper.KEY_NEWS_TITLE,
-                        NewsDbHelper.KEY_NEWS_DATE,
-                        NewsDbHelper.KEY_NEWS_SNIPPET
-                },
-                null, // selection
-                null, // selectionArgs
-                NewsDbHelper.KEY_NEWS_DATE + " DESC" // orderBy
-        );
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+        switch (loaderId) {
+        case NEWS_LOADER:
+            return new CursorLoader(
+                    getActivity(),
+                    NewsProvider.CONTENT_URI_NEWS,
+                    new String[] { // columns
+                            NewsDbHelper.KEY_NEWS_ID,
+                            NewsDbHelper.KEY_NEWS_TITLE,
+                            NewsDbHelper.KEY_NEWS_DATE,
+                            NewsDbHelper.KEY_NEWS_SNIPPET
+                    },
+                    null, // selection
+                    null, // selectionArgs
+                    NewsDbHelper.KEY_NEWS_DATE + " DESC" // orderBy
+            );
+        default:
+            return null;
+        }
     }
 
     @Override

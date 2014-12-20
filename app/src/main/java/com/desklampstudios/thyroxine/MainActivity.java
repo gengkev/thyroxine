@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         // create ArrayAdapter to display drawer items, add click listener
-        mDrawerList.setAdapter(new ArrayAdapter<String>(
+        mDrawerList.setAdapter(new ArrayAdapter<>(
                 getSupportActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
@@ -86,7 +86,7 @@ public class MainActivity extends ActionBarActivity {
         selectItem(mDrawerSelectedPosition);
     }
 
-    public void initializeSyncAdapters() {
+    private void initializeSyncAdapters() {
         // Make sure stub account exists (if not, initializes NewsSyncAdapter)
         StubAuthenticator.getStubAccount(this);
     }

@@ -53,16 +53,23 @@ class IodineAuthErrorParser extends AbstractXMLParser {
         parser.require(XmlPullParser.START_TAG, ns, "error");
 
         Integer id = null;
+        String message = null;
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("id")) {
+            switch (name) {
+            case "id":
                 id = readInt(parser, "id");
-            } else {
+                break;
+            case "message":
+                message = readText(parser, "message");
+                break;
+            default:
                 skip(parser);
+                break;
             }
         }
 

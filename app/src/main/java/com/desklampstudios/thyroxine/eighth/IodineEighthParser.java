@@ -61,7 +61,7 @@ class IodineEighthParser extends AbstractXMLParser {
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
 
-        // getBlock API begins w/ currently selected block, then all activities
+        // getBlock API begins with currently selected block, then all activities
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "block");
         EighthBlock curBlock = readBlock(mParser);
@@ -133,25 +133,28 @@ class IodineEighthParser extends AbstractXMLParser {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("bid")) {
+            switch (name) {
+            case "bid":
                 bid = readInt(parser, "bid");
-            }
-            else if (name.equals("date")) {
+                break;
+            case "date":
                 date = readBasicDate(parser);
-            }
-            else if (name.equals("type")) {
+                break;
+            case "type":
                 type = readText(parser, "type");
-            }
-            else if (name.equals("block")) {
+                break;
+            case "block":
                 type = readText(parser, "block");
-            }
-            else if (name.equals("activity")) {
+                break;
+            case "activity":
                 curActivity = readActivity(parser);
-            }
-            else if (name.equals("locked")) {
+                break;
+            case "locked":
                 locked = readInt(parser, "locked") != 0;
-            } else {
+                break;
+            default:
                 skip(parser);
+                break;
             }
         }
 
@@ -222,52 +225,57 @@ class IodineEighthParser extends AbstractXMLParser {
             String name = parser.getName();
 
             // fields
-            if (name.equals("aid")) {
-                aid = readInt(parser, "aid");
-            }
-            else if (name.equals("name")) {
-                aName = Utils.cleanHtml(readText(parser, "name"));
-            }
-            else if (name.equals("description")) {
-                description = Utils.cleanHtml(readText(parser, "description"));
-            }
-            else if (name.equals("comment")) {
-                comment = Utils.cleanHtml(readText(parser, "comment"));
-            }
-            else if (name.equals("block_rooms_comma")) {
-                roomsStr = Utils.cleanHtml(readText(parser, "block_rooms_comma"));
-            }
-            else if (name.equals("member_count")) {
-                memberCount = readInt(parser, "member_count");
-            }
-            else if (name.equals("capacity")) {
-                capacity = readInt(parser, "capacity");
-            }
-            // EighthActv flags
-            else if (name.equals("restricted")) {
-                if (readInt(parser, "restricted") != 0)
-                    flags |= EighthActv.FLAG_RESTRICTED;
-            }
-            else if (name.equals("sticky")) {
-                if (readInt(parser, "sticky") != 0)
-                    flags |= EighthActv.FLAG_STICKY;
-            }
-            else if (name.equals("special")) {
-                if (readInt(parser, "special") != 0)
-                    flags |= EighthActv.FLAG_SPECIAL;
-            }
-            // EighthActvInstance flags
-            else if (name.equals("attendancetaken")) {
-                if (readInt(parser, "attendancetaken") != 0)
-                    flags |= EighthActvInstance.FLAG_ATTENDANCETAKEN;
-            }
-            else if (name.equals("cancelled")) {
-                if (readInt(parser, "cancelled") != 0)
-                    flags |= EighthActvInstance.FLAG_CANCELLED;
-            }
-            // else
-            else {
-                skip(parser);
+            switch (name) {
+                case "aid":
+                    aid = readInt(parser, "aid");
+                    break;
+                case "name":
+                    aName = Utils.cleanHtml(readText(parser, "name"));
+                    break;
+                case "description":
+                    description = Utils.cleanHtml(readText(parser, "description"));
+                    break;
+                case "comment":
+                    comment = Utils.cleanHtml(readText(parser, "comment"));
+                    break;
+                case "block_rooms_comma":
+                    roomsStr = Utils.cleanHtml(readText(parser, "block_rooms_comma"));
+                    break;
+                case "member_count":
+                    memberCount = readInt(parser, "member_count");
+                    break;
+                case "capacity":
+                    capacity = readInt(parser, "capacity");
+                    break;
+
+                // EighthActv flags
+                case "restricted":
+                    if (readInt(parser, "restricted") != 0)
+                        flags |= EighthActv.FLAG_RESTRICTED;
+                    break;
+                case "sticky":
+                    if (readInt(parser, "sticky") != 0)
+                        flags |= EighthActv.FLAG_STICKY;
+                    break;
+                case "special":
+                    if (readInt(parser, "special") != 0)
+                        flags |= EighthActv.FLAG_SPECIAL;
+                    break;
+
+                // EighthActvInstance flags
+                case "attendancetaken":
+                    if (readInt(parser, "attendancetaken") != 0)
+                        flags |= EighthActvInstance.FLAG_ATTENDANCETAKEN;
+                    break;
+                case "cancelled":
+                    if (readInt(parser, "cancelled") != 0)
+                        flags |= EighthActvInstance.FLAG_CANCELLED;
+                    break;
+
+                // else
+                default:
+                    skip(parser);
+                    break;
             }
         }
 

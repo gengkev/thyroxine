@@ -12,7 +12,7 @@ class NewsDbHelper extends SQLiteOpenHelper {
     private static final String TAG = NewsDbHelper.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 3;
-    public static final String DATABASE_NAME = "thyroxine.db.news";
+    private static final String DATABASE_NAME = "thyroxine.db.news";
 
     // NewsEntry table
     static final String TABLE_NEWS = "news";

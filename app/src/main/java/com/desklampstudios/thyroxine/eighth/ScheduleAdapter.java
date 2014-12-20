@@ -54,9 +54,9 @@ class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
 
         holder.mDateView.setText(DATE_FORMAT.format(new Date(block.date)));
         holder.mBlockView.setText("Block " + block.type);
-        holder.mActivityNameView.setText(block.selectedActv.actv.name);
+        holder.mActivityNameView.setText(actvInstance.actv.name);
 
-        ArrayList<String> statuses = new ArrayList<String>();
+        ArrayList<String> statuses = new ArrayList<>();
         // cancelled
         if ((actvInstance.getFlags() & EighthActvInstance.FLAG_CANCELLED) != 0) {
             statuses.add("CANCELLED");

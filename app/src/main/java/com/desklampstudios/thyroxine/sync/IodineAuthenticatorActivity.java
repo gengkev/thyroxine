@@ -28,7 +28,7 @@ import com.desklampstudios.thyroxine.R;
 /**
  * A login screen that offers login via username/password.
  */
-public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
+public class IodineAuthenticatorActivity extends AbstractAccountAuthenticatorActivity {
     private final static String TAG = IodineAuthenticatorActivity.class.getSimpleName();
     public final static String ARG_ACCOUNT_TYPE = "ACCOUNT_TYPE";
     public final static String ARG_AUTH_TOKEN_TYPE = "AUTH_TOKEN_TYPE";

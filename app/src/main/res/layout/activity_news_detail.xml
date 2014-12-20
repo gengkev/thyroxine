@@ -1,70 +1,28 @@
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:orientation="vertical"
     tools:context="com.desklampstudios.thyroxine.news.NewsDetailActivity">
+
+    <include layout="@layout/default_toolbar" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/background">
+        android:background="@color/background"
+        android:paddingTop="@dimen/activity_vertical_margin">
 
-        <include layout="@layout/default_toolbar" />
-
-        <!--
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
-
-                <TextView
-                    android:text="@string/news_entry_title"
-                    android:id="@+id/news_entry_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:textSize="32sp" />
-
-                <TextView
-                    android:text="@string/news_entry_published"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/news_entry_published"
-                    android:layout_marginBottom="8dp"
-                    android:textSize="16sp"
-                    android:textColor="?android:textColorSecondary" />
-
-                <TextView
-                    android:text="Content"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/news_entry_content"
-                    android:textSize="16sp"
-                    android:textColor="?android:textColorPrimary"
-                    android:lineSpacingExtra="4dp" />
-
-            </LinearLayout>
-
-        </ScrollView>
-        -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="16dp"
             android:paddingBottom="4dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:paddingStart="@dimen/activity_horizontal_margin"
+            android:paddingEnd="@dimen/activity_horizontal_margin">
 
             <TextView android:id="@+id/news_entry_title"
                 android:text="@string/news_entry_title"
@@ -84,8 +42,8 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:paddingTop="4dp"
             android:paddingBottom="8dp">
 
@@ -98,4 +56,4 @@
 
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>

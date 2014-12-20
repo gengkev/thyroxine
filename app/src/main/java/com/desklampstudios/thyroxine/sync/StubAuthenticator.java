@@ -21,7 +21,7 @@ import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 public class StubAuthenticator extends AbstractAccountAuthenticator {
     private static final String TAG = StubAuthenticator.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
     private final Handler handler = new Handler();
 
     public StubAuthenticator(Context context) {

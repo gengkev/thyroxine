@@ -27,8 +27,8 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = NewsSyncAdapter.class.getSimpleName();
 
     // Sync intervals
-    public static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+    private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
+    private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
 
     public NewsSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -82,8 +82,8 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
      * otherwise, it is inserted into the database.
      * @param entry NewsEntry to update the database with.
      */
-    protected void updateDatabase(NewsEntry entry,
-                                  ContentProviderClient provider) throws RemoteException {
+    private void updateDatabase(NewsEntry entry,
+                                ContentProviderClient provider) throws RemoteException {
         // test if record exists
         Cursor c = provider.query(NewsProvider.CONTENT_URI_NEWS,
                 null, // columns

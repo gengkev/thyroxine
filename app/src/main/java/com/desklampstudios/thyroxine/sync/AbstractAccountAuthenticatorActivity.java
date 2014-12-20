@@ -1,5 +1,6 @@
 /*
  * Modified version of AccountAuthenticatorActivity that extends ActionBarActivity.
+ * Changed package, class name, spelling of "Retrieves", and made class abstract.
  */
 
 /*
@@ -28,7 +29,7 @@ import android.support.v7.app.ActionBarActivity;
 /**
  * Base class for implementing an Activity that is used to help implement an
  * AbstractAccountAuthenticator. If the AbstractAccountAuthenticator needs to use an activity
- * to handle the request then it can have the activity extend AccountAuthenticatorActivity.
+ * to handle the request then it can have the activity extend AbstractAccountAuthenticatorActivity.
  * The AbstractAccountAuthenticator passes in the response to the intent using the following:
  * <pre>
  *      intent.putExtra({@link AccountManager#KEY_ACCOUNT_AUTHENTICATOR_RESPONSE}, response);
@@ -39,7 +40,7 @@ import android.support.v7.app.ActionBarActivity;
  * is never set or if it is set to null then error {@link AccountManager#ERROR_CODE_CANCELED}
  * will be called on the response.
  */
-public class AccountAuthenticatorActivity extends ActionBarActivity {
+public abstract class AbstractAccountAuthenticatorActivity extends ActionBarActivity {
     private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
     private Bundle mResultBundle = null;
 
@@ -54,7 +55,7 @@ public class AccountAuthenticatorActivity extends ActionBarActivity {
     }
 
     /**
-     * Retreives the AccountAuthenticatorResponse from either the intent of the icicle, if the
+     * Retrieves the AccountAuthenticatorResponse from either the intent of the icicle, if the
      * icicle is non-zero.
      * @param icicle the save instance data of this Activity, may be null
      */

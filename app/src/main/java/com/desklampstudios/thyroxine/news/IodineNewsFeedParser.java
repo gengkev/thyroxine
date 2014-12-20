@@ -78,16 +78,22 @@ class IodineNewsFeedParser extends AbstractXMLParser {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("title")) {
+            switch (name) {
+            case "title":
                 title = Utils.cleanHtml(readText(parser, "title"));
-            } else if (name.equals("pubDate")) {
+                break;
+            case "pubDate":
                 published = readPublished(parser);
-            } else if (name.equals("link")) {
+                break;
+            case "link":
                 link = Utils.cleanHtml(readText(parser, "link"));
-            } else if (name.equals("description")) {
+                break;
+            case "description":
                 content = readText(parser, "description");
-            } else {
+                break;
+            default:
                 skip(parser);
+                break;
             }
         }
 

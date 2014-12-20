@@ -170,7 +170,7 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
 
             InputStream stream = null;
             IodineEighthParser parser;
-            List<EighthBlock> blocks = new ArrayList<EighthBlock>();
+            List<EighthBlock> blocks = new ArrayList<>();
 
             try {
                 stream = IodineApiHelper.getBlockList(authToken);

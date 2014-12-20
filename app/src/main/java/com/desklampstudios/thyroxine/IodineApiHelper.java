@@ -108,7 +108,7 @@ public class IodineApiHelper {
         Log.i(TAG, "Login succeeded: status " + conn.getResponseCode());
 
         // cookies yum yum
-        List<HttpCookie> cookies = new ArrayList<HttpCookie>();
+        List<HttpCookie> cookies = new ArrayList<>();
         List<String> cookieHeaders = conn.getHeaderFields().get("Set-Cookie");
         for (String header : cookieHeaders) {
             cookies.addAll(HttpCookie.parse(header));

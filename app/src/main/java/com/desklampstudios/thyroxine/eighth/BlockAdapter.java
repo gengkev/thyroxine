@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
-    private List<EighthActvInstance> mDataset;
-    private ActvClickListener mListener;
+    private final List<EighthActvInstance> mDataset;
+    private final ActvClickListener mListener;
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public BlockAdapter(List<EighthActvInstance> dataset, ActvClickListener listener) {
@@ -53,7 +53,7 @@ class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
                 actvInstance.comment + " " +
                 actvInstance.actv.description).trim());
 
-        ArrayList<String> statuses = new ArrayList<String>();
+        ArrayList<String> statuses = new ArrayList<>();
         int color = (position % 2 == 0) ? 0x7FF8F8F8 : 0x7FFAFAFA;
 
         // restricted
@@ -115,11 +115,11 @@ class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public View mView;
-        public TextView mNameView;
-        public TextView mRoomView;
-        public TextView mDescriptionView;
-        public TextView mStatusView;
+        public final View mView;
+        public final TextView mNameView;
+        public final TextView mRoomView;
+        public final TextView mDescriptionView;
+        public final TextView mStatusView;
 
         public ViewHolder(View v) {
             super(v);

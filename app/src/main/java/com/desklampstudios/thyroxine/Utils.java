@@ -2,13 +2,11 @@ package com.desklampstudios.thyroxine;
 
 import android.accounts.Account;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.SyncRequest;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 

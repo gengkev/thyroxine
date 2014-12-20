@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
+    android:paddingStart="@dimen/activity_horizontal_margin"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
     android:paddingTop="16dp"
     android:paddingBottom="20dp"
     android:minHeight="72dp"
@@ -26,8 +26,8 @@
             android:ellipsize="end" />
 
         <TextView android:id="@+id/eighth_block"
-            android:paddingLeft="8dp"
-            android:paddingRight="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
