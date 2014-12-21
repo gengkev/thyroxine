@@ -46,11 +46,19 @@
             android:label="@string/title_activity_block"
             android:parentActivityName=".MainActivity" />
 
+        <!-- News content provider -->
         <provider android:name=".news.NewsProvider"
             android:authorities="@string/news_content_authority"
             android:exported="false"
             android:syncable="true"
             android:label="@string/news_provider_name" />
+
+        <!-- Eighth content provider -->
+        <provider android:name=".eighth.EighthProvider"
+            android:authorities="@string/eighth_content_authority"
+            android:exported="false"
+            android:syncable="true"
+            android:label="@string/eighth_provider_name" />
 
         <!-- Authenticator service for stub login -->
         <service android:name=".sync.StubAuthenticatorService"

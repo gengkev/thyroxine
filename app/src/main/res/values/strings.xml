@@ -45,6 +45,7 @@
     <!-- News strings -->
     <string name="title_fragment_news">News</string>
     <string name="refresh">Refresh</string>
+
     <string name="news_provider_name">Thyroxine: News</string>
     <!-- Warning: also declared in NewsProvider -->
     <string name="news_content_authority" translatable="false">com.desklampstudios.thyroxine.news</string>
@@ -58,6 +59,10 @@
     <!-- Eighth strings -->
     <string name="title_fragment_eighth">Eighth</string>
     <string name="title_activity_block">Block</string>
+
+    <string name="eighth_provider_name">Thyroxine: Eighth</string>
+    <!-- Warning: also declared in EighthProvider -->
+    <string name="eighth_content_authority" translatable="false">com.desklampstudios.thyroxine.eighth</string>
 
     <!-- SyncAdapter related strings -->
     <!-- Warning: sync account types also declared in IodineAuthenticator -->
