@@ -1,28 +1,26 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
-    private static final String TAG = ScheduleAdapter.class.getSimpleName();
-    private static final DateFormat DATE_FORMAT =
-            DateFormat.getDateInstance(DateFormat.FULL); // default locale OK
+class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapter.ViewHolder> {
+    private static final String TAG = ScheduleListAdapter.class.getSimpleName();
 
-    private final List<EighthBlock> mDataset;
+    private final List<Pair<EighthBlock, Integer>> mDataset;
     private final BlockClickListener mListener;
 
-    public ScheduleAdapter(List<EighthBlock> dataset, BlockClickListener listener) {
-        this.mDataset = dataset;
+    public ScheduleListAdapter(BlockClickListener listener) {
+        this.mDataset = new ArrayList<>();
         this.mListener = listener;
     }
 
@@ -39,8 +37,8 @@ class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
             @Override
             public void onClick(View view) {
                 int pos = vh.getPosition();
-                EighthBlock block = mDataset.get(pos);
-                mListener.onBlockClick(block);
+                Pair<EighthBlock, Integer> pair = mDataset.get(pos);
+                mListener.onBlockClick(pair.first);
             }
         });
         return vh;
@@ -49,13 +47,17 @@ class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        EighthBlock block = mDataset.get(position);
-        EighthActvInstance actvInstance = block.selectedActv;
+        Pair<EighthBlock, Integer> pair = mDataset.get(position);
+        EighthBlock block = pair.first;
+        //EighthActvInstance actvInstance = block.selectedActv;
 
-        holder.mDateView.setText(DATE_FORMAT.format(new Date(block.date)));
+        String dateStr = Utils.formatBasicDate(block.date, Utils.DISPLAY_DATE_FORMAT);
+        holder.mDateView.setText(dateStr);
         holder.mBlockView.setText("Block " + block.type);
-        holder.mActivityNameView.setText(actvInstance.actv.name);
+        //holder.mActivityNameView.setText(actvInstance.actv.name);
+        holder.mActivityNameView.setText("<activity name>");
 
+        /*
         ArrayList<String> statuses = new ArrayList<>();
         // cancelled
         if ((actvInstance.getFlags() & EighthActvInstance.FLAG_CANCELLED) != 0) {
@@ -74,14 +76,15 @@ class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
             holder.mStatusView.setPaddingRelative(0, 0, 0, 0);
             holder.mStatusView.setText("");
         }
+        */
     }
 
-    public void add(EighthBlock block) {
-        add(mDataset.size(), block);
+    public void add(Pair<EighthBlock, Integer> pair) {
+        add(mDataset.size(), pair);
     }
 
-    public void add(int pos, EighthBlock block) {
-        mDataset.add(pos, block);
+    public void add(int pos, Pair<EighthBlock, Integer> pair) {
+        mDataset.add(pos, pair);
         notifyItemInserted(pos);
     }
 

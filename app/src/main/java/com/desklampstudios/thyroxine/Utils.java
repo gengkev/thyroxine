@@ -6,11 +6,41 @@ import android.content.SyncRequest;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class Utils {
+    private static final String TAG = Utils.class.getSimpleName();
+
+    public static final DateFormat FEED_DATETIME_FORMAT =
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
+    public static final DateFormat ISO_DATETIME_FORMAT =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+
+    public static final DateFormat BASIC_DATE_FORMAT =
+            new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    public static final DateFormat DISPLAY_DATE_FORMAT =
+            DateFormat.getDateInstance(DateFormat.FULL); // default locale OK
+    public static final DateFormat DISPLAY_DATE_FORMAT_MEDIUM =
+            DateFormat.getDateInstance(DateFormat.MEDIUM); // default locale OK
+
+    public static String formatBasicDate(String str, DateFormat dateFormat) {
+        Date date = new Date(0);
+        try {
+            date = BASIC_DATE_FORMAT.parse(str);
+        } catch (ParseException e) {
+            Log.e(TAG, "Parsing date failed: " + str);
+        }
+        return dateFormat.format(date);
+    }
+
     public static String cleanHtml(String in) {
         return Html.fromHtml(in).toString().trim();
     }

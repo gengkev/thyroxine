@@ -3,30 +3,29 @@
     <string-array name="iodine_auth_error">
         <!-- 0: unknown -->
         <item>
-            Une erreur non identifié s\'est produite.
-            C\'est probablement à cause de l\'appli. Veuillez nous l\'indiquer!
+            Erreur d\'Iode: Une erreur non identifié s\'est produite.
         </item>
         <!-- 1: bad_password -->
         <item>
-            Votre connexion a échoué. Peut-être que votre mot de passe est incorrect?
+            Erreur d\'Iode: Votre connexion a échoué. Peut-être que votre mot de passe est incorrect?
         </item>
         <!-- 2: not_in_database -->
         <item>
-            Votre mot de passe et nom d\'utilisateur étaient corrects, mais il semble que vous
-            n\'existez pas dans la base de données.
-            S\'il s\'agit d\'une erreur, veuillez l\'indiquer à l\'Intranetmestre.
+            Erreur d\'Iode: Votre mot de passe et nom d\'utilisateur étaient corrects, mais il
+            semble que vous n\'existez pas dans la base de données. S\'il s\'agit d\'une erreur,
+            veuillez l\'indiquer à l\'Intranetmestre.
         </item>
         <!-- 3: bad_username -->
         <item>
-            Votre conneexion a échoué. Peut-être que votre nom d\'utilisateur est incorrect?
+            Erreur d\'Iode: Votre conneexion a échoué. Peut-être que votre nom d\'utilisateur est incorrect?
         </item>
         <!-- 4: tj_email_suffix -->
         <item>
-            Votre adresse e-mail n\'est pas votre nom d\'utilisateur! Enlevez le suffixe @tjhsst.edu.
+            Erreur d\'Iode: Votre adresse e-mail n\'est pas votre nom d\'utilisateur! Enlevez le suffixe @tjhsst.edu.
         </item>
         <!-- 5: not_yet_active -->
         <item>
-            Votre compte n\'est pas encore actif sur Intranet. Patientez, jeune troisième.
+            Erreur d\'Iode: Votre compte n\'est pas encore actif sur Intranet. Patientez, jeune troisième.
         </item>
     </string-array>
 </resources>

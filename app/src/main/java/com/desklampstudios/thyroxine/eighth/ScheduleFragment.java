@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.DividerItemDecoration;
 import com.desklampstudios.thyroxine.IodineApiHelper;
+import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
@@ -27,8 +29,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -36,12 +36,12 @@ import java.util.List;
  * Use the {@link ScheduleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockClickListener {
+public class ScheduleFragment extends Fragment implements ScheduleListAdapter.BlockClickListener {
     private static final String TAG = ScheduleFragment.class.getSimpleName();
 
     private RetrieveBlocksTask mRetrieveBlocksTask;
     private RecyclerView mRecyclerView;
-    private ScheduleAdapter mAdapter;
+    private ScheduleListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     private Account mAccount;
@@ -65,10 +65,8 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
         }
         */
 
-        mAdapter = new ScheduleAdapter(new ArrayList<EighthBlock>(), this);
-        mAdapter.add(new EighthBlock(-1, 0L, "Z", false,
-                new EighthActvInstance(
-                        new EighthActv(-1, "<name>", "<description>", 0L), "<comment>", 0L)));
+        mAdapter = new ScheduleListAdapter(this);
+        mAdapter.add(new Pair<>(new EighthBlock(-1, "2014-12-21", "A", false), 999));
 
         // load blocks
         retrieveBlocks();
@@ -103,7 +101,7 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
         //Toast.makeText(getActivity(), "Block: " + block, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), BlockActivity.class);
-        intent.putExtra(BlockFragment.ARG_BID, block.bid);
+        intent.putExtra(BlockFragment.ARG_BID, block.blockId);
         startActivity(intent);
     }
 
@@ -144,11 +142,11 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
         mRetrieveBlocksTask.execute();
     }
 
-    private class RetrieveBlocksTask extends AsyncTask<Void, EighthBlock, List<EighthBlock>> {
+    private class RetrieveBlocksTask extends AsyncTask<Void, Object, Void> {
         private Exception exception = null;
 
         @Override
-        protected List<EighthBlock> doInBackground(Void... params) {
+        protected Void doInBackground(Void... params) {
             final AccountManager am = AccountManager.get(getActivity());
             AccountManagerFuture<Bundle> future = am.getAuthToken(mAccount,
                     IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, Bundle.EMPTY, getActivity(), null, null);
@@ -169,24 +167,22 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
             }
 
             InputStream stream = null;
-            IodineEighthParser parser;
-            List<EighthBlock> blocks = new ArrayList<>();
+            IodineEighthParser parser = null;
 
             try {
                 stream = IodineApiHelper.getBlockList(authToken);
 
-                parser = new IodineEighthParser();
+                parser = new IodineEighthParser(getActivity());
                 parser.beginListBlocks(stream);
 
-                EighthBlock block;
+                Pair<EighthBlock, Integer> pair;
                 while (!isCancelled()) {
-                    block = parser.nextBlock();
+                    pair = parser.nextBlock();
 
-                    if (block == null)
+                    if (pair == null)
                         break;
 
-                    publishProgress(block);
-                    blocks.add(block);
+                    publishProgress(pair.first, pair.second);
                 }
 
             } catch (IOException e) {
@@ -197,7 +193,13 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
                 Log.e(TAG, "XML error: " + e.toString());
                 exception = e;
                 return null;
+            } catch (IodineAuthException e) {
+                Log.e(TAG, "Iodine auth error", e);
+                exception = e;
+                return null;
             } finally {
+                if (parser != null)
+                    parser.stopParse();
                 try {
                     if (stream != null) stream.close();
                 } catch (IOException e) {
@@ -205,17 +207,18 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
                 }
             }
 
-            return blocks;
+            return null;
         }
 
         @Override
-        protected void onProgressUpdate(EighthBlock... entries) {
-            mAdapter.add(entries[0]);
+        protected void onProgressUpdate(Object... args) {
+            // TODO: this is incredibly stupid, remove it
+            mAdapter.add(new Pair<>((EighthBlock)args[0], (Integer) args[1]));
             // Log.i(TAG, "Adding entry: " + entries[0]);
         }
 
         @Override
-        protected void onPostExecute(List<EighthBlock> entries) {
+        protected void onPostExecute(Void _) {
             mRetrieveBlocksTask = null;
             if (exception != null) {
                 if (getActivity() != null) {
@@ -226,11 +229,11 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.BlockC
                 return;
             }
 
-            Log.i(TAG, "Got blocks (" + entries.size() + " blocks)");
+            Log.i(TAG, "Got blocks");
 
             if (getActivity() != null) {
                 Toast.makeText(getActivity(),
-                        "Got blocks (" + entries.size() + " blocks)",
+                        "Got blocks",
                         Toast.LENGTH_SHORT).show();
             }
         }

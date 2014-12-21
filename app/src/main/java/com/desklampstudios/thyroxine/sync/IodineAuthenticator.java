@@ -107,7 +107,7 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         // If no auth token, try to authenticate the user.
         if (authToken == null && password != null) {
             try {
-                authToken = IodineApiHelper.attemptLogin(account.name, password);
+                authToken = IodineApiHelper.attemptLogin(account.name, password, mContext);
             }
             catch (IodineAuthException e) {
                 // Do nothing. Username/password probably incorrect

@@ -40,12 +40,12 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                               ContentProviderClient provider, SyncResult syncResult) {
 
         InputStream stream = null;
-        IodineNewsFeedParser parser;
+        IodineNewsFeedParser parser = null;
         //List<NewsEntry> entries = new ArrayList<NewsEntry>();
 
         try {
             stream = IodineApiHelper.getPublicNewsFeed();
-            parser = new IodineNewsFeedParser();
+            parser = new IodineNewsFeedParser(getContext());
             parser.beginFeed(stream);
 
             NewsEntry entry = parser.nextEntry();
@@ -68,8 +68,11 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
             Log.e(TAG, "XML error: " + e.toString());
             syncResult.stats.numParseExceptions++;
         } finally {
+            if (parser != null)
+                parser.stopParse();
             try {
-                if (stream != null) stream.close();
+                if (stream != null)
+                    stream.close();
             } catch (IOException e) {
                 Log.e(TAG, "IOException when closing stream: " + e);
             }

@@ -1,16 +1,19 @@
 package com.desklampstudios.thyroxine;
 
+import android.content.Context;
+import android.util.Log;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-class IodineAuthErrorParser extends AbstractXMLParser {
+public class IodineAuthErrorParser extends AbstractXMLParser {
     private static final String TAG = IodineAuthErrorParser.class.getSimpleName();
 
-    public IodineAuthErrorParser() throws XmlPullParserException {
-        super();
+    public IodineAuthErrorParser(Context context) throws XmlPullParserException {
+        super(context);
     }
 
     public void beginAuthError(InputStream in) throws XmlPullParserException, IOException {
@@ -20,36 +23,41 @@ class IodineAuthErrorParser extends AbstractXMLParser {
 
         mInputStream = in;
         mParser.setInput(mInputStream, null);
+        parsingBegun = true;
 
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "auth");
-
-        parsingBegun = true;
     }
 
     public IodineAuthException getError() throws XmlPullParserException, IOException {
-        if (!parsingBegun) {
+        return getErrorStatic(this);
+    }
+
+    public static IodineAuthException getErrorStatic(AbstractXMLParser xmlParser)
+            throws XmlPullParserException, IOException {
+        if (!xmlParser.parsingBegun) {
             return null;
         }
 
-        while (mParser.next() != XmlPullParser.END_TAG) {
-            if (mParser.getEventType() != XmlPullParser.START_TAG) {
+        while (xmlParser.mParser.next() != XmlPullParser.END_TAG) {
+            if (xmlParser.mParser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
-            String name = mParser.getName();
+            String name = xmlParser.mParser.getName();
             if (name.equals("error")) {
-                return readError(mParser);
+                return readError(xmlParser.mParser, xmlParser.mContext);
             } else {
-                skip(mParser);
+                skip(xmlParser.mParser);
             }
         }
 
         // No more entries found
-        stopParse();
+        xmlParser.stopParse();
         return null;
     }
 
-    private static IodineAuthException readError(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private static IodineAuthException readError(XmlPullParser parser, Context context)
+            throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "error");
 
         Integer id = null;
@@ -75,6 +83,8 @@ class IodineAuthErrorParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "error");
 
-        return new IodineAuthException(id);
+        IodineAuthException e = IodineAuthException.create(id, message, context);
+        Log.d(TAG, "Parsed auth error", e);
+        return e;
     }
 }

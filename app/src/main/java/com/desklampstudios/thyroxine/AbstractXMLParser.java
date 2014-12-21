@@ -1,5 +1,6 @@
 package com.desklampstudios.thyroxine;
 
+import android.content.Context;
 import android.util.Log;
 import android.util.Xml;
 
@@ -16,17 +17,23 @@ public abstract class AbstractXMLParser {
     protected final XmlPullParser mParser;
     protected InputStream mInputStream;
     protected boolean parsingBegun = false;
+    protected Context mContext;
 
-    protected AbstractXMLParser() throws XmlPullParserException {
+    protected AbstractXMLParser(Context context) throws XmlPullParserException {
+        mContext = context;
         mParser = Xml.newPullParser();
         mParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
         mParser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, false);
         mParser.setFeature(Xml.FEATURE_RELAXED, true);
     }
 
-    protected void stopParse() throws XmlPullParserException {
+    public void stopParse() {
         parsingBegun = false;
-        mParser.setInput(null);
+        try {
+            mParser.setInput(null);
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "stopParse: error while trying to stop parse", e);
+        }
         mInputStream = null;
     }
 

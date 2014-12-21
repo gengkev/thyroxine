@@ -1,8 +1,12 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
+import com.desklampstudios.thyroxine.IodineAuthErrorParser;
+import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -18,62 +22,33 @@ import java.util.Locale;
 
 class IodineEighthParser extends AbstractXMLParser {
     private static final String TAG = IodineEighthParser.class.getSimpleName();
-    private static final DateFormat ISO_DATE_FORMAT =
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
-    private static final DateFormat BASIC_DATE_FORMAT =
-            new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
-    public IodineEighthParser() throws XmlPullParserException {
-        super();
+    public IodineEighthParser(Context context) throws XmlPullParserException {
+        super(context);
     }
 
     // after this, call getBlock until it returns null
-    public void beginListBlocks(InputStream in) throws XmlPullParserException, IOException {
+    public void beginListBlocks(InputStream in) throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
             stopParse();
         }
 
         mInputStream = in;
         mParser.setInput(mInputStream, null);
+        parsingBegun = true;
 
         mParser.nextTag();
-        if (mParser.getName().equals("auth")) {
-            throw new IOException("Auth error (not logged in?)");
+        if (mParser.getName().equals("auth")) { // Auth error
+            throw IodineAuthErrorParser.getErrorStatic(this);
         }
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
+
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "blocks");
-
-        parsingBegun = true;
     }
 
-    // after this, call getActivity until it returns null
-    public EighthBlock beginGetBlock(InputStream in)
-            throws XmlPullParserException, IOException {
-        if (parsingBegun) {
-            stopParse();
-        }
-        parsingBegun = true;
-
-        mInputStream = in;
-        mParser.setInput(mInputStream, null);
-
-        mParser.nextTag();
-        mParser.require(XmlPullParser.START_TAG, ns, "eighth");
-
-        // getBlock API begins with currently selected block, then all activities
-        mParser.nextTag();
-        mParser.require(XmlPullParser.START_TAG, ns, "block");
-        EighthBlock curBlock = readBlock(mParser);
-
-        // advance to activities
-        mParser.nextTag();
-        mParser.require(XmlPullParser.START_TAG, ns, "activities");
-
-        return curBlock;
-    }
-
-    public EighthBlock nextBlock() throws XmlPullParserException, IOException {
+    // Use with beginListBlocks
+    public Pair<EighthBlock, Integer> nextBlock() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
         }
@@ -95,7 +70,38 @@ class IodineEighthParser extends AbstractXMLParser {
         return null;
     }
 
-    public EighthActvInstance nextActivity() throws XmlPullParserException, IOException {
+    // after this, call nextActivity until it returns null
+    public Pair<EighthBlock, Integer> beginGetBlock(InputStream in)
+            throws XmlPullParserException, IOException, IodineAuthException {
+        if (parsingBegun) {
+            stopParse();
+        }
+
+        mInputStream = in;
+        mParser.setInput(mInputStream, null);
+        parsingBegun = true;
+
+        mParser.nextTag();
+        if (mParser.getName().equals("auth")) { // Auth error
+            throw IodineAuthErrorParser.getErrorStatic(this);
+        }
+        mParser.require(XmlPullParser.START_TAG, ns, "eighth");
+
+        // getBlock API begins with currently selected block, then all activities
+        mParser.nextTag();
+        mParser.require(XmlPullParser.START_TAG, ns, "block");
+        Pair<EighthBlock, Integer> pair = readBlock(mParser);
+
+        // advance to activities
+        mParser.nextTag();
+        mParser.require(XmlPullParser.START_TAG, ns, "activities");
+
+        return pair;
+    }
+
+    // Use with beginGetBlock
+    public Pair<EighthActv, EighthActvInstance> nextActivity()
+            throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
         }
@@ -117,16 +123,16 @@ class IodineEighthParser extends AbstractXMLParser {
         return null;
     }
 
-    private static EighthBlock readBlock(XmlPullParser parser)
-            throws XmlPullParserException, IOException {
+    private static Pair<EighthBlock, Integer> readBlock(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "block");
 
         int bid = -1;
-        long date = 0;
+        String date = "";
         String type = "";
-
-        EighthActvInstance curActivity = null;
         Boolean locked = null;
+
+        Pair<EighthActv, EighthActvInstance> actvPair = null;
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -147,7 +153,7 @@ class IodineEighthParser extends AbstractXMLParser {
                 type = readText(parser, "block");
                 break;
             case "activity":
-                curActivity = readActivity(parser);
+                actvPair = readActivity(parser);
                 break;
             case "locked":
                 locked = readInt(parser, "locked") != 0;
@@ -160,16 +166,24 @@ class IodineEighthParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "block");
 
-        if (bid == -1 || date == 0 || type.isEmpty()) {
-            Log.w(TAG, String.format("readActivity: bid (%s) or date (%s) or type (%s) bad",
-                    bid, date, type));
+        // Check for valid inputs
+        if (bid < 0 || date.isEmpty() || type.isEmpty()) {
+            String msg = String.format("readBlock: bid (%s) or date (%s) or type (%s) bad",
+                    bid, date, type);
+            Log.e(TAG, msg);
+            throw new XmlPullParserException(msg, parser, null);
+        }
+        if (actvPair == null) {
+            String msg = "readBlock: activity not found";
+            Log.e(TAG, msg);
+            throw new XmlPullParserException(msg, parser, null);
         }
 
-        return new EighthBlock(bid, date, type, locked, curActivity);
+        EighthBlock block = new EighthBlock(bid, date, type, locked);
+        return new Pair<>(block, actvPair.second.blockId);
     }
 
-    private static Long readBasicDate(XmlPullParser parser)
-            throws IOException, XmlPullParserException {
+    private static String readBasicDate(XmlPullParser parser) throws IOException, XmlPullParserException {
 
         parser.require(XmlPullParser.START_TAG, ns, "date");
 
@@ -194,18 +208,20 @@ class IodineEighthParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "date");
 
-        Long dateLong = null;
+        // parse to ensure validity
         try {
-            Date date = BASIC_DATE_FORMAT.parse(dateStr);
-            dateLong = date.getTime();
+            Utils.BASIC_DATE_FORMAT.parse(dateStr);
         } catch (ParseException e) {
-            Log.e(TAG, "datetime parse exception: " + dateStr + ", " + e.toString());
+            Log.e(TAG, "Invalid date string: " + dateStr);
+            throw new XmlPullParserException("Invalid date string: " + dateStr, parser, e);
         }
-        return dateLong;
+
+        return dateStr;
     }
 
-    private static EighthActvInstance readActivity(XmlPullParser parser)
+    private static Pair<EighthActv, EighthActvInstance> readActivity(XmlPullParser parser)
             throws IOException, XmlPullParserException {
+
         parser.require(XmlPullParser.START_TAG, ns, "activity");
 
         int aid = -1;
@@ -281,21 +297,26 @@ class IodineEighthParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "activity");
 
-        if (aid == -1 || aName == null || description == null) {
-            Log.w(TAG, String.format("readActivity: EighthActv aid (%d) or name (%s) " +
-                    "or description (%s) not found", aid, aName, description));
-            aName = (aName == null) ? "" : aName;
-            description = (description == null) ? "" : description;
+        // Check for valid inputs
+        if (aid < 0 || aName == null || description == null) {
+            String msg = String.format("readActivity: EighthActv aid (%d) or name (%s) " +
+                    "or description (%s) not found", aid, aName, description);
+            Log.e(TAG, msg);
+            throw new XmlPullParserException(msg, parser, null);
         }
         if (comment == null) {
-            Log.w(TAG, String.format("readActivity: EighthActvInstance comment (%s) " +
-                    "not found", comment));
-            comment = (comment == null) ? "" : comment;
+            String msg = String.format("readActivity: EighthActvInstance comment (%s) " +
+                    "not found", comment);
+            Log.e(TAG, msg);
+            throw new XmlPullParserException(msg, parser, null);
         }
 
-        EighthActv actv = new EighthActv(aid, aName, description, flags & EighthActv.FLAG_ALL);
+        EighthActv actv = new EighthActv(aid, aName, description,
+                flags & EighthActv.FLAG_ALL);
 
-        return new EighthActvInstance(actv, comment, flags & EighthActvInstance.FLAG_ALL,
-                roomsStr, memberCount, capacity);
+        EighthActvInstance actvInstance = new EighthActvInstance(aid, -1, comment,
+                flags & EighthActvInstance.FLAG_ALL, roomsStr, memberCount, capacity);
+
+        return new Pair<>(actv, actvInstance);
     }
 }

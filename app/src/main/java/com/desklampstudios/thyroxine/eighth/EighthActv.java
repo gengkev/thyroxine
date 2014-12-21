@@ -12,17 +12,17 @@ class EighthActv {
     public static final int FLAG_SPECIAL = 32;
     //public static final int FLAG_CALENDAR = 64;
 
-    /* @NotNull */ public final int aid;
+    /* @NotNull */ public int actvId;
 
     /* @NotNull */ public String name;
     /* @NotNull */ public String description;
     /* @NotNull */ public long flags;
 
-    public EighthActv(int aid, String name, String description, long flags) {
+    public EighthActv(int actvId, String name, String description, long flags) {
         assert name != null;
         assert description != null;
 
-        this.aid = aid;
+        this.actvId = actvId;
         this.name = name;
         this.description = description;
         this.flags = flags;
@@ -31,6 +31,6 @@ class EighthActv {
     @Override
     public String toString() {
         return String.format("[Actv id: %d, name: %s, description: %s, flags: %d]",
-                aid, name, description, flags);
+                actvId, name, description, flags);
     }
 }

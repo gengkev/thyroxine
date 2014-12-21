@@ -2,6 +2,7 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +13,13 @@ import com.desklampstudios.thyroxine.R;
 import java.util.ArrayList;
 import java.util.List;
 
-class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
-    private final List<EighthActvInstance> mDataset;
+class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.ViewHolder> {
+    private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
     private final ActvClickListener mListener;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public BlockAdapter(List<EighthActvInstance> dataset, ActvClickListener listener) {
-        this.mDataset = dataset;
+    public BlockListAdapter(ActvClickListener listener) {
+        this.mDataset = new ArrayList<>();
         this.mListener = listener;
     }
 
@@ -35,8 +36,8 @@ class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
             @Override
             public void onClick(View view) {
                 int pos = vh.getPosition();
-                EighthActvInstance actv = mDataset.get(pos);
-                mListener.onActvClick(actv);
+                Pair<EighthActv, EighthActvInstance> pair = mDataset.get(pos);
+                mListener.onActvClick(pair.second);
             }
         });
         return vh;
@@ -45,33 +46,33 @@ class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        EighthActvInstance actvInstance = mDataset.get(position);
+        Pair<EighthActv, EighthActvInstance> pair = mDataset.get(position);
 
-        holder.mNameView.setText(actvInstance.actv.name);
-        holder.mRoomView.setText(actvInstance.roomsStr);
+        holder.mNameView.setText(pair.first.name);
+        holder.mRoomView.setText(pair.second.roomsStr);
         holder.mDescriptionView.setText((
-                actvInstance.comment + " " +
-                actvInstance.actv.description).trim());
+                pair.second.comment + " " +
+                        pair.first.description).trim());
 
         ArrayList<String> statuses = new ArrayList<>();
         int color = (position % 2 == 0) ? 0x7FF8F8F8 : 0x7FFAFAFA;
 
         // restricted
-        if ((actvInstance.getFlags() & EighthActv.FLAG_RESTRICTED) != 0) {
+        if ((pair.first.flags & EighthActv.FLAG_RESTRICTED) != 0) {
             statuses.add("(R)");
             color = (position % 2 == 0) ? 0x7FFFCCAA : 0x7FFDC5A0;
         }
         // sticky
-        if ((actvInstance.getFlags() & EighthActv.FLAG_STICKY) != 0) {
+        if ((pair.first.flags & EighthActv.FLAG_STICKY) != 0) {
             statuses.add("(S)");
         }
         // capacity full
-        if (actvInstance.memberCount != null && actvInstance.capacity != null &&
-                actvInstance.memberCount >= actvInstance.capacity) {
+        if (pair.second.memberCount != null && pair.second.capacity != null &&
+                pair.second.memberCount >= pair.second.capacity) {
             statuses.add("<font color=\"#0000FF\">FULL</font>");
         }
         // cancelled
-        if ((actvInstance.getFlags() & EighthActvInstance.FLAG_CANCELLED) != 0) {
+        if ((pair.second.flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
             statuses.add("<font color=\"#FF0000\">CANCELLED</font>");
             color = (position % 2 == 0) ? 0x7FCF0000 : 0x7FCA0000;
         }
@@ -88,12 +89,12 @@ class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.ViewHolder> {
         holder.mView.setBackgroundColor(color);
     }
 
-    public void add(EighthActvInstance actv) {
-        add(mDataset.size(), actv);
+    public void add(Pair<EighthActv, EighthActvInstance> pair) {
+        add(mDataset.size(), pair);
     }
 
-    public void add(int pos, EighthActvInstance actv) {
-        mDataset.add(pos, actv);
+    public void add(int pos, Pair<EighthActv, EighthActvInstance> pair) {
+        mDataset.add(pos, pair);
         notifyItemInserted(pos);
     }
 

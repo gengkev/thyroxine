@@ -6,7 +6,8 @@ class EighthActvInstance {
     public static final int FLAG_CANCELLED = 2048;
     //public static final int FLAG_ROOMCHANGED = 4096;
 
-    /* @NotNull */ public final EighthActv actv;
+    /* @NotNull */ public int actvId;
+    /* @NotNull */ public int blockId;
 
     /* @NotNull */ public String comment;
     /* @NotNull */ public long flags;
@@ -15,28 +16,27 @@ class EighthActvInstance {
     public Integer memberCount = null;
     public Integer capacity = null;
 
-    public EighthActvInstance(EighthActv actv, String comment, long flags) {
+    public EighthActvInstance(int actvId, int blockId, String comment, long flags) {
         assert comment != null;
-        this.actv = actv;
+
+        this.actvId = actvId;
+        this.blockId = blockId;
         this.comment = comment;
         this.flags = flags;
     }
 
-    public EighthActvInstance(EighthActv actv, String comment, long flags,
+    public EighthActvInstance(int actvId, int blockId, String comment, long flags,
                               String roomsStr, Integer memberCount, Integer capacity) {
-        this(actv, comment, flags);
+        this(actvId, blockId, comment, flags);
         this.roomsStr = roomsStr;
         this.memberCount = memberCount;
         this.capacity = capacity;
     }
 
-    public long getFlags() {
-        return actv.flags | flags;
-    }
-
     @Override
     public String toString() {
-        return String.format("[ActvInstance actv: %s, comment: %s, flags: %s, rooms: %s, " +
-                "signed up: %s/%s]", actv.toString(), comment, flags, roomsStr, memberCount, capacity);
+        return String.format("[ActvInstance actvId: %d, blockId: %d, comment: %s, flags: %s, " +
+                "rooms: %s, signed up: %s/%s]",
+                actvId, blockId, comment, flags, roomsStr, memberCount, capacity);
     }
 }

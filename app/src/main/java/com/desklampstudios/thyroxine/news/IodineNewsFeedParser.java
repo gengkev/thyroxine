@@ -1,5 +1,6 @@
 package com.desklampstudios.thyroxine.news;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
@@ -10,19 +11,14 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 class IodineNewsFeedParser extends AbstractXMLParser {
     private static final String TAG = IodineNewsFeedParser.class.getSimpleName();
-    private static final DateFormat FEED_DATE_FORMAT =
-            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
 
-    public IodineNewsFeedParser() throws XmlPullParserException {
-        super();
+    public IodineNewsFeedParser(Context context) throws XmlPullParserException {
+        super(context);
     }
 
     public void beginFeed(InputStream in) throws XmlPullParserException, IOException {
@@ -118,7 +114,7 @@ class IodineNewsFeedParser extends AbstractXMLParser {
         String publishedStr = readText(parser, "pubDate");
         Long published = null;
         try {
-            Date date = FEED_DATE_FORMAT.parse(publishedStr);
+            Date date = Utils.FEED_DATETIME_FORMAT.parse(publishedStr);
             published = date.getTime();
         } catch (ParseException e) {
             Log.e(TAG, "datetime parse exception: " + publishedStr + ", " + e.toString());

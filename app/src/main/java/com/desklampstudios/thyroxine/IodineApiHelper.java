@@ -1,5 +1,6 @@
 package com.desklampstudios.thyroxine;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -68,7 +69,7 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
-    public static String attemptLogin(String username, String password)
+    public static String attemptLogin(String username, String password, Context context)
             throws IodineAuthException, IOException, XmlPullParserException {
 
         // create query params
@@ -94,13 +95,13 @@ public class IodineApiHelper {
             IodineAuthException authErr = null;
             InputStream is = conn.getInputStream();
             try {
-                IodineAuthErrorParser parser = new IodineAuthErrorParser();
+                IodineAuthErrorParser parser = new IodineAuthErrorParser(context);
                 parser.beginAuthError(is);
                 authErr = parser.getError();
             } finally {
                 is.close();
             }
-            Log.w(TAG, "Login error: " + authErr.errCode, authErr);
+            Log.w(TAG, "Iodine auth error occurred", authErr);
             throw authErr;
         }
 

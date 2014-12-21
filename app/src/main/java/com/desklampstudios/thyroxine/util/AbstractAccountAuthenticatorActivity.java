@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.desklampstudios.thyroxine.sync;
+package com.desklampstudios.thyroxine.util;
 
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;

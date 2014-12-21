@@ -3,31 +3,28 @@ package com.desklampstudios.thyroxine.eighth;
 import java.util.Date;
 
 class EighthBlock {
-    /* @NotNull */ public final int bid;
-    /* @NotNull */ public final long date;
-    /* @NotNull */ public final String type;
+    /* @NotNull */ public int blockId;
+    /* @NotNull */ public String date;
+    /* @NotNull */ public String type;
 
     public Boolean locked = null;
-    public EighthActvInstance selectedActv = null;
 
-    public EighthBlock(int bid, long date, String type) {
+    public EighthBlock(int blockId, String date, String type) {
         assert type != null;
 
-        this.bid = bid;
+        this.blockId = blockId;
         this.date = date;
         this.type = type;
     }
 
-    public EighthBlock(int bid, long date, String type,
-                       Boolean locked, EighthActvInstance selectedActv) {
-        this(bid, date, type);
+    public EighthBlock(int blockId, String date, String type, Boolean locked) {
+        this(blockId, date, type);
         this.locked = locked;
-        this.selectedActv = selectedActv;
     }
 
     @Override
     public String toString() {
         return String.format("[Block id: %d, date: %s, type: %s, locked: %s]",
-                bid, new Date(date), type, locked);
+                blockId, date, type, locked);
     }
 }

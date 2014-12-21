@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,22 +19,22 @@ import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.DividerItemDecoration;
 import com.desklampstudios.thyroxine.IodineApiHelper;
+import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link BlockFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BlockFragment extends Fragment implements BlockAdapter.ActvClickListener {
+public class BlockFragment extends Fragment implements BlockListAdapter.ActvClickListener {
     private static final String TAG = BlockFragment.class.getSimpleName();
     public static final String ARG_BID = "com.desklampstudios.thyroxine.BID";
 
@@ -41,10 +42,10 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
 
     private GetBlockTask mGetBlockTask;
     private RecyclerView mRecyclerView;
-    private BlockAdapter mAdapter;
+    private BlockListAdapter mAdapter;
 
     private RecyclerView mSelectedActvRecyclerView;
-    private BlockAdapter mSelectedActvAdapter;
+    private BlockListAdapter mSelectedActvAdapter;
 
     private Account mAccount = null;
 
@@ -66,16 +67,16 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
             bid = getArguments().getInt(ARG_BID);
         }
 
-        mAdapter = new BlockAdapter( new ArrayList<EighthActvInstance>(), this );
-        mAdapter.add( new EighthActvInstance(
-                new EighthActv(-1, "<Actv name>", "<Actv desc>", 0),
-                "<Actv comment>", 0));
+        mAdapter = new BlockListAdapter(this);
+        mAdapter.add(new Pair<>(
+                new EighthActv(999, "<Actv name>", "<Actv description>", 0),
+                new EighthActvInstance(999, -1, "<Actv comment>", 0)));
 
 
-        mSelectedActvAdapter = new BlockAdapter( new ArrayList<EighthActvInstance>(), this );
-        mAdapter.add( new EighthActvInstance(
-                new EighthActv(-1, "<Actv name>", "<Actv desc>", 0),
-                "<Actv comment>", 0));
+        mSelectedActvAdapter = new BlockListAdapter(this);
+        mAdapter.add(new Pair<>(
+                new EighthActv(999, "<Actv name>", "<Actv description>", 0),
+                new EighthActvInstance(999, -1, "<Actv comment>", 0)));
 
         // load blocks
         getBlock();
@@ -152,15 +153,14 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
     private void displayBlock(EighthBlock block) {
         Log.d(TAG, "block: " + block);
 
-        mSelectedActvAdapter.clear();
-        mSelectedActvAdapter.add(block.selectedActv);
+        //mSelectedActvAdapter.clear();
+        //mSelectedActvAdapter.add(block.selectedActv);
 
-
-        DateFormat DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM); // default locale OK
-        getActivity().setTitle(DATE_FORMAT.format(block.date) + " Block " + block.type);
+        String dateStr = Utils.formatBasicDate(block.date, Utils.DISPLAY_DATE_FORMAT_MEDIUM);
+        getActivity().setTitle(dateStr + " Block " + block.type);
     }
 
-    private class GetBlockTask extends AsyncTask<Void, EighthActvInstance, EighthBlock> {
+    private class GetBlockTask extends AsyncTask<Void, Object, EighthBlock> {
         private Exception exception = null;
 
         @Override
@@ -185,23 +185,23 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
             }
 
             InputStream stream = null;
-            IodineEighthParser parser;
-            EighthBlock block;
+            IodineEighthParser parser = null;
+            Pair<EighthBlock, Integer> blockPair;
 
             try {
                 stream = IodineApiHelper.getBlock(bid, authToken);
 
-                parser = new IodineEighthParser();
-                block = parser.beginGetBlock(stream);
+                parser = new IodineEighthParser(getActivity());
+                blockPair = parser.beginGetBlock(stream);
 
-                EighthActvInstance actv;
+                Pair<EighthActv, EighthActvInstance> pair;
                 while (!isCancelled()) {
-                    actv = parser.nextActivity();
+                    pair = parser.nextActivity();
 
-                    if (actv == null)
+                    if (pair == null)
                         break;
 
-                    publishProgress(actv);
+                    publishProgress(pair.first, pair.second);
                 }
 
             } catch (IOException e) {
@@ -212,20 +212,27 @@ public class BlockFragment extends Fragment implements BlockAdapter.ActvClickLis
                 Log.e(TAG, "XML error: " + e.toString());
                 exception = e;
                 return null;
+            } catch (IodineAuthException e) {
+                Log.e(TAG, "Iodine auth error", e);
+                exception = e;
+                return null;
             } finally {
+                if (parser != null)
+                    parser.stopParse();
                 try {
-                    if (stream != null) stream.close();
+                    if (stream != null)
+                        stream.close();
                 } catch (IOException e) {
                     Log.e(TAG, "IOException when closing stream: " + e);
                 }
             }
 
-            return block;
+            return blockPair.first;
         }
 
         @Override
-        protected void onProgressUpdate(EighthActvInstance... entries) {
-            mAdapter.add(entries[0]);
+        protected void onProgressUpdate(Object... args) {
+            mAdapter.add(new Pair<>((EighthActv)args[0], (EighthActvInstance)args[1]));
             // Log.i(TAG, "Adding entry: " + entries[0]);
         }
 

@@ -24,6 +24,10 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.util.AbstractAccountAuthenticatorActivity;
+
+import static com.desklampstudios.thyroxine.IodineAuthException.InvalidPasswordException;
+import static com.desklampstudios.thyroxine.IodineAuthException.InvalidUsernameException;
 
 /**
  * A login screen that offers login via username/password.
@@ -210,22 +214,22 @@ public class IodineAuthenticatorActivity extends AbstractAccountAuthenticatorAct
 
         @Override
         protected Intent doInBackground(Void... params) {
+            String authToken;
             try {
-                String authToken = IodineApiHelper.attemptLogin(mUsername, mPassword);
+                authToken = IodineApiHelper.attemptLogin(mUsername, mPassword, IodineAuthenticatorActivity.this);
                 Log.d(TAG, "attemptLogin succeeded, authToken: " + authToken);
-
-                final Intent res = new Intent();
-                res.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername);
-                res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, IodineAuthenticator.ACCOUNT_TYPE);
-                res.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
-                res.putExtra(PARAM_USER_PASS, mPassword);
-
-                return res;
             } catch (Exception e) {
                 mException = e;
                 Log.w(TAG, "attemptLogin threw exception: " + e);
                 return null;
             }
+
+            final Intent res = new Intent();
+            res.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername);
+            res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, IodineAuthenticator.ACCOUNT_TYPE);
+            res.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
+            res.putExtra(PARAM_USER_PASS, mPassword);
+            return res;
         }
 
         @Override
@@ -235,21 +239,18 @@ public class IodineAuthenticatorActivity extends AbstractAccountAuthenticatorAct
 
             if (intent == null) {
                 if (mException instanceof IodineAuthException) {
-                    IodineAuthException authErr = (IodineAuthException) mException;
-
-                    if (authErr.errCode == 1) { // password incorrect
+                    if (mException instanceof InvalidPasswordException) { // password incorrect
                         mPasswordView.setError(getString(R.string.error_incorrect_password));
                         mPasswordView.requestFocus();
                         return;
-                    } else if (authErr.errCode == 3) { // username incorrect
+                    } else if (mException instanceof InvalidUsernameException) { // username incorrect
                         mUsernameView.setError(getString(R.string.error_incorrect_username));
                         mUsernameView.requestFocus();
                         return;
                     }
 
-                    String[] authErrString = getResources().getStringArray(R.array.iodine_auth_error);
                     Toast.makeText(IodineAuthenticatorActivity.this,
-                            "Iodine auth error:\n" + authErrString[authErr.errCode],
+                            "Iodine auth error:\n" + mException,
                             Toast.LENGTH_LONG).show();
                     return;
                 } else {
