@@ -42,15 +42,15 @@ class ScheduleListAdapter extends CursorAdapter {
         //Log.d(TAG, "Values: " + values);
 
         String dateStr = Utils.formatBasicDate(
-                values.getAsString(EighthContract.Blocks.DATE),
+                values.getAsString(EighthContract.Blocks.KEY_DATE),
                 Utils.DISPLAY_DATE_FORMAT);
         holder.mDateView.setText(dateStr);
 
         holder.mBlockView.setText("Block " +
-                values.getAsString(EighthContract.Blocks.TYPE));
+                values.getAsString(EighthContract.Blocks.KEY_TYPE));
         holder.mActivityNameView.setText(
-                values.getAsInteger(EighthContract.ActvInstances.ACTV_ID) + " " +
-                values.getAsString(EighthContract.Actvs.NAME));
+                values.getAsInteger(EighthContract.ActvInstances.KEY_ACTV_ID) + " " +
+                values.getAsString(EighthContract.Actvs.KEY_NAME));
 
         /*
         ArrayList<String> statuses = new ArrayList<>();

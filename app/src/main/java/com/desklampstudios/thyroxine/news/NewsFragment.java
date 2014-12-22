@@ -32,8 +32,6 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static final String ARG_LOGGED_IN = "loggedIn";
     private static final int NEWS_LOADER = 0;
 
-    private boolean loggedIn;
-
     private CursorAdapter mAdapter;
     private ListView mListView;
     private SwipeRefreshLayout mSwipeLayout;
@@ -47,22 +45,15 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
      *
      * @return A new instance of fragment NewsFragment.
      */
-    public static NewsFragment newInstance(boolean loggedIn) {
+    public static NewsFragment newInstance() {
         NewsFragment fragment = new NewsFragment();
-
-        Bundle args = new Bundle();
-        args.putBoolean(ARG_LOGGED_IN, loggedIn);
-        fragment.setArguments(args);
-
+        fragment.setArguments(Bundle.EMPTY);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            loggedIn = getArguments().getBoolean(ARG_LOGGED_IN);
-        }
 
         // create entries list
         mAdapter = new NewsListAdapter(getActivity(), null, 0);

@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine;
+package com.desklampstudios.thyroxine.util;
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *

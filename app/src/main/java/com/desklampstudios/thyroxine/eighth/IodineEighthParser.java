@@ -168,6 +168,9 @@ class IodineEighthParser extends AbstractXMLParser {
         parser.require(XmlPullParser.END_TAG, ns, "block");
 
         // TODO: re-add errors if fields not found, consider nullable fields again... :\
+        if (actvPair == null) {
+            throw new XmlPullParserException("Actv not found", parser, null);
+        }
 
         EighthBlock block = new EighthBlock(bid, date, type, locked);
         return new Pair<>(block, actvPair.second.actvId);
@@ -214,8 +217,8 @@ class IodineEighthParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.START_TAG, ns, "activity");
 
-        int aid = -1;
-        String aName = "";
+        int actvId = -1;
+        String actvName = "";
         String description = "";
         String comment = "";
         long flags = 0;
@@ -233,10 +236,10 @@ class IodineEighthParser extends AbstractXMLParser {
             // fields
             switch (name) {
                 case "aid":
-                    aid = readInt(parser, "aid");
+                    actvId = readInt(parser, "aid");
                     break;
                 case "name":
-                    aName = Utils.cleanHtml(readText(parser, "name"));
+                    actvName = Utils.cleanHtml(readText(parser, "name"));
                     break;
                 case "description":
                     description = Utils.cleanHtml(readText(parser, "description"));
@@ -289,10 +292,10 @@ class IodineEighthParser extends AbstractXMLParser {
 
         // TODO: re-add errors if fields not found, consider nullable fields again... :\
 
-        EighthActv actv = new EighthActv(aid, aName, description,
+        EighthActv actv = new EighthActv(actvId, actvName, description,
                 flags & EighthActv.FLAG_ALL);
 
-        EighthActvInstance actvInstance = new EighthActvInstance(aid, -1, comment,
+        EighthActvInstance actvInstance = new EighthActvInstance(actvId, -1, comment,
                 flags & EighthActvInstance.FLAG_ALL, roomsStr, memberCount, capacity);
 
         return new Pair<>(actv, actvInstance);

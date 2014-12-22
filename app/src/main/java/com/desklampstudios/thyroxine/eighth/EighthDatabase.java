@@ -9,11 +9,11 @@ import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Blocks;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Schedule;
 
-public class EighthDatabase extends SQLiteOpenHelper {
+class EighthDatabase extends SQLiteOpenHelper {
     private static final String TAG = EighthDatabase.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 2;
-    public static final String DATABASE_NAME = "thyroxine.db.eighth";
+    private static final String DATABASE_NAME = "thyroxine.db.eighth";
 
     interface Tables {
         String BLOCKS = "blocks";
@@ -41,48 +41,48 @@ public class EighthDatabase extends SQLiteOpenHelper {
         final String SQL_CREATE_BLOCK_TABLE =
                 "CREATE TABLE " + Tables.BLOCKS + " (" +
                         Blocks._ID + " INTEGER PRIMARY KEY, " +
-                        Blocks.BLOCK_ID + " INTEGER NOT NULL, " +
-                        Blocks.DATE + " TEXT NOT NULL, " +
-                        Blocks.TYPE + " TEXT NOT NULL, " +
-                        Blocks.LOCKED + " INTEGER, " +
+                        Blocks.KEY_BLOCK_ID + " INTEGER NOT NULL, " +
+                        Blocks.KEY_DATE + " TEXT NOT NULL, " +
+                        Blocks.KEY_TYPE + " TEXT NOT NULL, " +
+                        Blocks.KEY_LOCKED + " INTEGER, " +
 
                         // Block ID is unique
-                        "UNIQUE (" + Blocks.BLOCK_ID + ") ON CONFLICT REPLACE)";
+                        "UNIQUE (" + Blocks.KEY_BLOCK_ID + ") ON CONFLICT REPLACE)";
 
         final String SQL_CREATE_ACTV_TABLE =
                 "CREATE TABLE " + Tables.ACTVS + " (" +
                         Actvs._ID + " INTEGER PRIMARY KEY , " +
-                        Actvs.ACTV_ID + " INTEGER NOT NULL, " +
-                        Actvs.NAME + " TEXT NOT NULL, " +
-                        Actvs.DESCRIPTION + " TEXT NOT NULL, " +
-                        Actvs.FLAGS + " INTEGER NOT NULL, " +
+                        Actvs.KEY_ACTV_ID + " INTEGER NOT NULL, " +
+                        Actvs.KEY_NAME + " TEXT NOT NULL, " +
+                        Actvs.KEY_DESCRIPTION + " TEXT NOT NULL, " +
+                        Actvs.KEY_FLAGS + " INTEGER NOT NULL, " +
 
                         // Actv ID is unique
-                        "UNIQUE (" + Actvs.ACTV_ID + ") ON CONFLICT REPLACE)";
+                        "UNIQUE (" + Actvs.KEY_ACTV_ID + ") ON CONFLICT REPLACE)";
 
         final String SQL_CREATE_ACTVINSTANCE_TABLE =
                 "CREATE TABLE " + Tables.ACTVINSTANCES + " (" +
                         ActvInstances._ID + " INTEGER PRIMARY KEY ," +
-                        ActvInstances.ACTV_ID + " INTEGER NOT NULL, " +
-                        ActvInstances.BLOCK_ID + " INTEGER NOT NULL, " +
-                        ActvInstances.COMMENT + " TEXT NOT NULL, " +
-                        ActvInstances.FLAGS + " INTEGER NOT NULL, " +
-                        ActvInstances.ROOMS_STR + " TEXT, " +
-                        ActvInstances.MEMBER_COUNT + " INTEGER, " +
-                        ActvInstances.CAPACITY + " INTEGER, " +
+                        ActvInstances.KEY_ACTV_ID + " INTEGER NOT NULL, " +
+                        ActvInstances.KEY_BLOCK_ID + " INTEGER NOT NULL, " +
+                        ActvInstances.KEY_COMMENT + " TEXT NOT NULL, " +
+                        ActvInstances.KEY_FLAGS + " INTEGER NOT NULL, " +
+                        ActvInstances.KEY_ROOMS_STR + " TEXT, " +
+                        ActvInstances.KEY_MEMBER_COUNT + " INTEGER, " +
+                        ActvInstances.KEY_CAPACITY + " INTEGER, " +
 
                         // Only one AID/BID pair should exist at a time.
-                        "UNIQUE (" + ActvInstances.BLOCK_ID + ", " + ActvInstances.ACTV_ID +
+                        "UNIQUE (" + ActvInstances.KEY_BLOCK_ID + ", " + ActvInstances.KEY_ACTV_ID +
                         ") ON CONFLICT REPLACE)";
 
         final String SQL_CREATE_SCHEDULE_TABLE =
                 "CREATE TABLE " + Tables.SCHEDULE + " (" +
                         Schedule._ID + " INTEGER PRIMARY KEY, " +
-                        Schedule.BLOCK_ID + " INTEGER NOT NULL, " +
-                        Schedule.ACTV_ID + " INTEGER NOT NULL, " +
+                        Schedule.KEY_BLOCK_ID + " INTEGER NOT NULL, " +
+                        Schedule.KEY_ACTV_ID + " INTEGER NOT NULL, " +
 
                         // BID is unique
-                        "UNIQUE (" + Schedule.BLOCK_ID + ") ON CONFLICT REPLACE)";
+                        "UNIQUE (" + Schedule.KEY_BLOCK_ID + ") ON CONFLICT REPLACE)";
 
         db.execSQL(SQL_CREATE_BLOCK_TABLE);
         db.execSQL(SQL_CREATE_ACTV_TABLE);

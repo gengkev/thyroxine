@@ -14,10 +14,10 @@ public abstract class AbstractXMLParser {
     private static final String TAG = AbstractXMLParser.class.getSimpleName();
     protected static final String ns = null; // don't use namespaces
 
+    protected final Context mContext;
     protected final XmlPullParser mParser;
     protected InputStream mInputStream;
     protected boolean parsingBegun = false;
-    protected Context mContext;
 
     protected AbstractXMLParser(Context context) throws XmlPullParserException {
         mContext = context;

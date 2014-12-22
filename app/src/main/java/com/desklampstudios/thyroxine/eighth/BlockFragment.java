@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.desklampstudios.thyroxine.DividerItemDecoration;
+import com.desklampstudios.thyroxine.util.DividerItemDecoration;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
@@ -186,16 +186,17 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
                     publishProgress(pair.first, pair.second);
                 }
 
-            } catch (IOException e) {
+            } catch (IodineAuthException.NotLoggedInException e) {
+                Log.d(TAG, "Not logged in, oh no!", e);
+                // TODO: invalidate auth token
+                exception = e;
+                return null;
+            } catch (IOException | IodineAuthException e) {
                 Log.e(TAG, "Connection error: " + e.toString());
                 exception = e;
                 return null;
             } catch (XmlPullParserException e) {
                 Log.e(TAG, "XML error: " + e.toString());
-                exception = e;
-                return null;
-            } catch (IodineAuthException e) {
-                Log.e(TAG, "Iodine auth error", e);
                 exception = e;
                 return null;
             } finally {

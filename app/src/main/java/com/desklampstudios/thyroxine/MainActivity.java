@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
         Fragment fragment;
         switch (position) {
             case 0:
-                fragment = NewsFragment.newInstance(false);
+                fragment = NewsFragment.newInstance();
                 break;
             case 1:
                 fragment = ScheduleFragment.newInstance();

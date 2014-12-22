@@ -44,8 +44,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     public static ScheduleFragment newInstance() {
         ScheduleFragment fragment = new ScheduleFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
+        fragment.setArguments(Bundle.EMPTY);
         return fragment;
     }
 
@@ -76,7 +75,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                 Cursor cursor = mAdapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(pos)) {
-                    int blockId = cursor.getInt(cursor.getColumnIndex(EighthContract.Blocks.BLOCK_ID));
+                    int blockId = cursor.getInt(cursor.getColumnIndex(EighthContract.Blocks.KEY_BLOCK_ID));
                     onBlockClick(blockId);
                 }
             }
@@ -86,7 +85,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     // Called when an item in the adapter is clicked
-    public void onBlockClick(int blockId) {
+    private void onBlockClick(int blockId) {
         //Toast.makeText(getActivity(), "Block: " + block, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), BlockActivity.class);
@@ -145,19 +144,19 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                     EighthContract.Blocks.CONTENT_URI,
                     new String[] { // columns
                             EighthContract.Blocks._ID,
-                            EighthContract.Blocks.BLOCK_ID,
-                            EighthContract.Blocks.TYPE,
-                            EighthContract.Blocks.DATE,
-                            EighthContract.Actvs.NAME,
-                            EighthContract.Actvs.FLAGS,
-                            EighthContract.Actvs.ACTV_ID,
-                            EighthContract.ActvInstances.FLAGS,
-                            EighthContract.ActvInstances.MEMBER_COUNT,
-                            EighthContract.ActvInstances.CAPACITY
+                            EighthContract.Blocks.KEY_BLOCK_ID,
+                            EighthContract.Blocks.KEY_TYPE,
+                            EighthContract.Blocks.KEY_DATE,
+                            EighthContract.Actvs.KEY_NAME,
+                            EighthContract.Actvs.KEY_FLAGS,
+                            EighthContract.Actvs.KEY_ACTV_ID,
+                            EighthContract.ActvInstances.KEY_FLAGS,
+                            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
+                            EighthContract.ActvInstances.KEY_CAPACITY
                     },
                     null, // selection
                     null, // selectionArgs
-                    EighthContract.Blocks.DATE + " ASC" // orderBy
+                    EighthContract.Blocks.KEY_DATE + " ASC" // orderBy
             );
         default:
             return null;

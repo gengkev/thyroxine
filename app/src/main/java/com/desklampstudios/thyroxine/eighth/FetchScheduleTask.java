@@ -25,7 +25,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
+class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
     private static final String TAG = FetchScheduleTask.class.getSimpleName();
     private final Activity mActivity;
     private Exception exception = null;
@@ -120,10 +120,10 @@ public class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
                 EighthContract.Blocks.buildBlockUri(block.blockId),
                 new String[] { // projection
                         EighthContract.Blocks._ID,
-                        EighthContract.Blocks.BLOCK_ID,
-                        EighthContract.Blocks.TYPE,
-                        EighthContract.Blocks.DATE,
-                        EighthContract.Blocks.LOCKED
+                        EighthContract.Blocks.KEY_BLOCK_ID,
+                        EighthContract.Blocks.KEY_TYPE,
+                        EighthContract.Blocks.KEY_DATE,
+                        EighthContract.Blocks.KEY_LOCKED
                 }, null, null, null);
 
         if (c.moveToFirst()) { // already exists
@@ -151,8 +151,8 @@ public class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
 
     private void updateSelectedActv(int blockId, int actvId, ContentResolver resolver) {
         final ContentValues newValues = new ContentValues();
-        newValues.put(EighthContract.Schedule.BLOCK_ID, blockId);
-        newValues.put(EighthContract.Schedule.ACTV_ID, actvId);
+        newValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
+        newValues.put(EighthContract.Schedule.KEY_ACTV_ID, actvId);
 
         // test if record exists
         Cursor c = resolver.query(
@@ -162,7 +162,7 @@ public class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
 
         if (c.moveToFirst()) { // already exists
             ContentValues oldValues = Utils.cursorRowToContentValues(c);
-            int oldActvId = oldValues.getAsInteger(EighthContract.Schedule.ACTV_ID);
+            int oldActvId = oldValues.getAsInteger(EighthContract.Schedule.KEY_ACTV_ID);
 
             // compare old value to new value
             if (actvId != oldActvId) {
