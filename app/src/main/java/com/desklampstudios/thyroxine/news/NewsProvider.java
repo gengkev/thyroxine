@@ -1,8 +1,6 @@
 package com.desklampstudios.thyroxine.news;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -10,35 +8,29 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import static com.desklampstudios.thyroxine.news.NewsContract.NewsEntries;
+import static com.desklampstudios.thyroxine.news.NewsDatabase.Tables;
+
 public class NewsProvider extends ContentProvider {
-    private static final int NEWS = 100;
-    private static final int NEWS_ID = 101;
-
-    // Warning: for now, also declared in strings.xml
-    private static final String CONTENT_AUTHORITY = "com.desklampstudios.thyroxine.news";
-
-    private static final String PATH_NEWS = "news";
-    public static final Uri CONTENT_URI_NEWS = Uri.parse("content://" + CONTENT_AUTHORITY + "/" + PATH_NEWS);
-
-    public static final String CONTENT_TYPE_NEWS = ContentResolver.CURSOR_DIR_BASE_TYPE + "/newsEntries";
-    public static final String CONTENT_ITEM_TYPE_NEWS = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/newsEntry";
+    private static final int NEWSENTRIES = 100;
+    private static final int NEWSENTRIES_ID = 101;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
-    private NewsDbHelper mDbHelper;
+    private NewsDatabase mDbHelper;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        final String authority = CONTENT_AUTHORITY;
+        final String authority = NewsContract.CONTENT_AUTHORITY;
 
-        matcher.addURI(authority, PATH_NEWS, NEWS);
-        matcher.addURI(authority, PATH_NEWS + "/#", NEWS_ID);
+        matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES, NEWSENTRIES);
+        matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES + "/#", NEWSENTRIES_ID);
 
         return matcher;
     }
 
     @Override
     public boolean onCreate() {
-        mDbHelper = new NewsDbHelper(getContext());
+        mDbHelper = new NewsDatabase(getContext());
         return true;
     }
 
@@ -48,23 +40,23 @@ public class NewsProvider extends ContentProvider {
         final SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
-            // "news/#"
-            case NEWS_ID:
+            case NEWSENTRIES_ID: {
+                long entryId = NewsEntries.getEntryId(uri);
                 retCursor = db.query(
-                        NewsDbHelper.TABLE_NEWS,
+                        Tables.TABLE_NEWSENTRIES,
                         projection,
-                        NewsDbHelper.KEY_NEWS_ID + " = '?'",
-                        new String[]{ContentUris.parseId(uri) + ""},
+                        NewsEntries._ID + "=?",
+                        new String[]{ String.valueOf(entryId) },
                         null,
                         null,
                         sortOrder
                 );
                 break;
-
+            }
             // "news"
-            case NEWS:
+            case NEWSENTRIES: {
                 retCursor = db.query(
-                        NewsDbHelper.TABLE_NEWS,
+                        Tables.TABLE_NEWSENTRIES,
                         projection,
                         selection,
                         selectionArgs,
@@ -73,8 +65,10 @@ public class NewsProvider extends ContentProvider {
                         sortOrder
                 );
                 break;
-            default:
+            }
+            default: {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
         }
 
         // make sure listeners are notified
@@ -85,10 +79,10 @@ public class NewsProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case NEWS_ID:
-                return CONTENT_ITEM_TYPE_NEWS;
-            case NEWS:
-                return CONTENT_TYPE_NEWS;
+            case NEWSENTRIES_ID:
+                return NewsEntries.CONTENT_ITEM_TYPE_NEWSENTRIES;
+            case NEWSENTRIES:
+                return NewsEntries.CONTENT_TYPE_NEWSENTRIES;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -101,15 +95,17 @@ public class NewsProvider extends ContentProvider {
         long id;
 
         switch (sUriMatcher.match(uri)) {
-            case NEWS:
-                id = db.insert(NewsDbHelper.TABLE_NEWS, null, values);
+            case NEWSENTRIES: {
+                id = db.insert(Tables.TABLE_NEWSENTRIES, null, values);
                 if (id <= 0) {
                     throw new SQLException("Failed to insert row into " + uri);
                 }
-                returnUri = ContentUris.withAppendedId(CONTENT_URI_NEWS, id);
+                returnUri = NewsEntries.buildEntryUri(id);
                 break;
-            default:
+            }
+            default: {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
         }
 
         // make sure listeners are notified
@@ -123,12 +119,14 @@ public class NewsProvider extends ContentProvider {
         int rowsDeleted;
 
         switch (sUriMatcher.match(uri)) {
-            case NEWS:
-                rowsDeleted = db.delete(NewsDbHelper.TABLE_NEWS,
+            case NEWSENTRIES: {
+                rowsDeleted = db.delete(Tables.TABLE_NEWSENTRIES,
                         whereClause, whereArgs);
                 break;
-            default:
+            }
+            default: {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
         }
 
         if (rowsDeleted != 0) {
@@ -144,12 +142,14 @@ public class NewsProvider extends ContentProvider {
         int rowsUpdated;
 
         switch (sUriMatcher.match(uri)) {
-            case NEWS:
-                rowsUpdated = db.update(NewsDbHelper.TABLE_NEWS,
+            case NEWSENTRIES: {
+                rowsUpdated = db.update(NewsDatabase.Tables.TABLE_NEWSENTRIES,
                         values, whereClause, whereArgs);
                 break;
-            default:
+            }
+            default: {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
         }
 
         if (rowsUpdated != 0) {

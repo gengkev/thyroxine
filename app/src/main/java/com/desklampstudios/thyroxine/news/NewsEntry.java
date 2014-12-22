@@ -25,7 +25,7 @@ class NewsEntry {
 
     @Override
     public String toString() {
-        return String.format("Link: %s\nTitle: %s\nPublished: %s\nContent: %s\n",
+        return String.format("NewsEntry[link=%s, title=%s, published=%s, content=%s]",
                 this.link, this.title, new Date(this.published), this.contentSnippet);
     }
 
@@ -35,5 +35,10 @@ class NewsEntry {
         NewsEntry entry = (NewsEntry) o;
         return link.equals(entry.link) && title.equals(entry.title) &&
                 published == entry.published && contentRaw.equals(entry.contentRaw);
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 }

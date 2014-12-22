@@ -88,9 +88,9 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private void updateDatabase(NewsEntry entry,
                                 ContentProviderClient provider) throws RemoteException {
         // test if record exists
-        Cursor c = provider.query(NewsProvider.CONTENT_URI_NEWS,
+        Cursor c = provider.query(NewsContract.NewsEntries.CONTENT_URI,
                 null, // columns
-                NewsDbHelper.KEY_NEWS_LINK + " = ?", // selection
+                NewsContract.NewsEntries.KEY_LINK + " = ?", // selection
                 new String[]{ entry.link }, // selectionArgs
                 null // orderBy
         );
@@ -98,16 +98,17 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         // Record exists in the database; update if necessary
         if (c.moveToFirst()) {
             Log.v(TAG, "NewsEntry with same link already exists (link " + entry.link + ")");
-            NewsEntry oldEntry = NewsDbHelper.cursorRowToNewsEntry(c);
+            ContentValues oldValues = Utils.cursorRowToContentValues(c);
+            NewsEntry oldEntry = NewsContract.NewsEntries.contentValuesToNewsEntry(oldValues);
 
             // Record has changed; update it
             if (!entry.equals(oldEntry)) {
                 Log.v(TAG, "NewsEntry not equal, needs to be updated: " + entry);
-                ContentValues newValues = NewsDbHelper.newsEntryToContentValues(entry);
+                ContentValues newValues = NewsContract.NewsEntries.newsEntryToContentValues(entry);
 
-                int rowsAffected = provider.update(NewsProvider.CONTENT_URI_NEWS,
+                int rowsAffected = provider.update(NewsContract.NewsEntries.CONTENT_URI,
                         newValues,
-                        NewsDbHelper.KEY_NEWS_LINK + " = ?", // selection
+                        NewsContract.NewsEntries.KEY_LINK + "=?", // selection
                         new String[]{ entry.link } // selectionArgs
                 );
                 Log.v(TAG, rowsAffected + " rows updated.");
@@ -116,9 +117,9 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         // Record does not exist in the database; insert it
         else {
             Log.v(TAG, "New NewsEntry to be inserted (link " + entry.link + ")");
-            ContentValues map = NewsDbHelper.newsEntryToContentValues(entry);
+            ContentValues values = NewsContract.NewsEntries.newsEntryToContentValues(entry);
 
-            Uri uri = provider.insert(NewsProvider.CONTENT_URI_NEWS, map);
+            Uri uri = provider.insert(NewsContract.NewsEntries.CONTENT_URI, values);
             Log.v(TAG, "Inserted new entry with uri: " + uri);
         }
 
@@ -153,6 +154,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         ContentResolver.setSyncAutomatically(newAccount, authority, true);
 
         // Get things started with an initial sync
+        Log.d(TAG, "Performing initial sync");
         NewsSyncAdapter.syncImmediately(context);
     }
 }

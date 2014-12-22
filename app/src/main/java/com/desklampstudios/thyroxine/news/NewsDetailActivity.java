@@ -1,5 +1,6 @@
 package com.desklampstudios.thyroxine.news;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -54,17 +56,17 @@ public class NewsDetailActivity extends ActionBarActivity {
         long id = intent.getLongExtra(NewsFragment.EXTRA_NEWS_ID, -1);
 
         // load from db
-        Cursor cursor = getContentResolver().query(NewsProvider.CONTENT_URI_NEWS,
+        Cursor cursor = getContentResolver().query(
+                NewsContract.NewsEntries.buildEntryUri(id),
                 null, // projection
-                NewsDbHelper.KEY_NEWS_ID + " = ?", // selection
-                new String[]{ String.valueOf(id) }, // selectionArgs
-                null // sortOrder
-        );
+                null, null, null);
+
         if (cursor == null || !cursor.moveToNext()) {
             Toast.makeText(this, "Error loading from database", Toast.LENGTH_LONG).show();
             return;
         }
-        mNewsEntry = NewsDbHelper.cursorRowToNewsEntry(cursor);
+        ContentValues values = Utils.cursorRowToContentValues(cursor);
+        mNewsEntry = NewsContract.NewsEntries.contentValuesToNewsEntry(values);
 
         Log.d(TAG, "Entry: " + mNewsEntry);
 

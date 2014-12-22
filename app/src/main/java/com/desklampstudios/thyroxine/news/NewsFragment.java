@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
 
@@ -35,6 +36,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private CursorAdapter mAdapter;
     private ListView mListView;
+    private SwipeRefreshLayout mSwipeLayout;
 
     public NewsFragment() {
     }
@@ -82,9 +84,18 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
                 Cursor cursor = mAdapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(pos)) {
-                    long id = cursor.getLong(cursor.getColumnIndex(NewsDbHelper.KEY_NEWS_ID));
+                    long id = cursor.getLong(cursor.getColumnIndex(NewsContract.NewsEntries._ID));
                     openNewsDetailActivity(id);
                 }
+            }
+        });
+
+        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
+        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                retrieveNews();
             }
         });
 
@@ -129,10 +140,18 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Starts retrieveNewsTask
     private void retrieveNews() {
-        Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
+        mSwipeLayout.setRefreshing(true);
 
         // Start sync
         NewsSyncAdapter.syncImmediately(getActivity());
+
+        // TODO: actually detect end of sync with SyncObserver
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeLayout.setRefreshing(false);
+            }
+        }, 5000);
     }
 
     @Override
@@ -141,16 +160,16 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         case NEWS_LOADER:
             return new CursorLoader(
                     getActivity(),
-                    NewsProvider.CONTENT_URI_NEWS,
+                    NewsContract.NewsEntries.CONTENT_URI,
                     new String[] { // columns
-                            NewsDbHelper.KEY_NEWS_ID,
-                            NewsDbHelper.KEY_NEWS_TITLE,
-                            NewsDbHelper.KEY_NEWS_DATE,
-                            NewsDbHelper.KEY_NEWS_SNIPPET
+                            NewsContract.NewsEntries._ID,
+                            NewsContract.NewsEntries.KEY_TITLE,
+                            NewsContract.NewsEntries.KEY_DATE,
+                            NewsContract.NewsEntries.KEY_SNIPPET
                     },
                     null, // selection
                     null, // selectionArgs
-                    NewsDbHelper.KEY_NEWS_DATE + " DESC" // orderBy
+                    NewsContract.NewsEntries.KEY_DATE + " DESC" // orderBy
             );
         default:
             return null;

@@ -43,11 +43,11 @@ class NewsListAdapter extends CursorAdapter {
         ViewHolder holder = (ViewHolder) view.getTag();
 
         holder.mTitleView.setText(
-                values.getAsString(NewsDbHelper.KEY_NEWS_TITLE));
+                values.getAsString(NewsContract.NewsEntries.KEY_TITLE));
         holder.mPublishedView.setText(DATE_FORMAT.format(
-                values.getAsLong(NewsDbHelper.KEY_NEWS_DATE)));
+                values.getAsLong(NewsContract.NewsEntries.KEY_DATE)));
         holder.mSnippetView.setText(
-                values.getAsString(NewsDbHelper.KEY_NEWS_SNIPPET));
+                values.getAsString(NewsContract.NewsEntries.KEY_SNIPPET));
     }
 
     // Provide a reference to the views for each data item
