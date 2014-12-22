@@ -67,8 +67,7 @@ class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.ViewHolder>
             statuses.add("(S)");
         }
         // capacity full
-        if (pair.second.memberCount != null && pair.second.capacity != null &&
-                pair.second.memberCount >= pair.second.capacity) {
+        if (pair.second.memberCount >= pair.second.capacity) {
             statuses.add("<font color=\"#0000FF\">FULL</font>");
         }
         // cancelled

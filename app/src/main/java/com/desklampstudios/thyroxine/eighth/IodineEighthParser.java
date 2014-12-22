@@ -14,14 +14,12 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 class IodineEighthParser extends AbstractXMLParser {
     private static final String TAG = IodineEighthParser.class.getSimpleName();
+
+    private int curBlockId = -1;
 
     public IodineEighthParser(Context context) throws XmlPullParserException {
         super(context);
@@ -91,6 +89,7 @@ class IodineEighthParser extends AbstractXMLParser {
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "block");
         Pair<EighthBlock, Integer> pair = readBlock(mParser);
+        curBlockId = pair.first.blockId;
 
         // advance to activities
         mParser.nextTag();
@@ -112,7 +111,9 @@ class IodineEighthParser extends AbstractXMLParser {
             }
             String name = mParser.getName();
             if (name.equals("activity")) {
-                return readActivity(mParser);
+                Pair<EighthActv, EighthActvInstance> pair = readActivity(mParser);
+                pair.second.blockId = curBlockId;
+                return pair;
             } else {
                 skip(mParser);
             }
@@ -130,7 +131,7 @@ class IodineEighthParser extends AbstractXMLParser {
         int bid = -1;
         String date = "";
         String type = "";
-        Boolean locked = null;
+        boolean locked = false;
 
         Pair<EighthActv, EighthActvInstance> actvPair = null;
 
@@ -166,21 +167,10 @@ class IodineEighthParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "block");
 
-        // Check for valid inputs
-        if (bid < 0 || date.isEmpty() || type.isEmpty()) {
-            String msg = String.format("readBlock: bid (%s) or date (%s) or type (%s) bad",
-                    bid, date, type);
-            Log.e(TAG, msg);
-            throw new XmlPullParserException(msg, parser, null);
-        }
-        if (actvPair == null) {
-            String msg = "readBlock: activity not found";
-            Log.e(TAG, msg);
-            throw new XmlPullParserException(msg, parser, null);
-        }
+        // TODO: re-add errors if fields not found, consider nullable fields again... :\
 
         EighthBlock block = new EighthBlock(bid, date, type, locked);
-        return new Pair<>(block, actvPair.second.blockId);
+        return new Pair<>(block, actvPair.second.actvId);
     }
 
     private static String readBasicDate(XmlPullParser parser) throws IOException, XmlPullParserException {
@@ -225,14 +215,14 @@ class IodineEighthParser extends AbstractXMLParser {
         parser.require(XmlPullParser.START_TAG, ns, "activity");
 
         int aid = -1;
-        String aName = null;
-        String description = null;
-        String comment = null;
+        String aName = "";
+        String description = "";
+        String comment = "";
         long flags = 0;
 
-        String roomsStr = null;
-        Integer memberCount = null;
-        Integer capacity = null;
+        String roomsStr = "";
+        int memberCount = 0;
+        int capacity = -1;
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -297,19 +287,7 @@ class IodineEighthParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "activity");
 
-        // Check for valid inputs
-        if (aid < 0 || aName == null || description == null) {
-            String msg = String.format("readActivity: EighthActv aid (%d) or name (%s) " +
-                    "or description (%s) not found", aid, aName, description);
-            Log.e(TAG, msg);
-            throw new XmlPullParserException(msg, parser, null);
-        }
-        if (comment == null) {
-            String msg = String.format("readActivity: EighthActvInstance comment (%s) " +
-                    "not found", comment);
-            Log.e(TAG, msg);
-            throw new XmlPullParserException(msg, parser, null);
-        }
+        // TODO: re-add errors if fields not found, consider nullable fields again... :\
 
         EighthActv actv = new EighthActv(aid, aName, description,
                 flags & EighthActv.FLAG_ALL);

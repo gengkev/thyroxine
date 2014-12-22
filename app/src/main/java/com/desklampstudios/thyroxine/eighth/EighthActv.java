@@ -12,11 +12,10 @@ class EighthActv {
     public static final int FLAG_SPECIAL = 32;
     //public static final int FLAG_CALENDAR = 64;
 
-    /* @NotNull */ public int actvId;
-
-    /* @NotNull */ public String name;
-    /* @NotNull */ public String description;
-    /* @NotNull */ public long flags;
+    public int actvId;
+    public String name;
+    public String description;
+    public long flags;
 
     public EighthActv(int actvId, String name, String description, long flags) {
         assert name != null;
@@ -30,7 +29,20 @@ class EighthActv {
 
     @Override
     public String toString() {
-        return String.format("[Actv id: %d, name: %s, description: %s, flags: %d]",
+        return String.format("EighthActv[actvId=%d, name=%s, description=%s, flags=%d]",
                 actvId, name, description, flags);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof EighthActv)) return false;
+        EighthActv actv = (EighthActv) o;
+        return actvId == actv.actvId && name.equals(actv.name) &&
+                description.equals(actv.description) && flags == actv.flags;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 }

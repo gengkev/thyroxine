@@ -2,7 +2,10 @@ package com.desklampstudios.thyroxine;
 
 import android.accounts.Account;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.SyncRequest;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
@@ -81,5 +84,11 @@ public class Utils {
         } else {
             ContentResolver.addPeriodicSync(account, authority, Bundle.EMPTY, syncInterval);
         }
+    }
+
+    public static ContentValues cursorRowToContentValues(Cursor cursor) {
+        ContentValues values = new ContentValues();
+        DatabaseUtils.cursorRowToContentValues(cursor, values);
+        return values;
     }
 }

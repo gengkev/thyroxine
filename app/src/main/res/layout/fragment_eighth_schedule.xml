@@ -4,10 +4,9 @@
     android:layout_height="match_parent"
     tools:context="com.desklampstudios.thyroxine.eighth.ScheduleFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/my_recycler_view"
-        android:scrollbars="vertical"
+    <ListView android:id="@+id/blocks_list"
         android:layout_height="match_parent"
-        android:layout_width="match_parent" />
+        android:layout_width="match_parent"
+        android:scrollbars="vertical" />
 
 </FrameLayout>

@@ -1,13 +1,10 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
@@ -16,6 +13,7 @@ import com.desklampstudios.thyroxine.util.SelectionBuilder;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.ActvInstances;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Blocks;
+import static com.desklampstudios.thyroxine.eighth.EighthContract.Schedule;
 import static com.desklampstudios.thyroxine.eighth.EighthDatabase.Tables;
 
 public class EighthProvider extends ContentProvider {
@@ -29,8 +27,10 @@ public class EighthProvider extends ContentProvider {
     private static final int BLOCKS_ID_ACTVINSTANCES = 203;
 
     private static final int ACTVINSTANCES = 300;
-    private static final int ACTVINSTANCES_ACTV_BLOCK_ID = 301;
+    private static final int ACTVINSTANCES_BLOCK_ACTV_ID = 301;
 
+    private static final int SCHEDULE = 400;
+    private static final int SCHEDULE_BLOCK_ID = 401;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private EighthDatabase mDbHelper;
@@ -48,7 +48,10 @@ public class EighthProvider extends ContentProvider {
         matcher.addURI(authority, "blocks/*/actvInstances", BLOCKS_ID_ACTVINSTANCES);
 
         matcher.addURI(authority, "actvInstances", ACTVINSTANCES);
-        matcher.addURI(authority, "actvInstances/*/*", ACTVINSTANCES_ACTV_BLOCK_ID);
+        matcher.addURI(authority, "actvInstances/*/*", ACTVINSTANCES_BLOCK_ACTV_ID);
+
+        matcher.addURI(authority, "schedule", SCHEDULE);
+        matcher.addURI(authority, "schedule/*", SCHEDULE_BLOCK_ID);
 
         return matcher;
     }
@@ -79,8 +82,13 @@ public class EighthProvider extends ContentProvider {
 
             case ACTVINSTANCES:
                 return ActvInstances.CONTENT_TYPE;
-            case ACTVINSTANCES_ACTV_BLOCK_ID:
+            case ACTVINSTANCES_BLOCK_ACTV_ID:
                 return ActvInstances.CONTENT_ITEM_TYPE;
+
+            case SCHEDULE:
+                return Schedule.CONTENT_TYPE;
+            case SCHEDULE_BLOCK_ID:
+                return Schedule.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -119,19 +127,24 @@ public class EighthProvider extends ContentProvider {
         switch (match) {
             case ACTVS: {
                 db.insertOrThrow(Tables.ACTVS, null, values);
-                returnUri = Actvs.buildActvUri(values.getAsString(Actvs.ACTV_ID));
+                returnUri = Actvs.buildActvUri(values.getAsInteger(Actvs.ACTV_ID));
                 break;
             }
             case BLOCKS: {
                 db.insertOrThrow(Tables.BLOCKS, null, values);
-                returnUri = Blocks.buildBlockUri(values.getAsString(Blocks.BLOCK_ID));
+                returnUri = Blocks.buildBlockUri(values.getAsInteger(Blocks.BLOCK_ID));
                 break;
             }
             case ACTVINSTANCES: {
                 db.insertOrThrow(Tables.ACTVINSTANCES, null, values);
                 returnUri = ActvInstances.buildActvInstanceUri(
-                        values.getAsString(ActvInstances.ACTV_ID),
-                        values.getAsString(ActvInstances.BLOCK_ID));
+                        values.getAsInteger(ActvInstances.BLOCK_ID),
+                        values.getAsInteger(ActvInstances.ACTV_ID));
+                break;
+            }
+            case SCHEDULE: {
+                db.insertOrThrow(Tables.SCHEDULE, null, values);
+                returnUri = Schedule.buildScheduleUri(values.getAsInteger(Schedule.BLOCK_ID));
                 break;
             }
             default: {
@@ -139,6 +152,7 @@ public class EighthProvider extends ContentProvider {
             }
         }
 
+        // TODO: notify changes for other urls with joins and stuff
         // make sure listeners are notified
         getContext().getContentResolver().notifyChange(uri, null);
         return returnUri;
@@ -180,7 +194,7 @@ public class EighthProvider extends ContentProvider {
         return rowsUpdated;
     }
 
-    // Used by insert, remove, update
+    // Used by remove, update
     private SelectionBuilder buildSimpleSelection(Uri uri, int match) {
         final SelectionBuilder builder = new SelectionBuilder();
         switch (match) {
@@ -188,29 +202,38 @@ public class EighthProvider extends ContentProvider {
                 return builder.table(Tables.ACTVS);
             }
             case ACTVS_ID: {
-                final String actvId = Actvs.getActvId(uri);
+                final int actvId = Actvs.getActvId(uri);
                 return builder.table(Tables.ACTVS)
-                        .where(Actvs.ACTV_ID + "=?", actvId);
+                        .where(Actvs.ACTV_ID + "=?", String.valueOf(actvId));
             }
 
             case BLOCKS: {
                 return builder.table(Tables.BLOCKS);
             }
             case BLOCKS_ID: {
-                final String blockId = Blocks.getBlockId(uri);
+                final int blockId = Blocks.getBlockId(uri);
                 return builder.table(Tables.BLOCKS)
-                        .where(Blocks.BLOCK_ID + "=?", blockId);
+                        .where(Blocks.BLOCK_ID + "=?", String.valueOf(blockId));
             }
 
             case ACTVINSTANCES: {
                 return builder.table(Tables.ACTVINSTANCES);
             }
-            case ACTVINSTANCES_ACTV_BLOCK_ID: {
-                final String actvId = ActvInstances.getActvId(uri);
-                final String blockId = ActvInstances.getBlockId(uri);
+            case ACTVINSTANCES_BLOCK_ACTV_ID: {
+                final int blockId = ActvInstances.getBlockId(uri);
+                final int actvId = ActvInstances.getActvId(uri);
                 return builder.table(Tables.ACTVINSTANCES)
-                        .where(ActvInstances.ACTV_ID + "=?", actvId)
-                        .where(ActvInstances.BLOCK_ID + "=?", blockId);
+                        .where(ActvInstances.BLOCK_ID + "=?", String.valueOf(blockId))
+                        .where(ActvInstances.ACTV_ID + "=?", String.valueOf(actvId));
+            }
+
+            case SCHEDULE: {
+                return builder.table(Tables.SCHEDULE);
+            }
+            case SCHEDULE_BLOCK_ID: {
+                final int blockId = Schedule.getBlockId(uri);
+                return builder.table(Tables.SCHEDULE)
+                        .where(ActvInstances.BLOCK_ID + "=?", String.valueOf(blockId));
             }
             default: {
                 return null;
@@ -226,50 +249,65 @@ public class EighthProvider extends ContentProvider {
                 return builder.table(Tables.ACTVS);
             }
             case ACTVS_ID: {
-                final String actvId = Actvs.getActvId(uri);
+                final int actvId = Actvs.getActvId(uri);
                 return builder.table(Tables.ACTVS)
-                        .where(Actvs.ACTV_ID + "=?", actvId);
+                        .where(Actvs.ACTV_ID + "=?", String.valueOf(actvId));
             }
             case ACTVS_ID_ACTVINSTANCES: {
-                final String actvId = Actvs.getActvId(uri);
+                final int actvId = Actvs.getActvId(uri);
                 return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS)
                         .mapToTable(ActvInstances._ID, Tables.ACTVINSTANCES)
                         .mapToTable(ActvInstances.ACTV_ID, Tables.ACTVINSTANCES)
-                        .where(Tables.ACTVINSTANCES + "." + ActvInstances.ACTV_ID, actvId);
+                        .where(Tables.ACTVINSTANCES + "." + ActvInstances.ACTV_ID + "=?", String.valueOf(actvId));
             }
 
             case BLOCKS: {
-                return builder.table(Tables.BLOCKS);
+                return builder.table(Tables.BLOCKS_JOIN_SCHEDULE_ACTVS_ACTVINSTANCES)
+                        .mapToTable(Blocks._ID, Tables.BLOCKS)
+                        .mapToTable(Blocks.BLOCK_ID, Tables.BLOCKS)
+                        .mapToTable(Schedule.ACTV_ID, Tables.SCHEDULE);
             }
             case BLOCKS_ID: {
-                final String blockId = Blocks.getBlockId(uri);
-                return builder.table(Tables.BLOCKS)
-                        .where(Blocks.BLOCK_ID + "=?", blockId);
+                final int blockId = Blocks.getBlockId(uri);
+                return builder.table(Tables.BLOCKS_JOIN_SCHEDULE_ACTVS_ACTVINSTANCES)
+                        .mapToTable(Blocks._ID, Tables.BLOCKS)
+                        .mapToTable(Blocks.BLOCK_ID, Tables.BLOCKS)
+                        .mapToTable(Schedule.ACTV_ID, Tables.SCHEDULE)
+                        .where(Tables.BLOCKS + "." + Blocks.BLOCK_ID + "=?", String.valueOf(blockId));
             }
             case BLOCKS_ID_ACTVINSTANCES: {
-                final String blockId = Blocks.getBlockId(uri);
+                final int blockId = Blocks.getBlockId(uri);
                 return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS)
                         .mapToTable(ActvInstances._ID, Tables.ACTVINSTANCES)
                         .mapToTable(ActvInstances.BLOCK_ID, Tables.ACTVINSTANCES)
-                        .where(Tables.ACTVINSTANCES + "." + ActvInstances.BLOCK_ID, blockId);
+                        .where(Tables.ACTVINSTANCES + "." + ActvInstances.BLOCK_ID + "=?", String.valueOf(blockId));
             }
 
             case ACTVINSTANCES: {
                 return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS);
             }
-            case ACTVINSTANCES_ACTV_BLOCK_ID: {
-                final String actvId = ActvInstances.getActvId(uri);
-                final String blockId = ActvInstances.getBlockId(uri);
+            case ACTVINSTANCES_BLOCK_ACTV_ID: {
+                final int blockId = ActvInstances.getBlockId(uri);
+                final int actvId = ActvInstances.getActvId(uri);
                 return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS)
                         .mapToTable(ActvInstances._ID, Tables.ACTVINSTANCES)
                         .mapToTable(ActvInstances.ACTV_ID, Tables.ACTVINSTANCES)
                         .mapToTable(ActvInstances.BLOCK_ID, Tables.ACTVINSTANCES)
-                        .where(ActvInstances.ACTV_ID + "=?", actvId)
-                        .where(ActvInstances.BLOCK_ID + "=?", blockId);
+                        .where(ActvInstances.BLOCK_ID + "=?", String.valueOf(blockId))
+                        .where(ActvInstances.ACTV_ID + "=?", String.valueOf(actvId));
             }
 
-            default:
+            case SCHEDULE: {
+                return builder.table(Tables.SCHEDULE);
+            }
+            case SCHEDULE_BLOCK_ID: {
+                final int blockId = Schedule.getBlockId(uri);
+                return builder.table(Tables.SCHEDULE)
+                        .where(ActvInstances.BLOCK_ID + "=?", String.valueOf(blockId));
+            }
+            default: {
                 return null;
+            }
         }
     }
 }

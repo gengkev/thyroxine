@@ -1,61 +1,56 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
-class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapter.ViewHolder> {
+class ScheduleListAdapter extends CursorAdapter {
     private static final String TAG = ScheduleListAdapter.class.getSimpleName();
 
-    private final List<Pair<EighthBlock, Integer>> mDataset;
-    private final BlockClickListener mListener;
-
-    public ScheduleListAdapter(BlockClickListener listener) {
-        this.mDataset = new ArrayList<>();
-        this.mListener = listener;
+    public ScheduleListAdapter(Context context, Cursor cursor, int flags) {
+        super(context, cursor, flags);
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.block_list_textview, parent, false);
 
-        // set the view's size, margins, paddings and layout parameters
+        // yay ViewHolders!
+        final ViewHolder holder = new ViewHolder(view);
+        view.setTag(holder);
 
-        final ViewHolder vh = new ViewHolder(v);
-        vh.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int pos = vh.getPosition();
-                Pair<EighthBlock, Integer> pair = mDataset.get(pos);
-                mListener.onBlockClick(pair.first);
-            }
-        });
-        return vh;
+        return view;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        Pair<EighthBlock, Integer> pair = mDataset.get(position);
-        EighthBlock block = pair.first;
-        //EighthActvInstance actvInstance = block.selectedActv;
+    public void bindView(View view, Context context, Cursor cursor) {
+        ContentValues values = Utils.cursorRowToContentValues(cursor);
+        ViewHolder holder = (ViewHolder) view.getTag();
 
-        String dateStr = Utils.formatBasicDate(block.date, Utils.DISPLAY_DATE_FORMAT);
+        //Log.d(TAG, "Values: " + values);
+
+        String dateStr = Utils.formatBasicDate(
+                values.getAsString(EighthContract.Blocks.DATE),
+                Utils.DISPLAY_DATE_FORMAT);
         holder.mDateView.setText(dateStr);
-        holder.mBlockView.setText("Block " + block.type);
-        //holder.mActivityNameView.setText(actvInstance.actv.name);
-        holder.mActivityNameView.setText("<activity name>");
+
+        holder.mBlockView.setText("Block " +
+                values.getAsString(EighthContract.Blocks.TYPE));
+        holder.mActivityNameView.setText(
+                values.getAsInteger(EighthContract.ActvInstances.ACTV_ID) + " " +
+                values.getAsString(EighthContract.Actvs.NAME));
 
         /*
         ArrayList<String> statuses = new ArrayList<>();
@@ -79,32 +74,7 @@ class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapter.ViewH
         */
     }
 
-    public void add(Pair<EighthBlock, Integer> pair) {
-        add(mDataset.size(), pair);
-    }
-
-    public void add(int pos, Pair<EighthBlock, Integer> pair) {
-        mDataset.add(pos, pair);
-        notifyItemInserted(pos);
-    }
-
-    public void clear() {
-        int size = mDataset.size();
-        for (int i = size - 1; i >= 0; i--) {
-            mDataset.remove(i);
-        }
-        notifyItemRangeRemoved(0, size);
-    }
-
-    // Return the size of your dataset (invoked by the layout manager)
-    @Override
-    public int getItemCount() {
-        return mDataset.size();
-    }
-
     // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mDateView;
@@ -120,9 +90,5 @@ class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapter.ViewH
             mActivityNameView = (TextView) v.findViewById(R.id.eighth_activity_name);
             mStatusView = (TextView) v.findViewById(R.id.eighth_activity_status);
         }
-    }
-
-    public static interface BlockClickListener {
-        public void onBlockClick(EighthBlock block);
     }
 }

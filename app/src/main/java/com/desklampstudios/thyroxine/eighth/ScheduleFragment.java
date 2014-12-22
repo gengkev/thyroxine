@@ -4,31 +4,25 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
 
-import com.desklampstudios.thyroxine.DividerItemDecoration;
-import com.desklampstudios.thyroxine.IodineApiHelper;
-import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Arrays;
 
 
 /**
@@ -36,15 +30,14 @@ import java.io.InputStream;
  * Use the {@link ScheduleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ScheduleFragment extends Fragment implements ScheduleListAdapter.BlockClickListener {
+public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = ScheduleFragment.class.getSimpleName();
+    private static final int BLOCKS_LOADER = 0;
 
-    private RetrieveBlocksTask mRetrieveBlocksTask;
-    private RecyclerView mRecyclerView;
+    private FetchScheduleTask mFetchScheduleTask;
+
     private ScheduleListAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-
-    private Account mAccount;
+    private ListView mListView;
 
     public ScheduleFragment() {
     }
@@ -59,14 +52,9 @@ public class ScheduleFragment extends Fragment implements ScheduleListAdapter.Bl
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*
-        if (getArguments() != null) {
-            loggedIn = getArguments().getBoolean(ARG_LOGGED_IN);
-        }
-        */
 
-        mAdapter = new ScheduleListAdapter(this);
-        mAdapter.add(new Pair<>(new EighthBlock(-1, "2014-12-21", "A", false), 999));
+        // create list adapter
+        mAdapter = new ScheduleListAdapter(getActivity(), null, 0);
 
         // load blocks
         retrieveBlocks();
@@ -79,42 +67,40 @@ public class ScheduleFragment extends Fragment implements ScheduleListAdapter.Bl
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_eighth_schedule, container, false);
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.my_recycler_view);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setHasFixedSize(true); // changes in content don't change layout size
+        mListView = (ListView) view.findViewById(R.id.blocks_list);
+        mListView.setAdapter(mAdapter);
 
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                Cursor cursor = mAdapter.getCursor();
 
-        // item decorations??
-        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
-                getActivity(), DividerItemDecoration.VERTICAL_LIST);
-        mRecyclerView.addItemDecoration(itemDecoration);
+                if (cursor != null && cursor.moveToPosition(pos)) {
+                    int blockId = cursor.getInt(cursor.getColumnIndex(EighthContract.Blocks.BLOCK_ID));
+                    onBlockClick(blockId);
+                }
+            }
+        });
 
         return view;
     }
 
     // Called when an item in the adapter is clicked
-    @Override
-    public void onBlockClick(EighthBlock block) {
+    public void onBlockClick(int blockId) {
         //Toast.makeText(getActivity(), "Block: " + block, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), BlockActivity.class);
-        intent.putExtra(BlockFragment.ARG_BID, block.blockId);
+        intent.putExtra(BlockFragment.ARG_BID, blockId);
         startActivity(intent);
     }
 
     // Starts RetrieveBlocksTask
     private void retrieveBlocks() {
-        if (mRetrieveBlocksTask != null) {
+        if (mFetchScheduleTask != null) {
             return;
         }
 
         Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
-
-        // Reset adapter
-        mAdapter.clear();
 
         // Check login state
         final AccountManager am = AccountManager.get(getActivity());
@@ -133,114 +119,58 @@ public class ScheduleFragment extends Fragment implements ScheduleListAdapter.Bl
                     }, null);
             return;
         }
-        else {
-            mAccount = accounts[0];
+        else if (accounts.length > 1) {
+            Log.e(TAG, "More than one account: " + Arrays.toString(accounts));
         }
 
         // Load stuff async
-        mRetrieveBlocksTask = new RetrieveBlocksTask();
-        mRetrieveBlocksTask.execute();
+        mFetchScheduleTask = new FetchScheduleTask(getActivity());
+        mFetchScheduleTask.execute(accounts[0]);
     }
 
-    private class RetrieveBlocksTask extends AsyncTask<Void, Object, Void> {
-        private Exception exception = null;
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            final AccountManager am = AccountManager.get(getActivity());
-            AccountManagerFuture<Bundle> future = am.getAuthToken(mAccount,
-                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, Bundle.EMPTY, getActivity(), null, null);
+        // start loader
+        getLoaderManager().initLoader(BLOCKS_LOADER, null, this);
+    }
 
-            String authToken;
-            try {
-                Bundle bundle = future.getResult();
-                authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-                Log.v(TAG, "Got bundle: " + bundle);
-            } catch (IOException e) {
-                Log.e(TAG, "Connection error: "+ e.toString());
-                exception = e;
-                return null;
-            } catch (OperationCanceledException | AuthenticatorException e) {
-                Log.e(TAG, "Authentication error: " + e.toString());
-                exception = e;
-                return null;
-            }
-
-            InputStream stream = null;
-            IodineEighthParser parser = null;
-
-            try {
-                stream = IodineApiHelper.getBlockList(authToken);
-
-                parser = new IodineEighthParser(getActivity());
-                parser.beginListBlocks(stream);
-
-                Pair<EighthBlock, Integer> pair;
-                while (!isCancelled()) {
-                    pair = parser.nextBlock();
-
-                    if (pair == null)
-                        break;
-
-                    publishProgress(pair.first, pair.second);
-                }
-
-            } catch (IOException e) {
-                Log.e(TAG, "Connection error: " + e.toString());
-                exception = e;
-                return null;
-            } catch (XmlPullParserException e) {
-                Log.e(TAG, "XML error: " + e.toString());
-                exception = e;
-                return null;
-            } catch (IodineAuthException e) {
-                Log.e(TAG, "Iodine auth error", e);
-                exception = e;
-                return null;
-            } finally {
-                if (parser != null)
-                    parser.stopParse();
-                try {
-                    if (stream != null) stream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "IOException when closing stream: " + e);
-                }
-            }
-
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+        switch (loaderId) {
+        case BLOCKS_LOADER:
+            return new CursorLoader(
+                    getActivity(),
+                    EighthContract.Blocks.CONTENT_URI,
+                    new String[] { // columns
+                            EighthContract.Blocks._ID,
+                            EighthContract.Blocks.BLOCK_ID,
+                            EighthContract.Blocks.TYPE,
+                            EighthContract.Blocks.DATE,
+                            EighthContract.Actvs.NAME,
+                            EighthContract.Actvs.FLAGS,
+                            EighthContract.Actvs.ACTV_ID,
+                            EighthContract.ActvInstances.FLAGS,
+                            EighthContract.ActvInstances.MEMBER_COUNT,
+                            EighthContract.ActvInstances.CAPACITY
+                    },
+                    null, // selection
+                    null, // selectionArgs
+                    EighthContract.Blocks.DATE + " ASC" // orderBy
+            );
+        default:
             return null;
         }
+    }
 
-        @Override
-        protected void onProgressUpdate(Object... args) {
-            // TODO: this is incredibly stupid, remove it
-            mAdapter.add(new Pair<>((EighthBlock)args[0], (Integer) args[1]));
-            // Log.i(TAG, "Adding entry: " + entries[0]);
-        }
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        mAdapter.swapCursor(cursor);
+    }
 
-        @Override
-        protected void onPostExecute(Void _) {
-            mRetrieveBlocksTask = null;
-            if (exception != null) {
-                if (getActivity() != null) {
-                    Toast.makeText(getActivity(),
-                            "RetrieveBlocksTask error: " + exception,
-                            Toast.LENGTH_LONG).show();
-                }
-                return;
-            }
-
-            Log.i(TAG, "Got blocks");
-
-            if (getActivity() != null) {
-                Toast.makeText(getActivity(),
-                        "Got blocks",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mRetrieveBlocksTask = null;
-        }
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        mAdapter.swapCursor(null);
     }
 }
