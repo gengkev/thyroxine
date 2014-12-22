@@ -44,9 +44,6 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
     private RecyclerView mRecyclerView;
     private BlockListAdapter mAdapter;
 
-    private RecyclerView mSelectedActvRecyclerView;
-    private BlockListAdapter mSelectedActvAdapter;
-
     private Account mAccount = null;
 
     public BlockFragment() {
@@ -68,12 +65,6 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
         }
 
         mAdapter = new BlockListAdapter(this);
-        mAdapter.add(new Pair<>(
-                new EighthActv(999, "<Actv name>", "<Actv description>", 0),
-                new EighthActvInstance(999, -1, "<Actv comment>", 0)));
-
-
-        mSelectedActvAdapter = new BlockListAdapter(this);
         mAdapter.add(new Pair<>(
                 new EighthActv(999, "<Actv name>", "<Actv description>", 0),
                 new EighthActvInstance(999, -1, "<Actv comment>", 0)));
@@ -102,12 +93,6 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
                 getActivity(), DividerItemDecoration.VERTICAL_LIST);
         mRecyclerView.addItemDecoration(itemDecoration);
-
-        // selected activity recycler view
-        mSelectedActvRecyclerView = (RecyclerView) view.findViewById(R.id.selected_actv_recycler_view);
-        mSelectedActvRecyclerView.setAdapter(mSelectedActvAdapter);
-        mSelectedActvRecyclerView.setHasFixedSize(false);
-        mSelectedActvRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         return view;
     }
@@ -152,9 +137,6 @@ public class BlockFragment extends Fragment implements BlockListAdapter.ActvClic
 
     private void displayBlock(EighthBlock block) {
         Log.d(TAG, "block: " + block);
-
-        //mSelectedActvAdapter.clear();
-        //mSelectedActvAdapter.add(block.selectedActv);
 
         String dateStr = Utils.formatBasicDate(block.date, Utils.DISPLAY_DATE_FORMAT_MEDIUM);
         getActivity().setTitle(dateStr + " Block " + block.type);
