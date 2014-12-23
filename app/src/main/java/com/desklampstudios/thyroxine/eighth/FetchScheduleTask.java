@@ -60,12 +60,12 @@ class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
         }
 
         InputStream stream = null;
-        IodineEighthParser parser = null;
+        EighthListBlocksParser parser = null;
 
         try {
             stream = IodineApiHelper.getBlockList(authToken);
 
-            parser = new IodineEighthParser(mActivity);
+            parser = new EighthListBlocksParser(mActivity);
             parser.beginListBlocks(stream);
 
             Pair<EighthBlock, Integer> pair;

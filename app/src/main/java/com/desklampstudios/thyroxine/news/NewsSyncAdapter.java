@@ -40,12 +40,12 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                               ContentProviderClient provider, SyncResult syncResult) {
 
         InputStream stream = null;
-        IodineNewsFeedParser parser = null;
+        NewsFeedParser parser = null;
         //List<NewsEntry> entries = new ArrayList<NewsEntry>();
 
         try {
             stream = IodineApiHelper.getPublicNewsFeed();
-            parser = new IodineNewsFeedParser(getContext());
+            parser = new NewsFeedParser(getContext());
             parser.beginFeed(stream);
 
             NewsEntry entry = parser.nextEntry();

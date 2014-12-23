@@ -95,9 +95,9 @@ public class IodineApiHelper {
             IodineAuthException authErr = null;
             InputStream is = conn.getInputStream();
             try {
-                IodineAuthErrorParser parser = new IodineAuthErrorParser(context);
+                AuthErrorParser parser = new AuthErrorParser(context);
                 parser.beginAuthError(is);
-                authErr = parser.getError();
+                authErr = parser.nextAuth();
             } finally {
                 is.close();
             }

@@ -14,10 +14,10 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
 
-class IodineNewsFeedParser extends AbstractXMLParser {
-    private static final String TAG = IodineNewsFeedParser.class.getSimpleName();
+class NewsFeedParser extends AbstractXMLParser {
+    private static final String TAG = NewsFeedParser.class.getSimpleName();
 
-    public IodineNewsFeedParser(Context context) throws XmlPullParserException {
+    public NewsFeedParser(Context context) throws XmlPullParserException {
         super(context);
     }
 
@@ -46,11 +46,12 @@ class IodineNewsFeedParser extends AbstractXMLParser {
             if (mParser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
-            String name = mParser.getName();
-            if (name.equals("item")) {
-                return readEntry(mParser);
-            } else {
-                skip(mParser);
+            switch (mParser.getName()) {
+                case "item":
+                    return readEntry(mParser);
+                default:
+                    skip(mParser);
+                    break;
             }
         }
 
@@ -64,45 +65,37 @@ class IodineNewsFeedParser extends AbstractXMLParser {
     private static NewsEntry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "item");
 
-        String title = null;
+        String title = "";
         long published = 0;
-        String link = null;
-        String content = null;
+        String link = "";
+        String content = "";
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
-            String name = parser.getName();
-            switch (name) {
-            case "title":
-                title = Utils.cleanHtml(readText(parser, "title"));
-                break;
-            case "pubDate":
-                published = readPublished(parser);
-                break;
-            case "link":
-                link = Utils.cleanHtml(readText(parser, "link"));
-                break;
-            case "description":
-                content = readText(parser, "description");
-                break;
-            default:
-                skip(parser);
-                break;
+            switch (parser.getName()) {
+                case "title":
+                    title = Utils.cleanHtml(readText(parser, "title"));
+                    break;
+                case "pubDate":
+                    published = readPublished(parser);
+                    break;
+                case "link":
+                    link = Utils.cleanHtml(readText(parser, "link"));
+                    break;
+                case "description":
+                    content = readText(parser, "description");
+                    break;
+                default:
+                    skip(parser);
+                    break;
             }
         }
 
         parser.require(XmlPullParser.END_TAG, ns, "item");
 
-        if (title == null || published == 0 || link == null || content == null) {
-            Log.w(TAG, String.format("readEntry: title (%s) or published (%s) or link (%s) " +
-                    "or content (%s) not found", title, published, link, content));
-
-            title = (title == null) ? "" : title;
-            link = (link == null) ? "" : link;
-            content = (content == null) ? "" : content;
-        }
+        // TODO: re-add errors if fields not found, consider nullable fields again... :\
 
         String snippet = Utils.getSnippet(content, 300);
 

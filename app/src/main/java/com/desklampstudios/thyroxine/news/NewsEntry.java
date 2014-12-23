@@ -1,21 +1,18 @@
 package com.desklampstudios.thyroxine.news;
 
+import android.support.annotation.NonNull;
+
 import java.util.Date;
 
 class NewsEntry {
-    public final String link;
-
-    public String title;
+    @NonNull public String link;
+    @NonNull public String title;
     public long published;
-    public String contentRaw;
-    public String contentSnippet;
+    @NonNull public String contentRaw;
+    @NonNull public String contentSnippet;
 
-    public NewsEntry(String link, String title, long published,
-                     String contentRaw, String contentSnippet) {
-        assert link != null;
-        assert title != null;
-        assert contentRaw != null;
-
+    public NewsEntry(@NonNull String link, @NonNull String title, long published,
+                     @NonNull String contentRaw, @NonNull String contentSnippet) {
         this.link = link;
         this.title = title;
         this.published = published;

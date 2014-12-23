@@ -60,13 +60,13 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
 
         final int blockId = params[0];
         InputStream stream = null;
-        IodineEighthParser parser = null;
+        EighthGetBlockParser parser = null;
         Pair<EighthBlock, Integer> blockPair;
 
         try {
             stream = IodineApiHelper.getBlock(blockId, authToken);
 
-            parser = new IodineEighthParser(mActivity);
+            parser = new EighthGetBlockParser(mActivity);
             blockPair = parser.beginGetBlock(stream);
 
             Pair<EighthActv, EighthActvInstance> pair;
