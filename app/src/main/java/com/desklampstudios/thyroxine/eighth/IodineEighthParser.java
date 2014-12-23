@@ -1,6 +1,8 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
 
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 
+// TODO: split into a parser for listBlocks and getBlock
 class IodineEighthParser extends AbstractXMLParser {
     private static final String TAG = IodineEighthParser.class.getSimpleName();
 
@@ -25,7 +28,7 @@ class IodineEighthParser extends AbstractXMLParser {
         super(context);
     }
 
-    // after this, call getBlock until it returns null
+    // after this, call nextBlock until it returns null
     public void beginListBlocks(InputStream in) throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
             stopParse();
@@ -41,11 +44,13 @@ class IodineEighthParser extends AbstractXMLParser {
         }
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
 
+
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "blocks");
     }
 
     // Use with beginListBlocks
+    @Nullable
     public Pair<EighthBlock, Integer> nextBlock() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
@@ -56,10 +61,11 @@ class IodineEighthParser extends AbstractXMLParser {
                 continue;
             }
             String name = mParser.getName();
-            if (name.equals("block")) {
-                return readBlock(mParser);
-            } else {
-                skip(mParser);
+            switch (name) {
+                case "block":
+                    return readBlock(mParser);
+                default:
+                    skip(mParser);
             }
         }
 
@@ -69,6 +75,7 @@ class IodineEighthParser extends AbstractXMLParser {
     }
 
     // after this, call nextActivity until it returns null
+    @NonNull
     public Pair<EighthBlock, Integer> beginGetBlock(InputStream in)
             throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
@@ -99,6 +106,7 @@ class IodineEighthParser extends AbstractXMLParser {
     }
 
     // Use with beginGetBlock
+    @Nullable
     public Pair<EighthActv, EighthActvInstance> nextActivity()
             throws XmlPullParserException, IOException {
         if (!parsingBegun) {
@@ -110,12 +118,13 @@ class IodineEighthParser extends AbstractXMLParser {
                 continue;
             }
             String name = mParser.getName();
-            if (name.equals("activity")) {
-                Pair<EighthActv, EighthActvInstance> pair = readActivity(mParser);
-                pair.second.blockId = curBlockId;
-                return pair;
-            } else {
-                skip(mParser);
+            switch (name) {
+                case "activity":
+                    Pair<EighthActv, EighthActvInstance> pair = readActivity(mParser);
+                    pair.second.blockId = curBlockId;
+                    return pair;
+                default:
+                    skip(mParser);
             }
         }
 
@@ -124,11 +133,12 @@ class IodineEighthParser extends AbstractXMLParser {
         return null;
     }
 
-    private static Pair<EighthBlock, Integer> readBlock(XmlPullParser parser)
+    @NonNull
+    private static Pair<EighthBlock, Integer> readBlock(@NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "block");
 
-        int bid = -1;
+        int blockId = -1;
         String date = "";
         String type = "";
         boolean locked = false;
@@ -141,27 +151,27 @@ class IodineEighthParser extends AbstractXMLParser {
             }
             String name = parser.getName();
             switch (name) {
-            case "bid":
-                bid = readInt(parser, "bid");
-                break;
-            case "date":
-                date = readBasicDate(parser);
-                break;
-            case "type":
-                type = readText(parser, "type");
-                break;
-            case "block":
-                type = readText(parser, "block");
-                break;
-            case "activity":
-                actvPair = readActivity(parser);
-                break;
-            case "locked":
-                locked = readInt(parser, "locked") != 0;
-                break;
-            default:
-                skip(parser);
-                break;
+                case "bid":
+                    blockId = readInt(parser, "bid");
+                    break;
+                case "date":
+                    date = readBasicDate(parser);
+                    break;
+                case "type":
+                    type = readText(parser, "type");
+                    break;
+                case "block":
+                    type = readText(parser, "block");
+                    break;
+                case "activity":
+                    actvPair = readActivity(parser);
+                    break;
+                case "locked":
+                    locked = readInt(parser, "locked") != 0;
+                    break;
+                default:
+                    skip(parser);
+                    break;
             }
         }
 
@@ -172,11 +182,13 @@ class IodineEighthParser extends AbstractXMLParser {
             throw new XmlPullParserException("Actv not found", parser, null);
         }
 
-        EighthBlock block = new EighthBlock(bid, date, type, locked);
+        EighthBlock block = new EighthBlock(blockId, date, type, locked);
         return new Pair<>(block, actvPair.second.actvId);
     }
 
-    private static String readBasicDate(XmlPullParser parser) throws IOException, XmlPullParserException {
+    @NonNull
+    private static String readBasicDate(@NonNull XmlPullParser parser)
+            throws XmlPullParserException, IOException {
 
         parser.require(XmlPullParser.START_TAG, ns, "date");
 
@@ -187,15 +199,17 @@ class IodineEighthParser extends AbstractXMLParser {
                 parser.next();
                 break;
             }
-
-            if (parser.getEventType() != XmlPullParser.START_TAG) {
+            else if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("str")) {
-                dateStr = readText(parser, "str");
-            } else {
-                skip(parser);
+            switch (name) {
+                case "str":
+                    dateStr = readText(parser, "str");
+                    break;
+                default:
+                    skip(parser);
+                    break;
             }
         }
 
@@ -212,7 +226,8 @@ class IodineEighthParser extends AbstractXMLParser {
         return dateStr;
     }
 
-    private static Pair<EighthActv, EighthActvInstance> readActivity(XmlPullParser parser)
+    @NonNull
+    private static Pair<EighthActv, EighthActvInstance> readActivity(@NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
 
         parser.require(XmlPullParser.START_TAG, ns, "activity");

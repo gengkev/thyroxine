@@ -7,6 +7,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import com.desklampstudios.thyroxine.util.SelectionBuilder;
 
@@ -35,6 +36,7 @@ public class EighthProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private EighthDatabase mDbHelper;
 
+    @NonNull
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = EighthContract.CONTENT_AUTHORITY;
@@ -62,6 +64,7 @@ public class EighthProvider extends ContentProvider {
         return true;
     }
 
+    @NonNull
     @Override
     public String getType(Uri uri) {
         final int match = sUriMatcher.match(uri);
@@ -98,12 +101,7 @@ public class EighthProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
         final SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        final int match = sUriMatcher.match(uri);
-
-        final SelectionBuilder builder = buildExpandedSelection(uri, match);
-        if (builder == null) {
-            throw new UnsupportedOperationException("Unknown uri: " + uri);
-        }
+        final SelectionBuilder builder = buildExpandedSelection(uri);
 
         Cursor cursor = builder
                 .where(selection, selectionArgs)
@@ -161,9 +159,7 @@ public class EighthProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        final int match = sUriMatcher.match(uri);
-
-        final SelectionBuilder builder = buildSimpleSelection(uri, match);
+        final SelectionBuilder builder = buildSimpleSelection(uri);
 
         int rowsDeleted = builder
                 .where(selection, selectionArgs)
@@ -179,9 +175,7 @@ public class EighthProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        final int match = sUriMatcher.match(uri);
-
-        final SelectionBuilder builder = buildSimpleSelection(uri, match);
+        final SelectionBuilder builder = buildSimpleSelection(uri);
 
         int rowsUpdated = builder
                 .where(selection, selectionArgs)
@@ -195,7 +189,9 @@ public class EighthProvider extends ContentProvider {
     }
 
     // Used by remove, update
-    private SelectionBuilder buildSimpleSelection(Uri uri, int match) {
+    @NonNull
+    private SelectionBuilder buildSimpleSelection(@NonNull Uri uri) {
+        final int match = sUriMatcher.match(uri);
         final SelectionBuilder builder = new SelectionBuilder();
         switch (match) {
             case ACTVS: {
@@ -235,14 +231,17 @@ public class EighthProvider extends ContentProvider {
                 return builder.table(Tables.SCHEDULE)
                         .where(ActvInstances.KEY_BLOCK_ID + "=?", String.valueOf(blockId));
             }
+
             default: {
-                return null;
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
             }
         }
     }
 
     // Used by query
-    private SelectionBuilder buildExpandedSelection(Uri uri, int match) {
+    @NonNull
+    private SelectionBuilder buildExpandedSelection(@NonNull Uri uri) {
+        final int match = sUriMatcher.match(uri);
         final SelectionBuilder builder = new SelectionBuilder();
         switch (match) {
             case ACTVS: {
@@ -307,8 +306,9 @@ public class EighthProvider extends ContentProvider {
                 return builder.table(Tables.SCHEDULE)
                         .where(ActvInstances.KEY_BLOCK_ID + "=?", String.valueOf(blockId));
             }
+
             default: {
-                return null;
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
             }
         }
     }

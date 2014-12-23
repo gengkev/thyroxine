@@ -5,7 +5,7 @@
     android:orientation="vertical"
     tools:context="com.desklampstudios.thyroxine.eighth.BlockFragment">
 
-    <ListView android:id="@+id/activities_list"
+    <ListView android:id="@+id/actvs_list"
         android:scrollbars="vertical"
         android:layout_height="match_parent"
         android:layout_width="match_parent" />

@@ -12,6 +12,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
 
@@ -28,12 +30,13 @@ import java.io.InputStream;
 class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
     private static final String TAG = FetchScheduleTask.class.getSimpleName();
     private final Activity mActivity;
-    private Exception exception = null;
+    @Nullable private Exception exception = null;
 
     public FetchScheduleTask(Activity activity) {
         mActivity = activity;
     }
 
+    @Nullable
     @Override
     protected Void doInBackground(Account... params) {
         final Account account = params[0];
@@ -112,8 +115,8 @@ class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
         updateSelectedActv(block.blockId, curActvId, resolver);
     }
 
-    private void updateEighthBlock(EighthBlock block, ContentResolver resolver) {
-        final ContentValues newValues = EighthContract.Blocks.eighthBlockToContentValues(block);
+    private void updateEighthBlock(@NonNull EighthBlock block, @NonNull ContentResolver resolver) {
+        final ContentValues newValues = EighthContract.Blocks.toContentValues(block);
 
         // test if record exists
         Cursor c = resolver.query(
@@ -130,7 +133,7 @@ class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
             Log.v(TAG, "EighthBlock with same blockId already exists (bid " + block.blockId + ")");
 
             ContentValues oldValues = Utils.cursorRowToContentValues(c);
-            EighthBlock oldBlock = EighthContract.Blocks.contentValuesToEighthBlock(oldValues);
+            EighthBlock oldBlock = EighthContract.Blocks.fromContentValues(oldValues);
 
             // Compare old values to new values
             if (!block.equals(oldBlock)) {
@@ -149,7 +152,7 @@ class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
         c.close();
     }
 
-    private void updateSelectedActv(int blockId, int actvId, ContentResolver resolver) {
+    private void updateSelectedActv(int blockId, int actvId, @NonNull ContentResolver resolver) {
         final ContentValues newValues = new ContentValues();
         newValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
         newValues.put(EighthContract.Schedule.KEY_ACTV_ID, actvId);
@@ -188,9 +191,5 @@ class FetchScheduleTask extends AsyncTask<Account, Object, Void> {
         }
 
         Log.i(TAG, "Got blocks");
-    }
-
-    @Override
-    protected void onCancelled() {
     }
 }

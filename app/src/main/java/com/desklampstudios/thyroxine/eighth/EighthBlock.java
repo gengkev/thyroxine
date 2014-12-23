@@ -1,23 +1,18 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.support.annotation.NonNull;
+
 class EighthBlock {
     public int blockId;
-    public String date;
-    public String type;
+    @NonNull public String date;
+    @NonNull public String type;
 
     public boolean locked = false;
 
-    public EighthBlock(int blockId, String date, String type) {
-        assert date != null;
-        assert type != null;
-
+    public EighthBlock(int blockId, @NonNull String date, @NonNull String type, boolean locked) {
         this.blockId = blockId;
         this.date = date;
         this.type = type;
-    }
-
-    public EighthBlock(int blockId, String date, String type, boolean locked) {
-        this(blockId, date, type);
         this.locked = locked;
     }
 

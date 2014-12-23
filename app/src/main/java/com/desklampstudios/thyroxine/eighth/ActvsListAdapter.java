@@ -3,6 +3,7 @@ package com.desklampstudios.thyroxine.eighth;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,16 +14,16 @@ import android.widget.TextView;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 
-class BlockListAdapter extends CursorAdapter {
-    private static final String TAG = BlockListAdapter.class.getSimpleName();
+class ActvsListAdapter extends CursorAdapter {
+    private static final String TAG = ActvsListAdapter.class.getSimpleName();
 
-    public BlockListAdapter(Context context, Cursor cursor, int flags) {
+    public ActvsListAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+    public View newView(@NonNull Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.actv_list_textview, parent, false);
 
@@ -35,7 +36,7 @@ class BlockListAdapter extends CursorAdapter {
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(@NonNull View view, Context context, Cursor cursor) {
         ContentValues values = Utils.cursorRowToContentValues(cursor);
         ViewHolder holder = (ViewHolder) view.getTag();
 
@@ -91,13 +92,13 @@ class BlockListAdapter extends CursorAdapter {
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mNameView;
-        public final TextView mRoomView;
-        public final TextView mDescriptionView;
-        public final TextView mStatusView;
+        @NonNull public final View mView;
+        @NonNull public final TextView mNameView;
+        @NonNull public final TextView mRoomView;
+        @NonNull public final TextView mDescriptionView;
+        @NonNull public final TextView mStatusView;
 
-        public ViewHolder(View v) {
+        public ViewHolder(@NonNull View v) {
             super(v);
             mView = v;
             mNameView = (TextView) v.findViewById(R.id.iodine_eighth_activity_name);

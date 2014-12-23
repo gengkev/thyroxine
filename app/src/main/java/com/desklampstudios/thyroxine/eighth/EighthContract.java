@@ -4,12 +4,13 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 
 class EighthContract {
     // Warning: for now, also declared in strings.xml
     public static final String CONTENT_AUTHORITY = "com.desklampstudios.thyroxine.eighth";
 
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     private static final String PATH_BLOCKS = "blocks";
     private static final String PATH_ACTVS = "actvs";
@@ -30,16 +31,26 @@ class EighthContract {
         public static final String KEY_TYPE = "block_type";
         public static final String KEY_LOCKED = "block_locked";
 
+        /** Default "ORDER BY" clause */
+        public static final String DEFAULT_SORT = KEY_DATE + " ASC, " + KEY_TYPE + " ASC";
+
         public static Uri buildBlockUri(int blockId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(blockId))
                     .build();
         }
-        public static int getBlockId(Uri uri) {
+        public static Uri buildBlockWithActvInstancesUri(int blockId) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(String.valueOf(blockId))
+                    .appendPath(PATH_ACTVINSTANCES)
+                    .build();
+        }
+        public static int getBlockId(@NonNull Uri uri) {
             return Integer.parseInt(uri.getPathSegments().get(1));
         }
 
-        public static EighthBlock contentValuesToEighthBlock(ContentValues values) {
+        @NonNull
+        public static EighthBlock fromContentValues(@NonNull ContentValues values) {
             return new EighthBlock(
                     values.getAsInteger(KEY_BLOCK_ID),
                     values.getAsString(KEY_DATE),
@@ -47,7 +58,8 @@ class EighthContract {
                     values.getAsBoolean(KEY_LOCKED)
             );
         }
-        public static ContentValues eighthBlockToContentValues(EighthBlock block) {
+        @NonNull
+        public static ContentValues toContentValues(@NonNull EighthBlock block) {
             ContentValues values = new ContentValues();
             values.put(KEY_BLOCK_ID, block.blockId);
             values.put(KEY_DATE, block.date);
@@ -71,16 +83,26 @@ class EighthContract {
         public static final String KEY_DESCRIPTION = "actv_description";
         public static final String KEY_FLAGS = "actv_flags";
 
+        /** Default "ORDER BY" clause */
+        public static final String DEFAULT_SORT = KEY_NAME + " ASC";
+
         public static Uri buildActvUri(int actvId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(actvId))
                     .build();
         }
-        public static int getActvId(Uri uri) {
+        public static Uri buildActvWithActvInstancesUri(int actvId) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(String.valueOf(actvId))
+                    .appendPath(PATH_ACTVINSTANCES)
+                    .build();
+        }
+        public static int getActvId(@NonNull Uri uri) {
             return Integer.parseInt(uri.getPathSegments().get(1));
         }
 
-        public static EighthActv fromContentValues(ContentValues values) {
+        @NonNull
+        public static EighthActv fromContentValues(@NonNull ContentValues values) {
             return new EighthActv(
                     values.getAsInteger(KEY_ACTV_ID),
                     values.getAsString(KEY_NAME),
@@ -88,7 +110,8 @@ class EighthContract {
                     values.getAsLong(KEY_FLAGS)
             );
         }
-        public static ContentValues toContentValues(EighthActv actv) {
+        @NonNull
+        public static ContentValues toContentValues(@NonNull EighthActv actv) {
             ContentValues values = new ContentValues();
             values.put(KEY_ACTV_ID, actv.actvId);
             values.put(KEY_NAME, actv.name);
@@ -121,14 +144,15 @@ class EighthContract {
                     .appendPath(String.valueOf(actvId))
                     .build();
         }
-        public static int getBlockId(Uri uri) {
+        public static int getBlockId(@NonNull Uri uri) {
             return Integer.parseInt(uri.getPathSegments().get(1));
         }
-        public static int getActvId(Uri uri) {
+        public static int getActvId(@NonNull Uri uri) {
             return Integer.parseInt(uri.getPathSegments().get(2));
         }
 
-        public static EighthActvInstance fromContentValues(ContentValues values) {
+        @NonNull
+        public static EighthActvInstance fromContentValues(@NonNull ContentValues values) {
             return new EighthActvInstance(
                     values.getAsInteger(KEY_ACTV_ID),
                     values.getAsInteger(KEY_BLOCK_ID),
@@ -139,7 +163,8 @@ class EighthContract {
                     values.getAsInteger(KEY_CAPACITY)
             );
         }
-        public static ContentValues toContentValues(EighthActvInstance actvInstance) {
+        @NonNull
+        public static ContentValues toContentValues(@NonNull EighthActvInstance actvInstance) {
             ContentValues values = new ContentValues();
             values.put(KEY_ACTV_ID, actvInstance.actvId);
             values.put(KEY_BLOCK_ID, actvInstance.blockId);
@@ -169,7 +194,7 @@ class EighthContract {
                     .appendPath(String.valueOf(blockId))
                     .build();
         }
-        public static int getBlockId(Uri uri) {
+        public static int getBlockId(@NonNull Uri uri) {
             return Integer.parseInt(uri.getPathSegments().get(1));
         }
     }

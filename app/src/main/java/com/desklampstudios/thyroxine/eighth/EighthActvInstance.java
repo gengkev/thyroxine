@@ -1,5 +1,7 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.support.annotation.NonNull;
+
 class EighthActvInstance {
     public static final int FLAG_ALL = 7168;
     public static final int FLAG_ATTENDANCETAKEN = 1024;
@@ -8,18 +10,15 @@ class EighthActvInstance {
 
     public int actvId;
     public int blockId;
-    public String comment;
+    @NonNull public String comment;
     public long flags;
 
-    public String roomsStr = "";
+    @NonNull public String roomsStr = "";
     public int memberCount = 0;
     public int capacity = -1;
 
-    public EighthActvInstance(int actvId, int blockId, String comment, long flags,
-                              String roomsStr, int memberCount, int capacity) {
-        assert comment != null;
-        assert roomsStr != null;
-
+    public EighthActvInstance(int actvId, int blockId, @NonNull String comment, long flags,
+                              @NonNull String roomsStr, int memberCount, int capacity) {
         this.actvId = actvId;
         this.blockId = blockId;
         this.comment = comment;

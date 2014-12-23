@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,14 +35,27 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     private static final String TAG = ScheduleFragment.class.getSimpleName();
     private static final int BLOCKS_LOADER = 0;
 
+    private static final String[] BLOCKS_LOADER_PROJECTION = new String[] {
+            EighthContract.Blocks._ID,
+            EighthContract.Blocks.KEY_BLOCK_ID,
+            EighthContract.Blocks.KEY_TYPE,
+            EighthContract.Blocks.KEY_DATE,
+            EighthContract.Actvs.KEY_NAME,
+            EighthContract.Actvs.KEY_FLAGS,
+            EighthContract.Actvs.KEY_ACTV_ID,
+            EighthContract.ActvInstances.KEY_FLAGS,
+            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
+            EighthContract.ActvInstances.KEY_CAPACITY
+    };
+
     private FetchScheduleTask mFetchScheduleTask;
 
-    private ScheduleListAdapter mAdapter;
-    private ListView mListView;
+    private BlocksListAdapter mAdapter;
 
     public ScheduleFragment() {
     }
 
+    @NonNull
     public static ScheduleFragment newInstance() {
         ScheduleFragment fragment = new ScheduleFragment();
         fragment.setArguments(Bundle.EMPTY);
@@ -53,7 +67,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         super.onCreate(savedInstanceState);
 
         // create list adapter
-        mAdapter = new ScheduleListAdapter(getActivity(), null, 0);
+        mAdapter = new BlocksListAdapter(getActivity(), null, 0);
 
         // load blocks
         retrieveBlocks();
@@ -66,10 +80,10 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_eighth_schedule, container, false);
 
-        mListView = (ListView) view.findViewById(R.id.blocks_list);
-        mListView.setAdapter(mAdapter);
+        ListView listView = (ListView) view.findViewById(R.id.blocks_list);
+        listView.setAdapter(mAdapter);
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 Cursor cursor = mAdapter.getCursor();
@@ -139,29 +153,19 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
-        case BLOCKS_LOADER:
-            return new CursorLoader(
-                    getActivity(),
-                    EighthContract.Blocks.CONTENT_URI,
-                    new String[] { // columns
-                            EighthContract.Blocks._ID,
-                            EighthContract.Blocks.KEY_BLOCK_ID,
-                            EighthContract.Blocks.KEY_TYPE,
-                            EighthContract.Blocks.KEY_DATE,
-                            EighthContract.Actvs.KEY_NAME,
-                            EighthContract.Actvs.KEY_FLAGS,
-                            EighthContract.Actvs.KEY_ACTV_ID,
-                            EighthContract.ActvInstances.KEY_FLAGS,
-                            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
-                            EighthContract.ActvInstances.KEY_CAPACITY
-                    },
-                    null, // selection
-                    null, // selectionArgs
-                    EighthContract.Blocks.KEY_DATE + " ASC, " +
-                            EighthContract.Blocks.KEY_TYPE + " ASC" // orderBy
-            );
-        default:
-            return null;
+            case BLOCKS_LOADER: {
+                return new CursorLoader(
+                        getActivity(),
+                        EighthContract.Blocks.CONTENT_URI,
+                        BLOCKS_LOADER_PROJECTION, // columns
+                        null, // selection
+                        null, // selectionArgs
+                        EighthContract.Blocks.DEFAULT_SORT // orderBy
+                );
+            }
+            default: {
+                return null;
+            }
         }
     }
 

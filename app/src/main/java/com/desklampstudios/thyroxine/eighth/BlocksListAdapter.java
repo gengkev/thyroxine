@@ -3,6 +3,7 @@ package com.desklampstudios.thyroxine.eighth;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +14,10 @@ import android.widget.TextView;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 
-class ScheduleListAdapter extends CursorAdapter {
-    private static final String TAG = ScheduleListAdapter.class.getSimpleName();
+class BlocksListAdapter extends CursorAdapter {
+    private static final String TAG = BlocksListAdapter.class.getSimpleName();
 
-    public ScheduleListAdapter(Context context, Cursor cursor, int flags) {
+    public BlocksListAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
     }
 
@@ -76,13 +77,13 @@ class ScheduleListAdapter extends CursorAdapter {
 
     // Provide a reference to the views for each data item
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mDateView;
-        public final TextView mBlockView;
-        public final TextView mActivityNameView;
-        public final TextView mStatusView;
+        @NonNull public final View mView;
+        @NonNull public final TextView mDateView;
+        @NonNull public final TextView mBlockView;
+        @NonNull public final TextView mActivityNameView;
+        @NonNull public final TextView mStatusView;
 
-        public ViewHolder(View v) {
+        public ViewHolder(@NonNull View v) {
             super(v);
             mView = v;
             mDateView = (TextView) v.findViewById(R.id.eighth_date);

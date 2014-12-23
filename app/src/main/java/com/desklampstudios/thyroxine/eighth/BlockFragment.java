@@ -9,6 +9,7 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,19 +36,39 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     private static final int BLOCK_LOADER = 1;
     public static final String ARG_BLOCK_ID = "com.desklampstudios.thyroxine.eighth.BLOCK_ID";
 
+    private static final String[] ACTVS_LOADER_PROJECTION = new String[] {
+            EighthContract.ActvInstances._ID,
+            EighthContract.ActvInstances.KEY_ACTV_ID,
+            EighthContract.ActvInstances.KEY_ROOMS_STR,
+            EighthContract.ActvInstances.KEY_COMMENT,
+            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
+            EighthContract.ActvInstances.KEY_CAPACITY,
+            EighthContract.ActvInstances.KEY_FLAGS,
+            EighthContract.Actvs.KEY_NAME,
+            EighthContract.Actvs.KEY_DESCRIPTION,
+            EighthContract.Actvs.KEY_FLAGS
+    };
+    private static final String[] BLOCK_LOADER_PROJECTION = new String[]{
+            EighthContract.Blocks.KEY_BLOCK_ID,
+            EighthContract.Blocks.KEY_DATE,
+            EighthContract.Blocks.KEY_TYPE,
+            EighthContract.Blocks.KEY_LOCKED,
+            EighthContract.Schedule.KEY_ACTV_ID
+    };
+
     private int blockId;
 
-    private CursorLoader actvsLoader;
-    private CursorLoader blockLoader;
+    @Nullable private CursorLoader actvsLoader;
+    @Nullable private CursorLoader blockLoader;
 
     private FetchBlockTask mFetchBlockTask;
 
-    private BlockListAdapter mAdapter;
-    private ListView mListView;
+    private ActvsListAdapter mAdapter;
 
     public BlockFragment() {
     }
 
+    @NonNull
     public static BlockFragment newInstance(int bid) {
         BlockFragment fragment = new BlockFragment();
         Bundle args = new Bundle();
@@ -64,23 +85,23 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
 
         // create list adapter
-        mAdapter = new BlockListAdapter(getActivity(), null, 0);
+        mAdapter = new ActvsListAdapter(getActivity(), null, 0);
 
         // load blocks
         getBlock();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
-        mListView = (ListView) view.findViewById(R.id.activities_list);
-        mListView.setAdapter(mAdapter);
+        ListView listView = (ListView) view.findViewById(R.id.actvs_list);
+        listView.setAdapter(mAdapter);
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 Cursor cursor = mAdapter.getCursor();
@@ -127,7 +148,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mFetchBlockTask.execute(blockId);
     }
 
-    private void displayBlock(EighthBlock block) {
+    private void displayBlock(@NonNull EighthBlock block) {
         Log.d(TAG, "block: " + block);
 
         String dateStr = Utils.formatBasicDate(block.date, Utils.DISPLAY_DATE_FORMAT_MEDIUM);
@@ -146,61 +167,48 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         loaderManager.initLoader(BLOCK_LOADER, null, this);
     }
 
+    @Nullable
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
-        case ACTVS_LOADER:
-            actvsLoader = new CursorLoader(
-                    getActivity(),
-                    EighthContract.Blocks.buildBlockUri(blockId)
-                            .buildUpon().appendPath("actvInstances").build(),
-                    new String[] { // columns
-                            EighthContract.ActvInstances._ID,
-                            EighthContract.ActvInstances.KEY_ACTV_ID,
-                            EighthContract.ActvInstances.KEY_ROOMS_STR,
-                            EighthContract.ActvInstances.KEY_COMMENT,
-                            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
-                            EighthContract.ActvInstances.KEY_CAPACITY,
-                            EighthContract.ActvInstances.KEY_FLAGS,
-                            EighthContract.Actvs.KEY_NAME,
-                            EighthContract.Actvs.KEY_DESCRIPTION,
-                            EighthContract.Actvs.KEY_FLAGS
-                    },
-                    null, // selection
-                    null, // selectionArgs
-                    EighthContract.Actvs.KEY_NAME + " ASC" // orderBy
-            );
-            return actvsLoader;
-        case BLOCK_LOADER:
-            blockLoader = new CursorLoader(
-                    getActivity(),
-                    EighthContract.Blocks.buildBlockUri(blockId),
-                    new String[] { // columns
-                            EighthContract.Blocks.KEY_BLOCK_ID,
-                            EighthContract.Blocks.KEY_DATE,
-                            EighthContract.Blocks.KEY_TYPE,
-                            EighthContract.Blocks.KEY_LOCKED,
-                            EighthContract.Schedule.KEY_ACTV_ID
-                    },
-                    null, // selection
-                    null, // selectionArgs
-                    null
-            );
-            return blockLoader;
-        default:
-            return null;
+            case ACTVS_LOADER: {
+                actvsLoader = new CursorLoader(
+                        getActivity(),
+                        EighthContract.Blocks.buildBlockWithActvInstancesUri(blockId),
+                        ACTVS_LOADER_PROJECTION, // columns
+                        null, // selection
+                        null, // selectionArgs
+                        EighthContract.Actvs.DEFAULT_SORT // orderBy
+                );
+                return actvsLoader;
+            }
+
+            case BLOCK_LOADER: {
+                blockLoader = new CursorLoader(
+                        getActivity(),
+                        EighthContract.Blocks.buildBlockUri(blockId),
+                        BLOCK_LOADER_PROJECTION, // columns
+                        null, // selection
+                        null, // selectionArgs
+                        null
+                );
+                return blockLoader;
+            }
+            default: {
+                return null;
+            }
         }
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> cursorLoader, @Nullable Cursor cursor) {
         if (cursorLoader == actvsLoader) {
             mAdapter.swapCursor(cursor);
         }
         else if (cursorLoader == blockLoader) {
             if (cursor != null && cursor.moveToFirst()) {
                 ContentValues blockValues = Utils.cursorRowToContentValues(cursor);
-                EighthBlock block = EighthContract.Blocks.contentValuesToEighthBlock(blockValues);
+                EighthBlock block = EighthContract.Blocks.fromContentValues(blockValues);
                 displayBlock(block);
 
                 // TODO: do stuff with current actvId

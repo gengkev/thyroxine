@@ -11,6 +11,8 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
 
@@ -27,13 +29,14 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
     private static final String TAG = FetchBlockTask.class.getSimpleName();
     private final Activity mActivity;
     private final Account mAccount;
-    private Exception exception = null;
+    @Nullable private Exception exception = null;
 
     public FetchBlockTask(Activity activity, Account account) {
         this.mActivity = activity;
         this.mAccount = account;
     }
 
+    @Nullable
     @Override
     protected EighthBlock doInBackground(Integer... params) {
         final AccountManager am = AccountManager.get(mActivity);
@@ -115,7 +118,7 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
     }
 
     // TODO: do in bulk, and not on the UI thread!
-    private void updateEighthActv(EighthActv actv, ContentResolver resolver) {
+    private void updateEighthActv(@NonNull EighthActv actv, @NonNull ContentResolver resolver) {
         final ContentValues newValues = EighthContract.Actvs.toContentValues(actv);
 
         // actually, let's just insert it. derp
@@ -123,7 +126,8 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
         //Log.v(TAG, "Inserted EighthActv with uri: " + uri);
     }
 
-    private void updateEighthActvInstance(EighthActvInstance actvInstance, ContentResolver resolver) {
+    private void updateEighthActvInstance(@NonNull EighthActvInstance actvInstance,
+                                          @NonNull ContentResolver resolver) {
         final ContentValues newValues = EighthContract.ActvInstances.toContentValues(actvInstance);
 
         // actually, let's just insert it. derp
@@ -139,9 +143,5 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
         }
 
         Log.i(TAG, "Got activities");
-    }
-
-    @Override
-    protected void onCancelled() {
     }
 }
