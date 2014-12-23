@@ -15,20 +15,15 @@ class EighthActvInstance {
     public int memberCount = 0;
     public int capacity = -1;
 
-    public EighthActvInstance(int actvId, int blockId, String comment, long flags) {
+    public EighthActvInstance(int actvId, int blockId, String comment, long flags,
+                              String roomsStr, int memberCount, int capacity) {
         assert comment != null;
+        assert roomsStr != null;
 
         this.actvId = actvId;
         this.blockId = blockId;
         this.comment = comment;
         this.flags = flags;
-    }
-
-    public EighthActvInstance(int actvId, int blockId, String comment, long flags,
-                              String roomsStr, int memberCount, int capacity) {
-        this(actvId, blockId, comment, flags);
-        assert roomsStr != null;
-
         this.roomsStr = roomsStr;
         this.memberCount = memberCount;
         this.capacity = capacity;
@@ -39,6 +34,15 @@ class EighthActvInstance {
         return String.format("EighthActvInstance[actvId=%d, blockId=%d, comment=%s, flags=%s, " +
                 "roomsStr=%s, memberCount=%d, capacity=%d]",
                 actvId, blockId, comment, flags, roomsStr, memberCount, capacity);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof EighthActvInstance)) return false;
+        EighthActvInstance other = (EighthActvInstance) o;
+        return actvId == other.actvId && blockId == other.blockId && flags == other.flags &&
+                memberCount == other.memberCount && capacity == other.capacity &&
+                comment.equals(other.comment) && roomsStr.equals(other.roomsStr);
     }
 
     @Override

@@ -257,6 +257,7 @@ public class EighthProvider extends ContentProvider {
                 final int actvId = Actvs.getActvId(uri);
                 return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS)
                         .mapToTable(ActvInstances._ID, Tables.ACTVINSTANCES)
+                        .mapToTable(ActvInstances.KEY_BLOCK_ID, Tables.ACTVINSTANCES)
                         .mapToTable(ActvInstances.KEY_ACTV_ID, Tables.ACTVINSTANCES)
                         .where(Tables.ACTVINSTANCES + "." + ActvInstances.KEY_ACTV_ID + "=?", String.valueOf(actvId));
             }
@@ -280,6 +281,7 @@ public class EighthProvider extends ContentProvider {
                 return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS)
                         .mapToTable(ActvInstances._ID, Tables.ACTVINSTANCES)
                         .mapToTable(ActvInstances.KEY_BLOCK_ID, Tables.ACTVINSTANCES)
+                        .mapToTable(ActvInstances.KEY_ACTV_ID, Tables.ACTVINSTANCES)
                         .where(Tables.ACTVINSTANCES + "." + ActvInstances.KEY_BLOCK_ID + "=?", String.valueOf(blockId));
             }
 

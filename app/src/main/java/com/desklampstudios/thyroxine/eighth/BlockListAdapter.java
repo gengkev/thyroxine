@@ -1,59 +1,57 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
+class BlockListAdapter extends CursorAdapter {
+    private static final String TAG = BlockListAdapter.class.getSimpleName();
 
-class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.ViewHolder> {
-    private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
-    private final ActvClickListener mListener;
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public BlockListAdapter(ActvClickListener listener) {
-        this.mDataset = new ArrayList<>();
-        this.mListener = listener;
+    public BlockListAdapter(Context context, Cursor cursor, int flags) {
+        super(context, cursor, flags);
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.actv_list_textview, parent, false);
 
-        // set the view's size, margins, paddings and layout parameters
+        // yay ViewHolders!
+        final ViewHolder holder = new ViewHolder(view);
+        view.setTag(holder);
 
-        final ViewHolder vh = new ViewHolder(v);
-        vh.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int pos = vh.getPosition();
-                Pair<EighthActv, EighthActvInstance> pair = mDataset.get(pos);
-                mListener.onActvClick(pair.second);
-            }
-        });
-        return vh;
+        return view;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        Pair<EighthActv, EighthActvInstance> pair = mDataset.get(position);
+    public void bindView(View view, Context context, Cursor cursor) {
+        ContentValues values = Utils.cursorRowToContentValues(cursor);
+        ViewHolder holder = (ViewHolder) view.getTag();
 
-        holder.mNameView.setText(pair.first.name);
-        holder.mRoomView.setText(pair.second.roomsStr);
-        holder.mDescriptionView.setText((
-                pair.second.comment + " " +
-                        pair.first.description).trim());
+        holder.mNameView.setText(
+                values.getAsString(EighthContract.Actvs.KEY_NAME));
 
+        holder.mRoomView.setText(
+                values.getAsString(EighthContract.ActvInstances.KEY_ROOMS_STR));
+
+        String description = String.format("%s %s",
+                values.getAsString(EighthContract.ActvInstances.KEY_COMMENT),
+                values.getAsString(EighthContract.Actvs.KEY_DESCRIPTION));
+        description = description.trim();
+        holder.mDescriptionView.setText(description);
+
+        /*
         ArrayList<String> statuses = new ArrayList<>();
         int color = (position % 2 == 0) ? 0x7FF8F8F8 : 0x7FFAFAFA;
 
@@ -86,29 +84,7 @@ class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.ViewHolder>
 
         // set background color
         holder.mView.setBackgroundColor(color);
-    }
-
-    public void add(Pair<EighthActv, EighthActvInstance> pair) {
-        add(mDataset.size(), pair);
-    }
-
-    public void add(int pos, Pair<EighthActv, EighthActvInstance> pair) {
-        mDataset.add(pos, pair);
-        notifyItemInserted(pos);
-    }
-
-    public void clear() {
-        int size = mDataset.size();
-        for (int i = size - 1; i >= 0; i--) {
-            mDataset.remove(i);
-        }
-        notifyItemRangeRemoved(0, size);
-    }
-
-    // Return the size of your dataset (invoked by the layout manager)
-    @Override
-    public int getItemCount() {
-        return mDataset.size();
+        */
     }
 
     // Provide a reference to the views for each data item
@@ -129,9 +105,5 @@ class BlockListAdapter extends RecyclerView.Adapter<BlockListAdapter.ViewHolder>
             mDescriptionView = (TextView) v.findViewById(R.id.iodine_eighth_activity_description);
             mStatusView = (TextView) v.findViewById(R.id.iodine_eighth_activity_status);
         }
-    }
-
-    public static interface ActvClickListener {
-        public void onActvClick(EighthActvInstance actv);
     }
 }

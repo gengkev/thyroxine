@@ -6,7 +6,6 @@ import android.support.v7.widget.Toolbar;
 
 import com.desklampstudios.thyroxine.R;
 
-
 public class BlockActivity extends ActionBarActivity {
 
     @Override
@@ -27,7 +26,7 @@ public class BlockActivity extends ActionBarActivity {
             fragment.setArguments(getIntent().getExtras());
 
             // add fragment
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .add(R.id.container, fragment)
                     .commit();
         }

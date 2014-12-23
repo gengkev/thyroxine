@@ -79,6 +79,23 @@ class EighthContract {
         public static int getActvId(Uri uri) {
             return Integer.parseInt(uri.getPathSegments().get(1));
         }
+
+        public static EighthActv fromContentValues(ContentValues values) {
+            return new EighthActv(
+                    values.getAsInteger(KEY_ACTV_ID),
+                    values.getAsString(KEY_NAME),
+                    values.getAsString(KEY_DESCRIPTION),
+                    values.getAsLong(KEY_FLAGS)
+            );
+        }
+        public static ContentValues toContentValues(EighthActv actv) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_ACTV_ID, actv.actvId);
+            values.put(KEY_NAME, actv.name);
+            values.put(KEY_DESCRIPTION, actv.description);
+            values.put(KEY_FLAGS, actv.flags);
+            return values;
+        }
     }
 
     public static class ActvInstances implements BaseColumns {
@@ -109,6 +126,29 @@ class EighthContract {
         }
         public static int getActvId(Uri uri) {
             return Integer.parseInt(uri.getPathSegments().get(2));
+        }
+
+        public static EighthActvInstance fromContentValues(ContentValues values) {
+            return new EighthActvInstance(
+                    values.getAsInteger(KEY_ACTV_ID),
+                    values.getAsInteger(KEY_BLOCK_ID),
+                    values.getAsString(KEY_COMMENT),
+                    values.getAsLong(KEY_FLAGS),
+                    values.getAsString(KEY_ROOMS_STR),
+                    values.getAsInteger(KEY_MEMBER_COUNT),
+                    values.getAsInteger(KEY_CAPACITY)
+            );
+        }
+        public static ContentValues toContentValues(EighthActvInstance actvInstance) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_ACTV_ID, actvInstance.actvId);
+            values.put(KEY_BLOCK_ID, actvInstance.blockId);
+            values.put(KEY_COMMENT, actvInstance.comment);
+            values.put(KEY_FLAGS, actvInstance.flags);
+            values.put(KEY_ROOMS_STR, actvInstance.roomsStr);
+            values.put(KEY_MEMBER_COUNT, actvInstance.memberCount);
+            values.put(KEY_CAPACITY, actvInstance.capacity);
+            return values;
         }
     }
 

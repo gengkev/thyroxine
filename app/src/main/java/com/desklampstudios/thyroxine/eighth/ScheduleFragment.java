@@ -75,7 +75,8 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                 Cursor cursor = mAdapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(pos)) {
-                    int blockId = cursor.getInt(cursor.getColumnIndex(EighthContract.Blocks.KEY_BLOCK_ID));
+                    int blockId = cursor.getInt(cursor.getColumnIndex(
+                            EighthContract.Blocks.KEY_BLOCK_ID));
                     onBlockClick(blockId);
                 }
             }
@@ -89,11 +90,11 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         //Toast.makeText(getActivity(), "Block: " + block, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), BlockActivity.class);
-        intent.putExtra(BlockFragment.ARG_BID, blockId);
+        intent.putExtra(BlockFragment.ARG_BLOCK_ID, blockId);
         startActivity(intent);
     }
 
-    // Starts RetrieveBlocksTask
+    // Starts FetchScheduleTask
     private void retrieveBlocks() {
         if (mFetchScheduleTask != null) {
             return;
@@ -156,7 +157,8 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                     },
                     null, // selection
                     null, // selectionArgs
-                    EighthContract.Blocks.KEY_DATE + " ASC" // orderBy
+                    EighthContract.Blocks.KEY_DATE + " ASC, " +
+                            EighthContract.Blocks.KEY_TYPE + " ASC" // orderBy
             );
         default:
             return null;
