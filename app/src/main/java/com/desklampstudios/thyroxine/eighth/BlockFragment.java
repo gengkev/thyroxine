@@ -11,7 +11,10 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +25,9 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.util.DividerItemDecoration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -30,24 +35,11 @@ import java.util.Arrays;
  * Use the {@link BlockFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BlockFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class BlockFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,ActvsListAdapter.ActvClickListener {
     private static final String TAG = BlockFragment.class.getSimpleName();
-    private static final int ACTVS_LOADER = 0;
     private static final int BLOCK_LOADER = 1;
     public static final String ARG_BLOCK_ID = "com.desklampstudios.thyroxine.eighth.BLOCK_ID";
 
-    private static final String[] ACTVS_LOADER_PROJECTION = new String[] {
-            EighthContract.ActvInstances._ID,
-            EighthContract.ActvInstances.KEY_ACTV_ID,
-            EighthContract.ActvInstances.KEY_ROOMS_STR,
-            EighthContract.ActvInstances.KEY_COMMENT,
-            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
-            EighthContract.ActvInstances.KEY_CAPACITY,
-            EighthContract.ActvInstances.KEY_FLAGS,
-            EighthContract.Actvs.KEY_NAME,
-            EighthContract.Actvs.KEY_DESCRIPTION,
-            EighthContract.Actvs.KEY_FLAGS
-    };
     private static final String[] BLOCK_LOADER_PROJECTION = new String[]{
             EighthContract.Blocks.KEY_BLOCK_ID,
             EighthContract.Blocks.KEY_DATE,
@@ -58,11 +50,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     private int blockId;
 
-    @Nullable private CursorLoader actvsLoader;
     @Nullable private CursorLoader blockLoader;
+    @Nullable private FetchBlockTask mFetchBlockTask;
 
-    private FetchBlockTask mFetchBlockTask;
-
+    private RecyclerView mRecyclerView;
     private ActvsListAdapter mAdapter;
 
     public BlockFragment() {
@@ -85,7 +76,11 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
 
         // create list adapter
-        mAdapter = new ActvsListAdapter(getActivity(), null, 0);
+        mAdapter = new ActvsListAdapter(this);
+        mAdapter.add(new Pair<>(
+                new EighthActv(999, "Test activity", "Test description", 0),
+                new EighthActvInstance(999, 1337, "Test comment", 0, "All the rooms", 0, 0)
+        ));
 
         // load blocks
         getBlock();
@@ -98,28 +93,27 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
-        ListView listView = (ListView) view.findViewById(R.id.actvs_list);
-        listView.setAdapter(mAdapter);
+        // recyclerview!
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setHasFixedSize(true); // changes in content don't change layout size
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                Cursor cursor = mAdapter.getCursor();
+        // use a linear layout manager
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(layoutManager);
 
-                if (cursor != null && cursor.moveToPosition(pos)) {
-                    int actvId = cursor.getInt(cursor.getColumnIndex(
-                            EighthContract.Actvs.KEY_ACTV_ID));
-                    onActvClick(actvId);
-                }
-            }
-        });
+        // item decorations??
+        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
+                getActivity(), DividerItemDecoration.VERTICAL_LIST);
+        mRecyclerView.addItemDecoration(itemDecoration);
 
         return view;
     }
 
     // Called when an item in the adapter is clicked
-    private void onActvClick(int actvId) {
-        Toast.makeText(getActivity(), "Activity: " + actvId, Toast.LENGTH_LONG).show();
+    @Override
+    public void onActvClick(EighthActvInstance actv) {
+        Toast.makeText(getActivity(), "Activity: " + actv, Toast.LENGTH_LONG).show();
     }
 
     // Starts FetchBlockTask
@@ -141,7 +135,13 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
 
         // Load stuff async
-        mFetchBlockTask = new FetchBlockTask(getActivity(), account);
+        mFetchBlockTask = new FetchBlockTask(getActivity(), account, new FetchBlockTask.ActvsResultListener() {
+            @Override
+            public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
+                mAdapter.clear();
+                mAdapter.addAll(pairList);
+            }
+        });
         mFetchBlockTask.execute(blockId);
     }
 
@@ -160,7 +160,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
         // start loaders
         LoaderManager loaderManager = getLoaderManager();
-        loaderManager.initLoader(ACTVS_LOADER, null, this);
         loaderManager.initLoader(BLOCK_LOADER, null, this);
     }
 
@@ -168,18 +167,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
-            case ACTVS_LOADER: {
-                actvsLoader = new CursorLoader(
-                        getActivity(),
-                        EighthContract.Blocks.buildBlockWithActvInstancesUri(blockId),
-                        ACTVS_LOADER_PROJECTION, // columns
-                        null, // selection
-                        null, // selectionArgs
-                        EighthContract.Actvs.DEFAULT_SORT // orderBy
-                );
-                return actvsLoader;
-            }
-
             case BLOCK_LOADER: {
                 blockLoader = new CursorLoader(
                         getActivity(),
@@ -199,10 +186,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, @Nullable Cursor cursor) {
-        if (cursorLoader == actvsLoader) {
-            mAdapter.swapCursor(cursor);
-        }
-        else if (cursorLoader == blockLoader) {
+        if (cursorLoader == blockLoader) {
             if (cursor != null && cursor.moveToFirst()) {
                 ContentValues blockValues = Utils.cursorRowToContentValues(cursor);
                 EighthBlock block = EighthContract.Blocks.fromContentValues(blockValues);
@@ -223,8 +207,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        if (cursorLoader == actvsLoader) {
-            mAdapter.swapCursor(null);
-        }
+        // ???
     }
 }

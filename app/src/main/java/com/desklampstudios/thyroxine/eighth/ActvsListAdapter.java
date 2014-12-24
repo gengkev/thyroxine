@@ -1,76 +1,85 @@
 package com.desklampstudios.thyroxine.eighth;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.Utils;
 
-class ActvsListAdapter extends CursorAdapter {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder> {
     private static final String TAG = ActvsListAdapter.class.getSimpleName();
 
-    public ActvsListAdapter(Context context, Cursor cursor, int flags) {
-        super(context, cursor, flags);
+    private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
+    private final ActvClickListener mListener;
+
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public ActvsListAdapter(ActvClickListener listener) {
+        this.mDataset = new ArrayList<>();
+        this.mListener = listener;
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public View newView(@NonNull Context context, Cursor cursor, ViewGroup parent) {
-        View view = LayoutInflater.from(context)
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.actv_list_textview, parent, false);
 
-        // yay ViewHolders!
-        final ViewHolder holder = new ViewHolder(view);
-        view.setTag(holder);
+        // set the view's size, margins, paddings and layout parameters
 
-        return view;
+        final ViewHolder vh = new ViewHolder(v);
+        vh.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int pos = vh.getPosition();
+                Pair<EighthActv, EighthActvInstance> pair = mDataset.get(pos);
+                mListener.onActvClick(pair.second);
+            }
+        });
+        return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void bindView(@NonNull View view, Context context, Cursor cursor) {
-        ContentValues values = Utils.cursorRowToContentValues(cursor);
-        ViewHolder holder = (ViewHolder) view.getTag();
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        Pair<EighthActv, EighthActvInstance> pair = mDataset.get(position);
+        EighthActv actv = pair.first;
+        EighthActvInstance actvInstance = pair.second;
 
-        holder.mNameView.setText(
-                values.getAsString(EighthContract.Actvs.KEY_NAME));
-
-        holder.mRoomView.setText(
-                values.getAsString(EighthContract.ActvInstances.KEY_ROOMS_STR));
+        holder.mNameView.setText(actv.name);
+        holder.mRoomView.setText(actvInstance.roomsStr);
 
         String description = String.format("%s %s",
-                values.getAsString(EighthContract.ActvInstances.KEY_COMMENT),
-                values.getAsString(EighthContract.Actvs.KEY_DESCRIPTION));
-        description = description.trim();
+                actvInstance.comment, actv.description)
+                .trim();
         holder.mDescriptionView.setText(description);
 
-        /*
         ArrayList<String> statuses = new ArrayList<>();
         int color = (position % 2 == 0) ? 0x7FF8F8F8 : 0x7FFAFAFA;
 
         // restricted
-        if ((pair.first.flags & EighthActv.FLAG_RESTRICTED) != 0) {
+        if ((actv.flags & EighthActv.FLAG_RESTRICTED) != 0) {
             statuses.add("(R)");
             color = (position % 2 == 0) ? 0x7FFFCCAA : 0x7FFDC5A0;
         }
         // sticky
-        if ((pair.first.flags & EighthActv.FLAG_STICKY) != 0) {
+        if ((actv.flags & EighthActv.FLAG_STICKY) != 0) {
             statuses.add("(S)");
         }
         // capacity full
-        if (pair.second.memberCount >= pair.second.capacity) {
+        if (actvInstance.memberCount >= actvInstance.capacity) {
             statuses.add("<font color=\"#0000FF\">FULL</font>");
         }
         // cancelled
-        if ((pair.second.flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
+        if ((actvInstance.flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
             statuses.add("<font color=\"#FF0000\">CANCELLED</font>");
             color = (position % 2 == 0) ? 0x7FCF0000 : 0x7FCA0000;
         }
@@ -85,7 +94,35 @@ class ActvsListAdapter extends CursorAdapter {
 
         // set background color
         holder.mView.setBackgroundColor(color);
-        */
+    }
+
+    public void add(Pair<EighthActv, EighthActvInstance> pair) {
+        add(mDataset.size(), pair);
+    }
+
+    public void add(int pos, Pair<EighthActv, EighthActvInstance> pair) {
+        mDataset.add(pos, pair);
+        notifyItemInserted(pos);
+    }
+
+    public void addAll(Collection<Pair<EighthActv, EighthActvInstance>> pairList) {
+        int size = mDataset.size();
+        mDataset.addAll(pairList);
+        notifyItemRangeInserted(size, size + pairList.size());
+    }
+
+    public void clear() {
+        int size = mDataset.size();
+        for (int i = size - 1; i >= 0; i--) {
+            mDataset.remove(i);
+        }
+        notifyItemRangeRemoved(0, size);
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    @Override
+    public int getItemCount() {
+        return mDataset.size();
     }
 
     // Provide a reference to the views for each data item
@@ -106,5 +143,9 @@ class ActvsListAdapter extends CursorAdapter {
             mDescriptionView = (TextView) v.findViewById(R.id.iodine_eighth_activity_description);
             mStatusView = (TextView) v.findViewById(R.id.iodine_eighth_activity_status);
         }
+    }
+
+    public static interface ActvClickListener {
+        public void onActvClick(EighthActvInstance actv);
     }
 }

@@ -6,12 +6,8 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
@@ -24,21 +20,24 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
-class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
+class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv, EighthActvInstance>>> {
     private static final String TAG = FetchBlockTask.class.getSimpleName();
     private final Activity mActivity;
     private final Account mAccount;
+    private final ActvsResultListener mResultListener;
     @Nullable private Exception exception = null;
 
-    public FetchBlockTask(Activity activity, Account account) {
+    public FetchBlockTask(Activity activity, Account account, ActvsResultListener listener) {
         this.mActivity = activity;
         this.mAccount = account;
+        this.mResultListener = listener;
     }
 
     @Nullable
     @Override
-    protected EighthBlock doInBackground(Integer... params) {
+    protected ArrayList<Pair<EighthActv, EighthActvInstance>> doInBackground(Integer... params) {
         final AccountManager am = AccountManager.get(mActivity);
         AccountManagerFuture<Bundle> future = am.getAuthToken(mAccount,
                 IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, Bundle.EMPTY, mActivity, null, null);
@@ -68,16 +67,17 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
 
             parser = new EighthGetBlockParser(mActivity);
             blockPair = parser.beginGetBlock(stream);
+            Log.d(TAG, "Block: " + blockPair.first);
 
-            Pair<EighthActv, EighthActvInstance> pair;
-            while (!isCancelled()) {
+            ArrayList<Pair<EighthActv, EighthActvInstance>> pairList = new ArrayList<>();
+            Pair<EighthActv, EighthActvInstance> pair = parser.nextActivity();
+
+            while (pair != null && !isCancelled()) {
+                pairList.add(pair);
                 pair = parser.nextActivity();
-
-                if (pair == null)
-                    break;
-
-                publishProgress(pair.first, pair.second);
             }
+
+            return pairList;
 
         } catch (IodineAuthException.NotLoggedInException e) {
             Log.d(TAG, "Not logged in, oh no!", e);
@@ -102,10 +102,13 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
                 Log.e(TAG, "IOException when closing stream: " + e);
             }
         }
-
-        return blockPair.first;
     }
 
+    @Override
+    protected void onProgressUpdate(Void... args) {
+    }
+
+    /*
     @Override
     protected void onProgressUpdate(Object... args) {
         final ContentResolver resolver = mActivity.getContentResolver();
@@ -134,14 +137,20 @@ class FetchBlockTask extends AsyncTask<Integer, Object, EighthBlock> {
         Uri uri = resolver.insert(EighthContract.ActvInstances.CONTENT_URI, newValues);
         //Log.v(TAG, "Inserted EighthActvInstance with uri: " + uri);
     }
+    */
 
     @Override
-    protected void onPostExecute(EighthBlock block) {
+    protected void onPostExecute(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
         if (exception != null) {
             Log.e(TAG, "GetBlockTask error: " + exception);
             return;
         }
 
         Log.i(TAG, "Got activities");
+        mResultListener.onActvsResult(pairList);
+    }
+
+    public interface ActvsResultListener {
+        public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList);
     }
 }
