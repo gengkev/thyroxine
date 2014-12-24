@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -161,5 +162,29 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the first Iodine account stored in the account manager, or null if not logged in.
+     *
+     * <p>(Note that not logged in means that no account exists on the device -- not the same as
+     * IodineAuthError.NotLoggedInException, which may indicate expired credentials.)
+     *
+     * @param context The context used to access the account service
+     * @return The Iodine account, or null
+     */
+    @Nullable
+    public static Account getIodineAccount(Context context) {
+        // Get an instance of the Android account manager
+        AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+
+        // List all accounts of this type
+        Account[] accounts = am.getAccountsByType(IodineAuthenticator.ACCOUNT_TYPE);
+
+        if (accounts.length == 0) {
+            return null;
+        } else if (accounts.length > 1) {
+            Log.w(TAG, "getIodineAccount found more than one account");
+        }
+        return accounts[0];
+    }
 }
 

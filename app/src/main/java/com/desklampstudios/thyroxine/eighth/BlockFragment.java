@@ -131,20 +131,17 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
 
         // Check login state
-        final AccountManager am = AccountManager.get(getActivity());
-        Account[] accounts = am.getAccountsByType(IodineAuthenticator.ACCOUNT_TYPE);
+        Account account = IodineAuthenticator.getIodineAccount(getActivity());
 
-        if (accounts.length == 0) { // not logged in... wait what?
-            Log.e(TAG, "No accounts found (not logged in) in BlockFragment??");
+        if (account == null) { // not logged in... ???
+            Log.e(TAG, "No accounts found (not logged in) in BlockFragment???");
             Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
+            // TODO: maybe implement login screen here
             return;
-        }
-        else if (accounts.length > 1) {
-            Log.e(TAG, "More than one account: " + Arrays.toString(accounts));
         }
 
         // Load stuff async
-        mFetchBlockTask = new FetchBlockTask(getActivity(), accounts[0]);
+        mFetchBlockTask = new FetchBlockTask(getActivity(), account);
         mFetchBlockTask.execute(blockId);
     }
 

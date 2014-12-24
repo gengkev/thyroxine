@@ -1,5 +1,6 @@
 package com.desklampstudios.thyroxine;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -19,8 +20,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
+import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
@@ -87,8 +90,18 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void initializeSyncAdapters() {
-        // Make sure stub account exists (if not, initializes NewsSyncAdapter)
-        StubAuthenticator.getStubAccount(this);
+        // Make sure stub account exists
+        Account stubAccount = StubAuthenticator.getStubAccount(this);
+        // Configure News sync with stub account
+        NewsSyncAdapter.configureSync(stubAccount);
+
+        // Find Iodine account (may not exist)
+        Account iodineAccount = IodineAuthenticator.getIodineAccount(this);
+        if (iodineAccount != null) {
+            // Configure Eighth sync with Iodine account
+            // TODO: it would be useful to do this after an account is added
+            EighthSyncAdapter.configureSync(iodineAccount);
+        }
     }
 
     /** Swaps fragments in the main content view */

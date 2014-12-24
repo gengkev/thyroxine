@@ -38,6 +38,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
+        Log.d(TAG, "onPerformSync for account " + account);
 
         InputStream stream = null;
         NewsFeedParser parser = null;
@@ -135,26 +136,21 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(StubAuthenticator.getStubAccount(context),
-                context.getString(R.string.news_content_authority), bundle);
+                NewsContract.CONTENT_AUTHORITY, bundle);
     }
 
 
     /**
-     * Called from StubAuthenticator when a stub account is created.
+     * Configures sync scheduling. Called from MainActivity.
      * @param newAccount The stub account that was created.
-     * @param context The context used to get strings
      */
-    public static void onAccountCreated(Account newAccount, Context context) {
-        String authority = context.getString(R.string.news_content_authority);
+    public static void configureSync(Account newAccount) {
+        final String authority = NewsContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
         Utils.configurePeriodicSync(newAccount, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         // Configure syncing automatically
         ContentResolver.setSyncAutomatically(newAccount, authority, true);
-
-        // Get things started with an initial sync
-        Log.d(TAG, "Performing initial sync");
-        NewsSyncAdapter.syncImmediately(context);
     }
 }

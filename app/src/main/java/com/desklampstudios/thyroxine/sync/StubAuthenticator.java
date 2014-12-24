@@ -86,33 +86,27 @@ public class StubAuthenticator extends AbstractAccountAuthenticator {
 
     /**
      * Get the fake account for the SyncAdapter, or create one if necessary.
-     * If we make a new account, we call onAccountCreated to initialize things.
-     *
      * @param context The context used to access the account service
      * @return a fake account
      */
     public static Account getStubAccount(Context context) {
         // Get an instance of the Android account manager
-        AccountManager accountManager =
-                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+        AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         // Create the account type and default account
         Account newAccount = new Account(context.getString(R.string.stub_sync_fake_account_name),
                 context.getString(R.string.stub_account_type));
 
         // If the password doesn't exist, the account doesn't exist
-        if (accountManager.getPassword(newAccount) == null) {
+        if (am.getPassword(newAccount) == null) {
 
             // Add the account and account type, no password or user data
-            if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
+            if (!am.addAccountExplicitly(newAccount, "", null)) {
                 Log.w(TAG, "addAccountExplicitly returned false");
                 return null;
             }
 
             Log.d(TAG, "successfully added stub account");
-
-            // initialize SyncAdapters
-            NewsSyncAdapter.onAccountCreated(newAccount, context);
         }
         return newAccount;
     }

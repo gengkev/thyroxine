@@ -99,8 +99,6 @@ public class AuthErrorParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "error");
 
-        IodineAuthException e = IodineAuthException.create(id, message, context);
-        Log.d(TAG, "Parsed auth error", e);
-        return e;
+        return IodineAuthException.create(id, message, context);
     }
 }

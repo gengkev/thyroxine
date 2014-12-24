@@ -41,10 +41,10 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
-    public static InputStream getBlock(int bid, String cookieHeader) throws IOException {
+    public static InputStream getBlock(int blockId, String cookieHeader) throws IOException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
-        URL url = new URL(String.format(BLOCK_GET_URL, bid));
+        URL url = new URL(String.format(BLOCK_GET_URL, blockId));
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);

@@ -48,8 +48,6 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             EighthContract.ActvInstances.KEY_CAPACITY
     };
 
-    private FetchScheduleTask mFetchScheduleTask;
-
     private BlocksListAdapter mAdapter;
 
     public ScheduleFragment() {
@@ -108,21 +106,18 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         startActivity(intent);
     }
 
-    // Starts FetchScheduleTask
+    // Fetches schedule
     private void retrieveBlocks() {
-        if (mFetchScheduleTask != null) {
-            return;
-        }
-
         Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
 
         // Check login state
-        final AccountManager am = AccountManager.get(getActivity());
-        Account[] accounts = am.getAccountsByType(IodineAuthenticator.ACCOUNT_TYPE);
+        Account account = IodineAuthenticator.getIodineAccount(getActivity());
 
-        if (accounts.length == 0) { // not logged in
+        if (account == null) { // not logged in
             Log.e(TAG, "No accounts found (not logged in)");
             Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
+
+            AccountManager am = AccountManager.get(getActivity());
             am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
                     IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
                     null, null, getActivity(), new AccountManagerCallback<Bundle>() {
@@ -133,13 +128,9 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                     }, null);
             return;
         }
-        else if (accounts.length > 1) {
-            Log.e(TAG, "More than one account: " + Arrays.toString(accounts));
-        }
 
-        // Load stuff async
-        mFetchScheduleTask = new FetchScheduleTask(getActivity());
-        mFetchScheduleTask.execute(accounts[0]);
+        // Request immediate sync
+        EighthSyncAdapter.syncImmediately(getActivity());
     }
 
     @Override
