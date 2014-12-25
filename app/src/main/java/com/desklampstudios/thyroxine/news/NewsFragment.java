@@ -11,7 +11,6 @@ import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
 /**

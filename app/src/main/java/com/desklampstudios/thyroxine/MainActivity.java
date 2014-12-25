@@ -1,9 +1,5 @@
 package com.desklampstudios.thyroxine;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
@@ -22,13 +18,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
-import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.desklampstudios.thyroxine.sync.StubAuthenticator;
-
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = MainActivity.class.getSimpleName();

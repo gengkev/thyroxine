@@ -9,7 +9,7 @@ class NewsContract {
     // Warning: for now, also declared in strings.xml
     public static final String CONTENT_AUTHORITY = "com.desklampstudios.thyroxine.news";
 
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static final String PATH_NEWSENTRIES = "news";
 

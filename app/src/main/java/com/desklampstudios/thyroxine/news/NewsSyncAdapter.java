@@ -14,7 +14,6 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
-import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 

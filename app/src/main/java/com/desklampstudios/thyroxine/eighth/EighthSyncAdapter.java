@@ -25,7 +25,6 @@ import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -97,11 +96,10 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
-        // Update all activities in all blocks...
-
+        Log.d(TAG, "updated database; done syncing");
     }
 
-    public ArrayList<Pair<EighthBlock, Integer>> fetchSchedule(String authToken, SyncResult syncResult)
+    private ArrayList<Pair<EighthBlock, Integer>> fetchSchedule(String authToken, SyncResult syncResult)
             throws IodineAuthException.NotLoggedInException {
 
         InputStream stream = null;

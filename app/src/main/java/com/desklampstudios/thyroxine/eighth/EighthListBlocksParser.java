@@ -126,7 +126,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
     }
 
     @NonNull
-    static String readBasicDate(@NonNull XmlPullParser parser)
+    private static String readBasicDate(@NonNull XmlPullParser parser)
             throws XmlPullParserException, IOException {
 
         parser.require(XmlPullParser.START_TAG, ns, "date");

@@ -12,7 +12,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 
 /*
  * Implement AbstractAccountAuthenticator and stub out all

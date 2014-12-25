@@ -16,7 +16,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class EighthGetBlockParser extends AbstractXMLParser {
+class EighthGetBlockParser extends AbstractXMLParser {
     private static final String TAG = EighthGetBlockParser.class.getSimpleName();
 
     private int curBlockId = -1;

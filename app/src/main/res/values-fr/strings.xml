@@ -61,6 +61,7 @@
         compte actuel. Ça se fait dans les paramètres de l\'appareil sous la section Comptes.
     </string>
     <string name="iodine_cookie_auth_token_label">Compte TJHSST Iode</string>
+    <string name="eighth_provider_name">Thyroxine : Huitième</string>
 
 
 </resources>

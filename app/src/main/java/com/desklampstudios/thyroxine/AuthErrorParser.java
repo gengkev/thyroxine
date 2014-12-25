@@ -1,7 +1,6 @@
 package com.desklampstudios.thyroxine;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -16,7 +15,7 @@ public class AuthErrorParser extends AbstractXMLParser {
         super(context);
     }
 
-    public void beginAuthError(InputStream in) throws XmlPullParserException, IOException {
+    public void beginAuthError(InputStream in) throws XmlPullParserException {
         if (parsingBegun) {
             stopParse();
         }
