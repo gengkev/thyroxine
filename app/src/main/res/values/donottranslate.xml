@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="nav_titles" translatable="false">
+        <item>@string/title_fragment_news</item>
+        <item>@string/title_fragment_eighth</item>
+        <item>@string/title_fragment_bell_schedule</item>
+        <item>@string/title_fragment_links</item>
+    </string-array>
+
+    <string name="tjhsst_edu_suffix" translatable="false">"@tjhsst.edu"</string>
+
+    <!-- Warning: also declared in NewsProvider -->
+    <string name="news_content_authority" translatable="false">com.desklampstudios.thyroxine.news</string>
+
+    <!-- Warning: also declared in EighthProvider -->
+    <string name="eighth_content_authority" translatable="false">com.desklampstudios.thyroxine.eighth</string>
+
+    <!-- Warning: sync account types also declared in IodineAuthenticator -->
+    <string name="stub_account_type" translatable="false">stub.thyroxine.desklampstudios.com</string>
+    <string name="stub_sync_fake_account_name" translatable="false">thyroxine</string>
+
+    <string name="iodine_account_type" translatable="false">iodine.thyroxine.desklampstudios.com</string>
+</resources>

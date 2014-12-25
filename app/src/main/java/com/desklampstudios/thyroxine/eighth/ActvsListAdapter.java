@@ -1,5 +1,7 @@
 package com.desklampstudios.thyroxine.eighth;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,11 +22,16 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
     private static final String TAG = ActvsListAdapter.class.getSimpleName();
 
     private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
-    private final ActvClickListener mListener;
+    private final Context mContext;
+    private OnItemClickListener mListener;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ActvsListAdapter(ActvClickListener listener) {
+    public ActvsListAdapter(Context context) {
         this.mDataset = new ArrayList<>();
+        this.mContext = context;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.mListener = listener;
     }
 
@@ -40,8 +48,9 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
             @Override
             public void onClick(View view) {
                 int pos = vh.getPosition();
-                Pair<EighthActv, EighthActvInstance> pair = mDataset.get(pos);
-                mListener.onActvClick(pair.second);
+                if (mListener != null) {
+                    mListener.onItemClick(view, pos);
+                }
             }
         });
         return vh;
@@ -50,6 +59,8 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        final Resources resources = mContext.getResources();
+
         Pair<EighthActv, EighthActvInstance> pair = mDataset.get(position);
         EighthActv actv = pair.first;
         EighthActvInstance actvInstance = pair.second;
@@ -63,30 +74,47 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         holder.mDescriptionView.setText(description);
 
         ArrayList<String> statuses = new ArrayList<>();
-        int color = (position % 2 == 0) ? 0x7FF8F8F8 : 0x7FFAFAFA;
+
+        int color = resources.getColor((position % 2 == 0) ?
+                R.color.actv_background_default_1 :
+                R.color.actv_background_default_2);
 
         // restricted
         if ((actv.flags & EighthActv.FLAG_RESTRICTED) != 0) {
-            statuses.add("(R)");
-            color = (position % 2 == 0) ? 0x7FFFCCAA : 0x7FFDC5A0;
+            int textColor = resources.getColor(R.color.actv_textColor_restricted);
+            statuses.add(resources.getString(R.string.actv_status_restricted,
+                    Utils.colorToHtmlHex(textColor)));
+            color = resources.getColor((position % 2 == 0) ?
+                    R.color.actv_background_restricted_1 :
+                    R.color.actv_background_restricted_2);
         }
         // sticky
         if ((actv.flags & EighthActv.FLAG_STICKY) != 0) {
-            statuses.add("(S)");
+            int textColor = resources.getColor(R.color.actv_textColor_sticky);
+            statuses.add(resources.getString(R.string.actv_status_sticky,
+                    Utils.colorToHtmlHex(textColor)));
         }
         // capacity full
         if (actvInstance.memberCount >= actvInstance.capacity) {
-            statuses.add("<font color=\"#0000FF\">FULL</font>");
+            int textColor = resources.getColor(R.color.actvInstance_textColor_full);
+            statuses.add(resources.getString(R.string.actvInstance_status_full,
+                    Utils.colorToHtmlHex(textColor)));
         }
         // cancelled
         if ((actvInstance.flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
-            statuses.add("<font color=\"#FF0000\">CANCELLED</font>");
-            color = (position % 2 == 0) ? 0x7FCF0000 : 0x7FCA0000;
+            int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
+            statuses.clear(); // clear other statuses
+            statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
+                    Utils.colorToHtmlHex(textColor)));
+            color = resources.getColor((position % 2 == 0) ?
+                    R.color.actvInstance_background_cancelled_1 :
+                    R.color.actvInstance_background_cancelled_2);
         }
+
 
         // display statuses
         if (statuses.size() > 0) {
-            String statusText = statuses.toString().replaceAll("[\\[\\]]", "");
+            String statusText = Utils.join(statuses, ", ");
             holder.mStatusView.setText(Html.fromHtml(statusText));
         } else {
             holder.mStatusView.setText("");
@@ -109,6 +137,10 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         int size = mDataset.size();
         mDataset.addAll(pairList);
         notifyItemRangeInserted(size, size + pairList.size());
+    }
+
+    public Pair<EighthActv, EighthActvInstance> get(int pos) {
+        return mDataset.get(pos);
     }
 
     public void clear() {
@@ -145,7 +177,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         }
     }
 
-    public static interface ActvClickListener {
-        public void onActvClick(EighthActvInstance actv);
+    public interface OnItemClickListener {
+        public void onItemClick(View view, int pos);
     }
 }

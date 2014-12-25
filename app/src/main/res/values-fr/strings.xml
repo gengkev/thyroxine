@@ -34,6 +34,8 @@
     <string name="error_field_required">Champ obligatoire</string>
     <string name="error_tjhsst_edu_suffix">Le suffixe @tjhsst.edu n\'est pas nécessaire</string>
 
+    <string name="error_not_logged_in">Pas connecté(e)</string>
+
     <!-- News strings -->
     <string name="title_fragment_news">Nouvelles</string>
     <string name="refresh">Rafraîchir</string>
@@ -49,6 +51,17 @@
     <string name="title_fragment_eighth">Huitième</string>
     <string name="title_activity_block">Bloc</string>
 
+    <string name="block_title">Bloc %1$s</string>
+    <string name="block_title_date">%1$s bloc %2$s (%3$s)</string>
+
+    <string name="actvInstance_status_cancelled"><![CDATA[<font color="%1$s">Annulée</font>]]></string>
+    <string name="actvInstance_status_full"><![CDATA[<font color="%1$s">Pleine</font>]]></string>
+    <string name="actv_id_placeholder">[Activité %1$d]</string>
+    <string name="actv_not_selected"><![CDATA[<i>Non selectionnée</i>]]></string>
+    <string name="block_status_locked">Fermée</string>
+    <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Limitée</font>]]></string>
+    <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Oblig.</font>]]></string>
+
     <!-- SyncAdapter related strings -->
     <string name="stub_authenticator_name">Thyroxine (Sync)</string>
     <string name="stub_account_cannot_create">
@@ -62,6 +75,5 @@
     </string>
     <string name="iodine_cookie_auth_token_label">Compte TJHSST Iode</string>
     <string name="eighth_provider_name">Thyroxine : Huitième</string>
-
 
 </resources>

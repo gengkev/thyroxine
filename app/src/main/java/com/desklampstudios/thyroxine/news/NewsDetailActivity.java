@@ -20,14 +20,11 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 
-import java.text.DateFormat;
 import java.util.Date;
 
 
 public class NewsDetailActivity extends ActionBarActivity {
     private static final String TAG = NewsDetailActivity.class.getSimpleName();
-    private static final DateFormat DATE_FORMAT =
-            DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.SHORT); // default locale OK
 
     private NewsEntry mNewsEntry;
     private ShareActionProvider mShareActionProvider;
@@ -71,7 +68,7 @@ public class NewsDetailActivity extends ActionBarActivity {
         Log.d(TAG, "Entry: " + mNewsEntry);
 
         title.setText(mNewsEntry.title);
-        published.setText(DATE_FORMAT.format(new Date(mNewsEntry.published)));
+        published.setText(Utils.DateFormats.FULL_DATETIME.format(new Date(mNewsEntry.published)));
         //content.setText(Html.fromHtml(mNewsEntry.contentRaw));
         webView.loadData(mNewsEntry.contentRaw, "text/html;charset=utf-8", null);
         webView.setBackgroundColor(getResources().getColor(R.color.background));

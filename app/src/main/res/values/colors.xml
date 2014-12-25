@@ -6,4 +6,16 @@
 
     <item name="background" type="color">@color/background_material_light</item>
     <item name="background_dark" type="color">@color/background_material_dark</item>
+
+    <item name="actv_background_default_1" type="color">#F8F8F8</item>
+    <item name="actv_background_default_2" type="color">#FAFAFA</item>
+    <item name="actv_background_restricted_1" type="color">#FFCCAA</item>
+    <item name="actv_background_restricted_2" type="color">#FDC5A0</item>
+    <item name="actvInstance_background_cancelled_1" type="color">#CF0000</item>
+    <item name="actvInstance_background_cancelled_2" type="color">#CA0000</item>
+    <item name="actvInstance_textColor_full" type="color">@android:color/holo_blue_dark</item>
+    <item name="actvInstance_textColor_cancelled" type="color">@android:color/white</item>
+    <item name="actv_textColor_restricted" type="color">@android:color/holo_orange_dark</item>
+    <item name="actv_textColor_sticky" type="color">@android:color/holo_green_dark</item>
+
 </resources>

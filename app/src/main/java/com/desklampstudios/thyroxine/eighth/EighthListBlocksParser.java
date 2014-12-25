@@ -156,7 +156,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
 
         // parse to ensure validity
         try {
-            Utils.BASIC_DATE_FORMAT.parse(dateStr);
+            Utils.FixedDateFormats.BASIC.parse(dateStr);
         } catch (ParseException e) {
             Log.e(TAG, "Invalid date string: " + dateStr);
             throw new XmlPullParserException("Invalid date string: " + dateStr, parser, e);

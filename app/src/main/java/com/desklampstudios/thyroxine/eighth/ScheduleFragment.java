@@ -40,6 +40,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             EighthContract.Blocks.KEY_BLOCK_ID,
             EighthContract.Blocks.KEY_TYPE,
             EighthContract.Blocks.KEY_DATE,
+            EighthContract.Blocks.KEY_LOCKED,
             EighthContract.Actvs.KEY_NAME,
             EighthContract.Actvs.KEY_FLAGS,
             EighthContract.Actvs.KEY_ACTV_ID,
@@ -179,7 +180,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     private boolean checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
-            Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
             IodineAuthenticator.addAccount(getActivity());
             return false;
         }

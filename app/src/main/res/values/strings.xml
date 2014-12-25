@@ -8,13 +8,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string-array name="nav_titles" translatable="false">
-        <item>@string/title_fragment_news</item>
-        <item>@string/title_fragment_eighth</item>
-        <item>@string/title_fragment_bell_schedule</item>
-        <item>@string/title_fragment_links</item>
-    </string-array>
-
     <!-- Temporary nav strings -->
     <string name="title_fragment_bell_schedule">Bell Schedule</string>
     <string name="title_fragment_links">Links</string>
@@ -39,16 +32,15 @@
     <string name="error_incorrect_username">This username is incorrect</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="tjhsst_edu_suffix" translatable="false">"@tjhsst.edu"</string>
     <string name="error_tjhsst_edu_suffix">The @tjhsst.edu suffix is not necessary</string>
+
+    <string name="error_not_logged_in">Not logged in</string>
 
     <!-- News strings -->
     <string name="title_fragment_news">News</string>
     <string name="refresh">Refresh</string>
 
     <string name="news_provider_name">Thyroxine: News</string>
-    <!-- Warning: also declared in NewsProvider -->
-    <string name="news_content_authority" translatable="false">com.desklampstudios.thyroxine.news</string>
 
     <string name="title_activity_entry_detail">Post details</string>
     <string name="news_entry_title">Title</string>
@@ -60,20 +52,25 @@
     <string name="title_fragment_eighth">Eighth</string>
     <string name="title_activity_block">Block</string>
 
+    <string name="block_title">%1$s Block</string>
+    <string name="block_title_date">%1$s %2$s Block (%3$s)</string>
+
+    <string name="actv_not_selected"><![CDATA[<i>Not selected</i>]]></string>
+    <string name="actv_id_placeholder">[Activity %1$d]</string>
+    <string name="block_status_locked">Locked</string>
+    <string name="actvInstance_status_cancelled"><![CDATA[<font color="%1$s">Cancelled</font>]]></string>
+    <string name="actvInstance_status_full"><![CDATA[<font color="%1$s">Full</font>]]></string>
+    <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Restricted</font>]]></string>
+    <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Sticky</font>]]></string>
+
     <string name="eighth_provider_name">Thyroxine: Eighth</string>
-    <!-- Warning: also declared in EighthProvider -->
-    <string name="eighth_content_authority" translatable="false">com.desklampstudios.thyroxine.eighth</string>
 
     <!-- SyncAdapter related strings -->
-    <!-- Warning: sync account types also declared in IodineAuthenticator -->
-    <string name="stub_account_type" translatable="false">stub.thyroxine.desklampstudios.com</string>
-    <string name="stub_sync_fake_account_name" translatable="false">thyroxine</string>
     <string name="stub_authenticator_name">Thyroxine (Sync)</string>
     <string name="stub_account_cannot_create">
         This type of account cannot be created.
     </string>
 
-    <string name="iodine_account_type" translatable="false">iodine.thyroxine.desklampstudios.com</string>
     <string name="iodine_authenticator_name">Thyroxine (Iodine)</string>
     <string name="iodine_account_only_one">
         Only one Iodine account can exist at a time. To add another, remove the current one first.

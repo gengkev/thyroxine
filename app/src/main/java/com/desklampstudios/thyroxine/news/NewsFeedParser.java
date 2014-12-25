@@ -107,7 +107,7 @@ class NewsFeedParser extends AbstractXMLParser {
         String publishedStr = readText(parser, "pubDate");
         Long published = null;
         try {
-            Date date = Utils.FEED_DATETIME_FORMAT.parse(publishedStr);
+            Date date = Utils.FixedDateFormats.NEWS_FEED.parse(publishedStr);
             published = date.getTime();
         } catch (ParseException e) {
             Log.e(TAG, "datetime parse exception: " + publishedStr + ", " + e.toString());

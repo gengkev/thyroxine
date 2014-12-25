@@ -23,7 +23,6 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.desklampstudios.thyroxine.util.DividerItemDecoration;
 
 import java.util.ArrayList;
 
@@ -32,7 +31,7 @@ import java.util.ArrayList;
  * Use the {@link BlockFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BlockFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,ActvsListAdapter.ActvClickListener {
+public class BlockFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = BlockFragment.class.getSimpleName();
     private static final int BLOCK_LOADER = 1;
     public static final String ARG_BLOCK_ID = "com.desklampstudios.thyroxine.eighth.BLOCK_ID";
@@ -72,7 +71,14 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
 
         // create list adapter
-        mAdapter = new ActvsListAdapter(this);
+        mAdapter = new ActvsListAdapter(getActivity());
+        mAdapter.setOnItemClickListener(new ActvsListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int pos) {
+                Pair<EighthActv, EighthActvInstance> pair = mAdapter.get(pos);
+                onActvClick(pair);
+            }
+        });
         mAdapter.add(new Pair<>(
                 new EighthActv(999, "Test activity", "Test description", 0),
                 new EighthActvInstance(999, 1337, "Test comment", 0, "All the rooms", 0, 0)
@@ -86,7 +92,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
-        // recyclerview!
+        // RecyclerView!
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setHasFixedSize(true); // changes in content don't change layout size
@@ -95,10 +101,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
-        // item decorations??
-        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
-                getActivity(), DividerItemDecoration.VERTICAL_LIST);
-        recyclerView.addItemDecoration(itemDecoration);
+        // dividers between items
+        //RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
+        //        getActivity(), DividerItemDecoration.VERTICAL_LIST);
+        //recyclerView.addItemDecoration(itemDecoration);
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         mSwipeLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
@@ -133,15 +139,14 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     // Called when an item in the adapter is clicked
-    @Override
-    public void onActvClick(EighthActvInstance actv) {
-        Toast.makeText(getActivity(), "Activity: " + actv, Toast.LENGTH_LONG).show();
+    public void onActvClick(Pair<EighthActv, EighthActvInstance> pair) {
+        Toast.makeText(getActivity(), pair.first + "\n" + pair.second, Toast.LENGTH_LONG).show();
     }
 
     private boolean checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
-            Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
             IodineAuthenticator.addAccount(getActivity());
             return false;
         }
@@ -182,9 +187,13 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private void displayBlock(@NonNull EighthBlock block) {
-        String dateStr = Utils.formatBasicDate(block.date, Utils.DISPLAY_DATE_FORMAT_MEDIUM);
+        String dateStr = Utils.formatBasicDate(block.date, Utils.DateFormats.MED_DAYMONTH.get());
+        String weekday = Utils.formatBasicDate(block.date, Utils.DateFormats.WEEKDAY.get());
+        String displayStr = getResources().getString(R.string.block_title_date,
+                weekday, block.type, dateStr);
+
         if (getActivity() != null) {
-            getActivity().setTitle(dateStr + " Block " + block.type);
+            getActivity().setTitle(displayStr);
         }
     }
 

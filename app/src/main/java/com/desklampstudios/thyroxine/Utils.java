@@ -28,22 +28,63 @@ import java.util.Scanner;
 public class Utils {
     private static final String TAG = Utils.class.getSimpleName();
 
-    public static final DateFormat FEED_DATETIME_FORMAT =
-            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
-    public static final DateFormat ISO_DATETIME_FORMAT =
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+    /**
+     * Some date formats that are useful for parsing.
+     * The locale MUST be explicitly set!
+     * Also, warning that DateFormat objects aren't synchronized. This probably won't be a
+     * problem in the near future.
+     */
+    public static class FixedDateFormats {
+        public static final DateFormat NEWS_FEED =
+                new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
+        public static final DateFormat ISO =
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+        public static final DateFormat BASIC =
+                new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    }
 
-    public static final DateFormat BASIC_DATE_FORMAT =
-            new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-    public static final DateFormat DISPLAY_DATE_FORMAT =
-            DateFormat.getDateInstance(DateFormat.FULL); // default locale OK
-    public static final DateFormat DISPLAY_DATE_FORMAT_MEDIUM =
-            DateFormat.getDateInstance(DateFormat.MEDIUM); // default locale OK
+    /**
+     * Some date formats that are to be shown to the user.
+     * The default locale is OK.
+     */
+    public static enum DateFormats {
+        FULL_DATETIME, // Monday, January 1, 1970 12:00 AM
+        FULL_DATE, // Monday, January 1, 1970
+        MED_DAYMONTH, // Jan 1
+        WEEKDAY; // Mon
+
+        public DateFormat get() {
+            Locale locale = Locale.getDefault();
+
+            if (this == FULL_DATETIME) {
+                return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.SHORT, locale);
+            } else if (this == FULL_DATE) {
+                return DateFormat.getDateInstance(DateFormat.FULL);
+            } else if (this == MED_DAYMONTH) {
+                String str;
+                if (Build.VERSION.SDK_INT >= 18) {
+                    str = android.text.format.DateFormat.getBestDateTimePattern(locale, "dMMM");
+                } else if (locale.getLanguage().equals("fr")) { // TODO: remove hack
+                    str = "d MMM";
+                } else {
+                    str = "MMM d";
+                }
+                return new SimpleDateFormat(str, locale);
+            } else if (this == WEEKDAY) {
+                return new SimpleDateFormat("EEE", locale);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+        public String format(Date date) {
+            return get().format(date);
+        }
+    }
 
     public static String formatBasicDate(String str, DateFormat dateFormat) {
         Date date = new Date(0);
         try {
-            date = BASIC_DATE_FORMAT.parse(str);
+            date = FixedDateFormats.BASIC.parse(str);
         } catch (ParseException e) {
             Log.e(TAG, "Parsing date failed: " + str);
         }
@@ -60,6 +101,28 @@ public class Utils {
             in = in.substring(0, length);
         }
         return in;
+    }
+
+    public static <T> String join(Iterable<T> array, String sep) {
+        StringBuilder out = new StringBuilder();
+        boolean first = true;
+        for (T item : array) {
+            if (first) {
+                first = false;
+            } else {
+                out.append(sep);
+            }
+            out.append(String.valueOf(item));
+        }
+        return out.toString();
+    }
+
+    public static String colorToHtmlHex(int color) {
+        String str = Integer.toHexString(color);
+        while (str.length() < 8) {
+            str = "0" + str;
+        }
+        return "#" + str.substring(2, 8);
     }
 
     /**
