@@ -8,12 +8,11 @@
     android:minHeight="72dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@color/list_item_background">
 
-    <LinearLayout
+    <LinearLayout android:id="@+id/linear_layout1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/linear_layout1">
+        android:layout_height="wrap_content">
 
         <TextView android:id="@+id/eighth_date"
             android:layout_width="0dp"
