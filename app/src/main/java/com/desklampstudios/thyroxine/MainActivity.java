@@ -7,15 +7,15 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
@@ -27,10 +27,9 @@ public class MainActivity extends ActionBarActivity {
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
 
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
-    private View mDrawer;
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private NavDrawerAdapter mDrawerAdapter;
     private int mDrawerSelectedPosition = 0;
     private String[] mNavTitles;
 
@@ -54,8 +53,6 @@ public class MainActivity extends ActionBarActivity {
         // Navigation Drawer
         mNavTitles = getResources().getStringArray(R.array.nav_titles);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawer = findViewById(R.id.left_drawer);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer_list);
 
         // create drawer toggle
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -66,19 +63,14 @@ public class MainActivity extends ActionBarActivity {
         );
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        // create ArrayAdapter to display drawer items, add click listener
-        mDrawerList.setAdapter(new ArrayAdapter<>(
-                getSupportActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                mNavTitles));
+        // create RecyclerView to display drawer items
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.left_drawer_list);
 
-        mDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
-            }
-        });
+        mDrawerAdapter = new NavDrawerAdapter();
+        recyclerView.setAdapter(mDrawerAdapter);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
 
         // select an item in drawer
         selectItem(mDrawerSelectedPosition);
@@ -109,9 +101,9 @@ public class MainActivity extends ActionBarActivity {
                 .commit();
 
         // Highlight the selected item, update the title, and close the drawer
-        mDrawerList.setItemChecked(position, true);
+        mDrawerAdapter.setSelectedPosition(position);
         setTitle(mNavTitles[position]);
-        mDrawerLayout.closeDrawer(mDrawer);
+        mDrawerLayout.closeDrawer(Gravity.START);
     }
 
     @Override
@@ -158,8 +150,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onBackPressed() {
         // Close drawer on back button press
-        if (mDrawerLayout.isDrawerOpen(mDrawer)) {
-            mDrawerLayout.closeDrawer(mDrawer);
+        if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
+            mDrawerLayout.closeDrawer(Gravity.START);
             return;
         }
         super.onBackPressed();
@@ -192,6 +184,55 @@ public class MainActivity extends ActionBarActivity {
             textView.setText(title);
 
             return rootView;
+        }
+    }
+
+    public class NavDrawerAdapter extends RecyclerView.Adapter<ViewHolder> {
+        int mSelected = 0;
+
+        public void setSelectedPosition(int selected) {
+            int oldPosition = mSelected;
+            mSelected = selected;
+            notifyItemChanged(oldPosition);
+            notifyItemChanged(selected);
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.navdrawer_item, parent, false);
+
+            final ViewHolder holder = new ViewHolder(v);
+            holder.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = holder.getPosition();
+                    selectItem(position);
+                }
+            });
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            String title = mNavTitles[position];
+            holder.mTextView.setText(title);
+            holder.mView.setActivated(position == mSelected);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mNavTitles.length;
+        }
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public final View mView;
+        public final TextView mTextView;
+        public ViewHolder(View v) {
+            super(v);
+            mView = v;
+            mTextView = (TextView) v.findViewById(R.id.navdrawer_item_text);
         }
     }
 }

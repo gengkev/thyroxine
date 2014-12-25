@@ -6,6 +6,12 @@
 
     <item name="background" type="color">@color/background_material_light</item>
     <item name="background_dark" type="color">@color/background_material_dark</item>
+    <item name="background_white" type="color">#FFFFFF</item>
+
+    <item name="navdrawer_item_activated" type="color">#EFEFEF</item>
+    <item name="navdrawer_item_pressed" type="color">#DFDFDF</item>
+    <item name="navdrawer_item_textColor" type="color">#DF000000</item>
+    <item name="navdrawer_item_textColor_activated" type="color">@color/primary</item>
 
     <item name="actv_background_default_1" type="color">#F8F8F8</item>
     <item name="actv_background_default_2" type="color">#FAFAFA</item>

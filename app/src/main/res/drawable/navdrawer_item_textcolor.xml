@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true" android:color="@color/navdrawer_item_textColor_activated" />
+    <item android:color="@color/navdrawer_item_textColor" />
+</selector>
+    <!-- ?attr/colorControlActivated -->
