@@ -62,6 +62,8 @@
     <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Limitée</font>]]></string>
     <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Oblig.</font>]]></string>
 
+    <string name="attempt_login_try_again">On essaie de vous connecter. Veuillez réessayer.</string>
+
     <!-- SyncAdapter related strings -->
     <string name="stub_authenticator_name">Thyroxine (Sync)</string>
     <string name="stub_account_cannot_create">

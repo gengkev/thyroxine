@@ -11,9 +11,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -81,7 +83,8 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
 
         } catch (IodineAuthException.NotLoggedInException e) {
             Log.d(TAG, "Not logged in, oh no!", e);
-            // TODO: invalidate auth token
+            am.invalidateAuthToken(mAccount.type, authToken);
+            // TODO: try again automatically
             exception = e;
             return null;
         } catch (IOException | IodineAuthException e) {
@@ -142,7 +145,11 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
     @Override
     protected void onPostExecute(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
         if (exception != null) {
-            Log.e(TAG, "GetBlockTask error: " + exception);
+            if (exception instanceof IodineAuthException.NotLoggedInException) {
+                Toast.makeText(mActivity, R.string.attempt_login_try_again, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(mActivity, "An error occurred: " + exception, Toast.LENGTH_LONG).show();
+            }
             return;
         }
 

@@ -63,6 +63,7 @@
     <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Restricted</font>]]></string>
     <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Sticky</font>]]></string>
 
+    <string name="attempt_login_try_again">We\'re trying to log you in. Please try again.</string>
     <string name="eighth_provider_name">Thyroxine: Eighth</string>
 
     <!-- SyncAdapter related strings -->
