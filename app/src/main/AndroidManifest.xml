@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
+    <!-- Required to determine when application is syncing -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS"/>
+
     <!-- Cool authentication stuff -->
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>

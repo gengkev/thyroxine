@@ -1,32 +1,36 @@
 package com.desklampstudios.thyroxine.news;
 
+import android.accounts.Account;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link NewsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class NewsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        SyncStatusObserver {
     private static final String TAG = NewsFragment.class.getSimpleName();
     public static final String EXTRA_NEWS_ID = "com.desklampstudios.thyroxine.news.id";
     public static final String ARG_LOGGED_IN = "loggedIn";
@@ -34,6 +38,8 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private NewsListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeLayout;
+
+    private Object mSyncObserverHandle; // obtained in onResume
 
     public NewsFragment() {
     }
@@ -120,6 +126,56 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
     */
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Watch for sync state changes
+        final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
+                ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
+        mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Stop watching sync state changes
+        if (mSyncObserverHandle != null) {
+            ContentResolver.removeStatusChangeListener(mSyncObserverHandle);
+            mSyncObserverHandle = null;
+        }
+    }
+
+    /**
+     * Watches for sync changes, attached/detached in onResume/onPause.
+     * When the app is syncing, the swipe refresh layout is set to refreshing.
+     */
+    @Override
+    public void onStatusChanged(int which) {
+        final Activity activity = getActivity();
+        final Account account = StubAuthenticator.getStubAccount(activity);
+
+        final boolean syncActive = ContentResolver.isSyncActive(
+                account, NewsContract.CONTENT_AUTHORITY);
+        final boolean syncPending = ContentResolver.isSyncPending(
+                account, NewsContract.CONTENT_AUTHORITY);
+
+        Log.d(TAG, "onStatusChanged: syncActive=" + syncActive + ", syncPending=" + syncPending);
+
+        // Run on the UI thread in order to update the UI
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (account == null) {
+                    mSwipeLayout.setRefreshing(false);
+                    return;
+                }
+                mSwipeLayout.setRefreshing(syncActive || syncPending);
+            }
+        });
+    }
+
     // Called when an item in the adapter is clicked
     private void openNewsDetailActivity(long id) {
         // Toast.makeText(getApplicationContext(), "Entry: " + entry, Toast.LENGTH_LONG).show();
@@ -130,19 +186,8 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void retrieveNews() {
-        // indicate syncing
-        mSwipeLayout.setRefreshing(true);
-
         // Request immediate sync
         NewsSyncAdapter.syncImmediately(getActivity());
-
-        // TODO: actually detect end of sync with SyncObserver
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeLayout.setRefreshing(false);
-            }
-        }, 5000);
     }
 
     @Override

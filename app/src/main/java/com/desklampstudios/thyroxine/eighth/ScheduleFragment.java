@@ -1,17 +1,16 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -23,7 +22,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 
@@ -32,7 +30,8 @@ import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
  * Use the {@link ScheduleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        SyncStatusObserver {
     private static final String TAG = ScheduleFragment.class.getSimpleName();
     private static final int BLOCKS_LOADER = 0;
 
@@ -51,6 +50,8 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     private BlocksListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeLayout;
+
+    private Object mSyncObserverHandle; // obtained in onResume
 
     public ScheduleFragment() {
     }
@@ -116,6 +117,56 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Watch for sync state changes
+        final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
+                ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
+        mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Stop watching sync state changes
+        if (mSyncObserverHandle != null) {
+            ContentResolver.removeStatusChangeListener(mSyncObserverHandle);
+            mSyncObserverHandle = null;
+        }
+    }
+
+    /**
+     * Watches for sync changes, attached/detached in onResume/onPause.
+     * When the app is syncing, the swipe refresh layout is set to refreshing.
+     */
+    @Override
+    public void onStatusChanged(int which) {
+        final Activity activity = getActivity();
+        final Account account = IodineAuthenticator.getIodineAccount(activity);
+
+        final boolean syncActive = ContentResolver.isSyncActive(
+                account, EighthContract.CONTENT_AUTHORITY);
+        final boolean syncPending = ContentResolver.isSyncPending(
+                account, EighthContract.CONTENT_AUTHORITY);
+
+        Log.d(TAG, "onStatusChanged: syncActive=" + syncActive + ", syncPending=" + syncPending);
+
+        // Run on the UI thread in order to update the UI
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (account == null) {
+                    mSwipeLayout.setRefreshing(false);
+                    return;
+                }
+                mSwipeLayout.setRefreshing(syncActive || syncPending);
+            }
+        });
+    }
+
     // Called when an item in the adapter is clicked
     private void onBlockClick(int blockId) {
         //Toast.makeText(getActivity(), "Block: " + block, Toast.LENGTH_LONG).show();
@@ -139,23 +190,11 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     private void retrieveSchedule() {
         // make sure user is logged in
         if (!checkLoginState()) {
-            mSwipeLayout.setRefreshing(false);
             return;
         }
 
-        // indicate syncing
-        mSwipeLayout.setRefreshing(true);
-
         // Request immediate sync
         EighthSyncAdapter.syncImmediately(getActivity());
-
-        // TODO: actually detect end of sync with SyncObserver
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeLayout.setRefreshing(false);
-            }
-        }, 5000);
     }
 
     @Override
