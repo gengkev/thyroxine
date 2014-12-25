@@ -32,8 +32,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static final String ARG_LOGGED_IN = "loggedIn";
     private static final int NEWS_LOADER = 0;
 
-    private CursorAdapter mAdapter;
-    private ListView mListView;
+    private NewsListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeLayout;
 
     public NewsFragment() {
@@ -66,10 +65,10 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_news, container, false);
 
-        mListView = (ListView) view.findViewById(R.id.news_listview);
-        mListView.setAdapter(mAdapter);
+        ListView listView = (ListView) view.findViewById(R.id.news_listview);
+        listView.setAdapter(mAdapter);
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                 Cursor cursor = mAdapter.getCursor();
@@ -96,16 +95,16 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setHasOptionsMenu(true);
+        // setHasOptionsMenu(true);
 
         // start loader
         getLoaderManager().initLoader(NEWS_LOADER, null, this);
     }
 
+    /*
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.news, menu);
-
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -119,6 +118,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         return super.onOptionsItemSelected(item);
     }
+    */
 
     // Called when an item in the adapter is clicked
     private void openNewsDetailActivity(long id) {
@@ -129,11 +129,11 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         startActivity(intent);
     }
 
-    // Starts retrieveNewsTask
     private void retrieveNews() {
+        // indicate syncing
         mSwipeLayout.setRefreshing(true);
 
-        // Start sync
+        // Request immediate sync
         NewsSyncAdapter.syncImmediately(getActivity());
 
         // TODO: actually detect end of sync with SyncObserver

@@ -3,6 +3,7 @@ package com.desklampstudios.thyroxine;
 import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.SyncRequest;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -10,6 +11,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+
+import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
+import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -66,6 +72,25 @@ public class Utils {
      */
     public static String readInputStream(InputStream is) {
         return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
+    }
+
+    /**
+     * Makes sure synchronization is set up properly, retrieving the stub and Iodine accounts
+     * and configuring periodic synchronization with the SyncAdapters.
+     * @param context Context used to get accounts
+     */
+    public static void configureSync(Context context) {
+        // Make sure stub account exists
+        Account stubAccount = StubAuthenticator.getStubAccount(context);
+        // Configure News sync with stub account
+        NewsSyncAdapter.configureSync(stubAccount);
+
+        // Find Iodine account (may not exist)
+        Account iodineAccount = IodineAuthenticator.getIodineAccount(context);
+        if (iodineAccount != null) {
+            // Configure Eighth sync with Iodine account
+            EighthSyncAdapter.configureSync(iodineAccount);
+        }
     }
 
     /**

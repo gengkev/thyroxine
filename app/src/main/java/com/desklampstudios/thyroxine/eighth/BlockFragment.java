@@ -1,7 +1,6 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.ContentValues;
@@ -9,8 +8,10 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,8 +19,6 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
@@ -28,7 +27,6 @@ import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.util.DividerItemDecoration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -50,11 +48,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     private int blockId;
 
-    @Nullable private CursorLoader blockLoader;
     @Nullable private FetchBlockTask mFetchBlockTask;
 
-    private RecyclerView mRecyclerView;
     private ActvsListAdapter mAdapter;
+    private SwipeRefreshLayout mSwipeLayout;
 
     public BlockFragment() {
     }
@@ -81,9 +78,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                 new EighthActv(999, "Test activity", "Test description", 0),
                 new EighthActvInstance(999, 1337, "Test comment", 0, "All the rooms", 0, 0)
         ));
-
-        // load blocks
-        getBlock();
     }
 
     @Override
@@ -94,20 +88,49 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
         // recyclerview!
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setHasFixedSize(true); // changes in content don't change layout size
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setHasFixedSize(true); // changes in content don't change layout size
 
         // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(layoutManager);
 
         // item decorations??
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
                 getActivity(), DividerItemDecoration.VERTICAL_LIST);
-        mRecyclerView.addItemDecoration(itemDecoration);
+        recyclerView.addItemDecoration(itemDecoration);
+
+        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
+        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                retrieveBlock();
+            }
+        });
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // check if user is logged in
+        if (checkLoginState()) {
+            // start block loader
+            getLoaderManager().initLoader(BLOCK_LOADER, null, this);
+
+            // load actvs from server
+            // http://stackoverflow.com/a/26910973/689161
+            mSwipeLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    retrieveBlock();
+                }
+            });
+        }
     }
 
     // Called when an item in the adapter is clicked
@@ -116,28 +139,42 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         Toast.makeText(getActivity(), "Activity: " + actv, Toast.LENGTH_LONG).show();
     }
 
-    // Starts FetchBlockTask
-    private void getBlock() {
-        if (mFetchBlockTask != null) {
-            return;
-        }
-
-        Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
-
-        // Check login state
+    private boolean checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
-
-        if (account == null) { // not logged in... ???
-            Log.e(TAG, "No accounts found (not logged in) in BlockFragment???");
+        if (account == null) { // not logged in
             Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
-            // TODO: maybe implement login screen here
+            IodineAuthenticator.addAccount(getActivity());
+            return false;
+        }
+        return true;
+    }
+
+    // Starts FetchBlockTask
+    private void retrieveBlock() {
+        if (mFetchBlockTask != null) {
+            Log.w(TAG, "retrieveBlock cannot refresh while mFetchBlockTask is non-null");
             return;
         }
 
-        // Load stuff async
+        // make sure user is logged in
+        if (!checkLoginState()) {
+            mSwipeLayout.setRefreshing(false);
+            return;
+        }
+
+        // indicate syncing
+        mSwipeLayout.setRefreshing(true);
+
+        // Load stuff using AsyncTask
+        Account account = IodineAuthenticator.getIodineAccount(getActivity());
         mFetchBlockTask = new FetchBlockTask(getActivity(), account, new FetchBlockTask.ActvsResultListener() {
             @Override
             public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
+                Log.d(TAG, "syncing done");
+
+                mFetchBlockTask = null;
+                mSwipeLayout.setRefreshing(false); // syncing done
+
                 mAdapter.clear();
                 mAdapter.addAll(pairList);
             }
@@ -146,21 +183,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private void displayBlock(@NonNull EighthBlock block) {
-        Log.d(TAG, "block: " + block);
-
         String dateStr = Utils.formatBasicDate(block.date, Utils.DISPLAY_DATE_FORMAT_MEDIUM);
         if (getActivity() != null) {
             getActivity().setTitle(dateStr + " Block " + block.type);
         }
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        // start loaders
-        LoaderManager loaderManager = getLoaderManager();
-        loaderManager.initLoader(BLOCK_LOADER, null, this);
     }
 
     @Nullable
@@ -168,7 +194,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
             case BLOCK_LOADER: {
-                blockLoader = new CursorLoader(
+                return new CursorLoader(
                         getActivity(),
                         EighthContract.Blocks.buildBlockUri(blockId),
                         BLOCK_LOADER_PROJECTION, // columns
@@ -176,7 +202,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                         null, // selectionArgs
                         null
                 );
-                return blockLoader;
             }
             default: {
                 return null;
@@ -186,22 +211,17 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, @Nullable Cursor cursor) {
-        if (cursorLoader == blockLoader) {
-            if (cursor != null && cursor.moveToFirst()) {
-                ContentValues blockValues = Utils.cursorRowToContentValues(cursor);
-                EighthBlock block = EighthContract.Blocks.fromContentValues(blockValues);
-                displayBlock(block);
+        if (cursor != null && cursor.moveToFirst()) {
+            ContentValues blockValues = Utils.cursorRowToContentValues(cursor);
+            EighthBlock block = EighthContract.Blocks.fromContentValues(blockValues);
+            displayBlock(block);
 
-                // TODO: do stuff with current actvId
-                int curActvId = cursor.getInt(cursor.getColumnIndex(EighthContract.Schedule.KEY_ACTV_ID));
+            // TODO: do stuff with current actvId
+            int curActvId = cursor.getInt(cursor.getColumnIndex(EighthContract.Schedule.KEY_ACTV_ID));
 
-                Log.d(TAG, "Got block: " + block + ", curActvId: " + curActvId);
-            } else {
-                Log.e(TAG, "Cursor error");
-            }
-        }
-        else {
-            Log.e(TAG, "onLoadFinished for unknown CursorLoader: " + cursorLoader);
+            Log.d(TAG, "Got block: " + block + ", curActvId: " + curActvId);
+        } else {
+            Log.e(TAG, "Cursor error");
         }
     }
 

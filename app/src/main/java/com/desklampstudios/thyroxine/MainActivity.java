@@ -2,6 +2,8 @@ package com.desklampstudios.thyroxine;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
@@ -54,7 +56,8 @@ public class MainActivity extends ActionBarActivity {
             mDrawerSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         }
 
-        initializeSyncAdapters();
+        // Configure synchronization
+        Utils.configureSync(this);
 
         // Navigation Drawer
         mNavTitles = getResources().getStringArray(R.array.nav_titles);
@@ -87,21 +90,6 @@ public class MainActivity extends ActionBarActivity {
 
         // select an item in drawer
         selectItem(mDrawerSelectedPosition);
-    }
-
-    private void initializeSyncAdapters() {
-        // Make sure stub account exists
-        Account stubAccount = StubAuthenticator.getStubAccount(this);
-        // Configure News sync with stub account
-        NewsSyncAdapter.configureSync(stubAccount);
-
-        // Find Iodine account (may not exist)
-        Account iodineAccount = IodineAuthenticator.getIodineAccount(this);
-        if (iodineAccount != null) {
-            // Configure Eighth sync with Iodine account
-            // TODO: it would be useful to do this after an account is added
-            EighthSyncAdapter.configureSync(iodineAccount);
-        }
     }
 
     /** Swaps fragments in the main content view */
@@ -149,10 +137,7 @@ public class MainActivity extends ActionBarActivity {
 
         switch (item.getItemId()) {
             case R.id.action_login:
-                final AccountManager am = AccountManager.get(this);
-                am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
-                        IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
-                        null, null, this, null, null);
+                IodineAuthenticator.addAccount(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);

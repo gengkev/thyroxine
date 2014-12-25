@@ -4,7 +4,10 @@ import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.accounts.NetworkErrorException;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +19,7 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -180,11 +184,31 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         Account[] accounts = am.getAccountsByType(IodineAuthenticator.ACCOUNT_TYPE);
 
         if (accounts.length == 0) {
+            Log.w(TAG, "getIodineAccount: no accounts found (not logged in)");
             return null;
         } else if (accounts.length > 1) {
-            Log.w(TAG, "getIodineAccount found more than one account");
+            Log.w(TAG, "getIodineAccount: more than one account: " + Arrays.toString(accounts));
         }
         return accounts[0];
+    }
+
+    /**
+     * Attempts to add an Iodine account.
+     * @param activity The activity used to open the login activity and as a context.
+     */
+    public static void addAccount(final Activity activity) {
+        final AccountManager am = AccountManager.get(activity);
+        final AccountManagerCallback<Bundle> callback = new AccountManagerCallback<Bundle>() {
+            @Override
+            public void run(AccountManagerFuture<Bundle> future) {
+                if (activity != null) {
+                    Utils.configureSync(activity);
+                }
+            }
+        };
+        am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
+                IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
+                null, null, activity, callback, null);
     }
 }
 

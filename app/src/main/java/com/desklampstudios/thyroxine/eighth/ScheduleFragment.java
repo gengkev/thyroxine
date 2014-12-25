@@ -11,7 +11,9 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,9 +23,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-
-import java.util.Arrays;
 
 
 /**
@@ -49,6 +50,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     };
 
     private BlocksListAdapter mAdapter;
+    private SwipeRefreshLayout mSwipeLayout;
 
     public ScheduleFragment() {
     }
@@ -66,9 +68,6 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
         // create list adapter
         mAdapter = new BlocksListAdapter(getActivity(), null, 0);
-
-        // load blocks
-        retrieveBlocks();
     }
 
     @Override
@@ -94,7 +93,27 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             }
         });
 
+        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
+        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                retrieveSchedule();
+            }
+        });
+
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // check if user is logged in
+        if (checkLoginState()) {
+            // start loader
+            getLoaderManager().initLoader(BLOCKS_LOADER, null, this);
+        }
     }
 
     // Called when an item in the adapter is clicked
@@ -106,39 +125,37 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         startActivity(intent);
     }
 
-    // Fetches schedule
-    private void retrieveBlocks() {
-        Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
-
-        // Check login state
+    private boolean checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
-
         if (account == null) { // not logged in
-            Log.e(TAG, "No accounts found (not logged in)");
             Toast.makeText(getActivity(), "Not logged in", Toast.LENGTH_SHORT).show();
+            IodineAuthenticator.addAccount(getActivity());
+            return false;
+        }
+        return true;
+    }
 
-            AccountManager am = AccountManager.get(getActivity());
-            am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
-                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
-                    null, null, getActivity(), new AccountManagerCallback<Bundle>() {
-                        @Override
-                        public void run(AccountManagerFuture<Bundle> future) {
-                            retrieveBlocks();
-                        }
-                    }, null);
+    // Fetches schedule
+    private void retrieveSchedule() {
+        // make sure user is logged in
+        if (!checkLoginState()) {
+            mSwipeLayout.setRefreshing(false);
             return;
         }
 
+        // indicate syncing
+        mSwipeLayout.setRefreshing(true);
+
         // Request immediate sync
         EighthSyncAdapter.syncImmediately(getActivity());
-    }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        // start loader
-        getLoaderManager().initLoader(BLOCKS_LOADER, null, this);
+        // TODO: actually detect end of sync with SyncObserver
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeLayout.setRefreshing(false);
+            }
+        }, 5000);
     }
 
     @Override
