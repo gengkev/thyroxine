@@ -148,7 +148,9 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
             if (exception instanceof IodineAuthException.NotLoggedInException) {
                 Toast.makeText(mActivity, R.string.attempt_login_try_again, Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(mActivity, "An error occurred: " + exception, Toast.LENGTH_LONG).show();
+                String message = mActivity.getResources().getString(
+                        R.string.unexpected_error, exception.toString());
+                Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show();
             }
             return;
         }

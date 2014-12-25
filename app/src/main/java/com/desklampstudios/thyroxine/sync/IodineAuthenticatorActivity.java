@@ -26,6 +26,8 @@ import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.util.AbstractAccountAuthenticatorActivity;
 
+import java.util.regex.Pattern;
+
 import static com.desklampstudios.thyroxine.IodineAuthException.InvalidPasswordException;
 import static com.desklampstudios.thyroxine.IodineAuthException.InvalidUsernameException;
 
@@ -66,7 +68,7 @@ public class IodineAuthenticatorActivity extends AbstractAccountAuthenticatorAct
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login_ime || id == EditorInfo.IME_NULL) {
+                if (id == EditorInfo.IME_ACTION_DONE) {
                     attemptLogin();
                     return true;
                 }
@@ -108,23 +110,30 @@ public class IodineAuthenticatorActivity extends AbstractAccountAuthenticatorAct
         String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
 
-        // Check for a valid password
-        if (TextUtils.isEmpty(password)) {
-            mPasswordView.setError(getString(R.string.error_field_required));
-            mPasswordView.requestFocus();
-            return;
+        // Check for email suffix
+        final String emailSuffix = getResources().getString(R.string.tjhsst_edu_suffix);
+        if (username.endsWith(emailSuffix)) {
+            username = username.substring(0, username.length() - emailSuffix.length());
+            mUsernameView.setText(username);
+            Toast.makeText(this, R.string.error_tjhsst_edu_suffix, Toast.LENGTH_SHORT).show();
         }
 
-        String emailSuffix = getResources().getString(R.string.tjhsst_edu_suffix);
         // Check for a valid username
         if (TextUtils.isEmpty(username)) {
             mUsernameView.setError(getString(R.string.error_field_required));
             mUsernameView.requestFocus();
             return;
-        } else if (username.endsWith(emailSuffix)) {
-            username = username.substring(0, username.length() - emailSuffix.length());
-            mUsernameView.setText(username);
-            Toast.makeText(this, R.string.error_tjhsst_edu_suffix, Toast.LENGTH_SHORT).show();
+        } else if (!Pattern.matches("^[a-zA-Z0-9-_.]+$", username)) { // probably
+            mUsernameView.setError(getString(R.string.error_invalid_username));
+            mUsernameView.requestFocus();
+            return;
+        }
+
+        // Check for a valid password
+        if (TextUtils.isEmpty(password)) {
+            mPasswordView.setError(getString(R.string.error_field_required));
+            mPasswordView.requestFocus();
+            return;
         }
 
         // Show a progress spinner, and kick off a background task to
@@ -249,14 +258,16 @@ public class IodineAuthenticatorActivity extends AbstractAccountAuthenticatorAct
                         return;
                     }
 
+                    String message = getResources().getString(
+                            R.string.iodine_auth_error, mException.toString());
                     Toast.makeText(IodineAuthenticatorActivity.this,
-                            "Iodine auth error:\n" + mException,
-                            Toast.LENGTH_LONG).show();
+                            message, Toast.LENGTH_LONG).show();
                     return;
                 } else {
+                    String message = getResources().getString(
+                            R.string.unexpected_error, mException.toString());
                     Toast.makeText(IodineAuthenticatorActivity.this,
-                            "Unexpected error:\n" + mException,
-                            Toast.LENGTH_LONG).show();
+                            message, Toast.LENGTH_LONG).show();
                     return;
                 }
             }

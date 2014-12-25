@@ -31,10 +31,13 @@
 
     <string name="error_incorrect_username">This username is incorrect</string>
     <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_invalid_username">This username is invalid</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_tjhsst_edu_suffix">The @tjhsst.edu suffix is not necessary</string>
 
     <string name="error_not_logged_in">Not logged in</string>
+    <string name="iodine_auth_error">Iodine authentication error:\n%1$s</string>
+    <string name="unexpected_error">Unexpected error:\n%1$s</string>
 
     <!-- News strings -->
     <string name="title_fragment_news">News</string>
