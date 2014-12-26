@@ -58,8 +58,10 @@
     <string name="block_title">%1$s Block</string>
     <string name="block_title_date">%1$s %2$s Block (%3$s)</string>
 
-    <string name="actv_not_selected"><![CDATA[<i>Not selected</i>]]></string>
     <string name="actv_id_placeholder">[Activity %1$d]</string>
+
+
+    <string name="actv_not_selected"><![CDATA[<i>Not selected</i>]]></string>
     <string name="block_status_locked">Locked</string>
     <string name="actvInstance_status_cancelled"><![CDATA[<font color="%1$s">Cancelled</font>]]></string>
     <string name="actvInstance_status_full"><![CDATA[<font color="%1$s">Full</font>]]></string>
@@ -67,6 +69,12 @@
     <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Sticky</font>]]></string>
 
     <string name="attempt_login_try_again">We\'re trying to log you in. Please try again.</string>
+
+    <string name="signup_changing">Signing up for "%1$s"</string>
+    <string name="signup_changing_wait">Please wait for the current signup to complete.</string>
+    <string name="signup_success">You were successfully signed up for "%1$s".</string>
+    <string name="signup_failure">Signup for "%1$s" failed because of the following reasons:</string>
+
     <string name="eighth_provider_name">Thyroxine: Eighth</string>
 
     <!-- SyncAdapter related strings -->

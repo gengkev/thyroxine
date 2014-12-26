@@ -65,7 +65,12 @@
     <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Limitée</font>]]></string>
     <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Oblig.</font>]]></string>
 
-    <string name="attempt_login_try_again">On essaie de vous connecter. Veuillez réessayer.</string>
+    <string name="attempt_login_try_again">On est en train de vous connecter. Veuillez réessayer.</string>
+
+    <string name="signup_changing">En train de vous inscrire à «%1$s»</string>
+    <string name="signup_changing_wait">Veuillez patienter jusqu\'à ce que l\'inscription actuelle se termine.</string>
+    <string name="signup_success">Vous vous êtes bien inscrit(e) à «%1$s».</string>
+    <string name="signup_failure">L\'inscription à «%1$s» a echoué à cause des raisons ci-dessous :</string>
 
     <!-- SyncAdapter related strings -->
     <string name="stub_authenticator_name">Thyroxine (Sync)</string>
@@ -80,5 +85,4 @@
     </string>
     <string name="iodine_cookie_auth_token_label">Compte TJHSST Iode</string>
     <string name="eighth_provider_name">Thyroxine : Huitième</string>
-
 </resources>

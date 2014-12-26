@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <string-array name="eighth_signup_error">
+        <!-- 1: Cancelled -->
+        <item>
+            [Cancelled] This activity is cancelled.
+        </item>
+        <!-- 2: Permissions -->
+        <item>
+            [Permissions] You are not allowed into this activity.
+        </item>
+        <!-- 4: Capacity -->
+        <item>
+            [Capacity] This activity is full.
+        </item>
+        <!-- 8: Sticky -->
+        <item>
+            [Sticky] You are stuck to another mandatory activity.
+        </item>
+        <!-- 16: One-a-Day -->
+        <item>
+            [One-a-Day] Student is already signed up for another block of this one-a-day activity.
+        </item>
+        <!-- 32: Presign -->
+        <item>
+            [Presign] This activity is popular, and signups for it are not yet open.
+            Try signing up within 48 hours of the activity date.
+        </item>
+        <!-- 64: Locked -->
+        <item>
+            [Locked]
+        </item>
+        <!-- 128: Past -->
+        <item>
+            [Past] This activity is in the past.
+        </item>
+        <!-- 256: RestrictList -->
+        <item>
+            [RestrictList]
+        </item>
+    </string-array>
+</resources>

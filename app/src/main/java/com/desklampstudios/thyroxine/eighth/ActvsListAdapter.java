@@ -44,21 +44,13 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         // set the view's size, margins, paddings and layout parameters
 
         final ViewHolder vh = new ViewHolder(v);
-        vh.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int pos = vh.getPosition();
-                if (mListener != null) {
-                    mListener.onItemClick(view, pos);
-                }
-            }
-        });
+
         return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
         final Resources resources = mContext.getResources();
 
         Pair<EighthActv, EighthActvInstance> pair = mDataset.get(position);
@@ -122,6 +114,22 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
 
         // set background color
         holder.mView.setBackgroundColor(color);
+
+        // set event listeners
+        holder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onItemClick(view, position);
+                }
+            }
+        });
+        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                return mListener != null && mListener.onItemLongClick(view, position);
+            }
+        });
     }
 
     public void add(Pair<EighthActv, EighthActvInstance> pair) {
@@ -179,5 +187,6 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
 
     public interface OnItemClickListener {
         public void onItemClick(View view, int pos);
+        public boolean onItemLongClick(View view, int pos);
     }
 }

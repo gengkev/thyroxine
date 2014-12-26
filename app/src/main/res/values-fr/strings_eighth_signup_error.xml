@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <string-array name="eighth_signup_error">
+        <!-- 1: Cancelled -->
+        <item>
+            [Annulation] Cette activité est annulée.
+        </item>
+        <!-- 2: Permissions -->
+        <item>
+            [Autorisation] Vous n\'êtes pas autorisé(e) dans cette activité.
+        </item>
+        <!-- 4: Capacity -->
+        <item>
+            [Capacité] Cette activité est pleine.
+        </item>
+        <!-- 8: Sticky -->
+        <item>
+            [Colle] Vous êtes collé(e) à une autre activité obligatoire.
+        </item>
+        <!-- 16: One-a-Day -->
+        <item>
+            [Une-par-jour] Vous vous êtes déjà inscrit(e) à un autre bloc de cette activité une-par-jour.
+        </item>
+        <!-- 32: Presign -->
+        <item>
+            [Préinscription] Cette activité est populaire, et les inscriptions ne sont pas encore ouvertes.
+            Réessayez de vous inscrire 48 heures avant l\'activité.
+        </item>
+        <!-- 64: Locked -->
+        <item>
+            [Fermé]
+        </item>
+        <!-- 128: Past -->
+        <item>
+            [Passé] Cette activité est dans le passé.
+        </item>
+        <!-- 256: RestrictList -->
+        <item>
+            [RestrictList]
+        </item>
+    </string-array>
+</resources>

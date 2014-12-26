@@ -47,6 +47,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     private int blockId;
 
     @Nullable private FetchBlockTask mFetchBlockTask;
+    @Nullable private SignupActvTask mSignupActvTask;
 
     private ActvsListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeLayout;
@@ -77,6 +78,12 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             public void onItemClick(View view, int pos) {
                 Pair<EighthActv, EighthActvInstance> pair = mAdapter.get(pos);
                 onActvClick(pair);
+            }
+            @Override
+            public boolean onItemLongClick(View view, int pos) {
+                Pair<EighthActv, EighthActvInstance> pair = mAdapter.get(pos);
+                changeSelectedActv(pair);
+                return true;
             }
         });
         mAdapter.add(new Pair<>(
@@ -184,6 +191,39 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             }
         });
         mFetchBlockTask.execute(blockId);
+    }
+
+    public void changeSelectedActv(final Pair<EighthActv, EighthActvInstance> pair) {
+        if (mSignupActvTask != null) {
+            String message = getActivity().getString(R.string.signup_changing_wait);
+            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            return;
+        }
+        String message = getActivity().getString(R.string.signup_changing, pair.first.name);
+        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+
+        Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        mSignupActvTask = new SignupActvTask(getActivity(), account, new SignupActvTask.SignupResultListener() {
+            @Override
+            public void onSignupResult(int result) {
+                mSignupActvTask = null;
+                if (result == 0) {
+                    String message = getActivity().getString(R.string.signup_success, pair.first.name);
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                } else {
+                    String message = getActivity().getString(R.string.signup_failure, pair.first.name);
+
+                    final String[] arr = getActivity().getResources().getStringArray(R.array.eighth_signup_error);
+                    for (int i = 0; i < arr.length; i++) {
+                        if ((result & (1 << i)) != 0) {
+                            message += "\n" + arr[i];
+                        }
+                    }
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        mSignupActvTask.execute(blockId, pair.first.actvId);
     }
 
     private void displayBlock(@NonNull EighthBlock block) {

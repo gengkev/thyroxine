@@ -26,6 +26,7 @@ public class IodineApiHelper {
     private static final String LOGIN_URL = IODINE_BASE_URL + "/api/";
     private static final String BLOCK_LIST_URL = IODINE_BASE_URL + "/api/eighth/list_blocks";
     private static final String BLOCK_GET_URL = IODINE_BASE_URL + "/api/eighth/get_block/%d";
+    private static final String SIGNUP_ACTIVITY_URL = IODINE_BASE_URL + "/api/eighth/signup_activity";
 
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
@@ -62,6 +63,32 @@ public class IodineApiHelper {
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
+
+        if (conn.getResponseCode() != 200) {
+            throw new IOException("Response code invalid: " + conn.getResponseCode());
+        }
+        return new BufferedInputStream(conn.getInputStream());
+    }
+
+    public static InputStream signupActivity(int blockId, int actvId, String cookieHeader)
+            throws IodineAuthException, IOException, XmlPullParserException {
+
+        // create query params
+        String query = "bid=" + URLEncoder.encode(String.valueOf(blockId), "UTF-8") +
+                "&aid=" + URLEncoder.encode(String.valueOf(actvId), "UTF-8");
+
+        // create request
+        URL url = new URL(SIGNUP_ACTIVITY_URL);
+        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Cookie", cookieHeader);
+        conn.setFixedLengthStreamingMode(query.length());
+        conn.setInstanceFollowRedirects(false);
+
+        // write output and begin request
+        OutputStreamWriter outWriter = new OutputStreamWriter(conn.getOutputStream());
+        outWriter.write(query);
+        outWriter.close();
 
         if (conn.getResponseCode() != 200) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
