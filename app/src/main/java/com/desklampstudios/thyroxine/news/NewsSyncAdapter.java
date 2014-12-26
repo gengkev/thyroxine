@@ -3,14 +3,19 @@ package com.desklampstudios.thyroxine.news;
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
@@ -21,6 +26,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = NewsSyncAdapter.class.getSimpleName();
@@ -28,6 +35,26 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     // Sync intervals
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+
+    private static final Utils.MergeInterface<NewsEntry, String> MERGE_INTERFACE =
+            new Utils.MergeInterface<NewsEntry, String>() {
+                @Override
+                public ContentValues toContentValues(NewsEntry item) {
+                    return NewsContract.NewsEntries.toContentValues(item);
+                }
+                @Override
+                public NewsEntry fromContentValues(ContentValues values) {
+                    return NewsContract.NewsEntries.fromContentValues(values);
+                }
+                @Override
+                public String getId(NewsEntry item) {
+                    return item.link;
+                }
+                @Override
+                public Uri buildContentUri(String id) {
+                    return NewsContract.NewsEntries.buildEntryUri(id);
+                }
+            };
 
     public NewsSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -39,34 +66,51 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                               ContentProviderClient provider, SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
 
+        // Part I. Get news list
+        List<NewsEntry> newsList;
+        try {
+            newsList = fetchNews();
+        } catch (IOException e) {
+            Log.e(TAG, "Connection error: " + e.toString());
+            syncResult.stats.numIoExceptions++;
+            return;
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XML error: " + e.toString());
+            syncResult.stats.numParseExceptions++;
+            return;
+        }
+        Log.v(TAG, "Got news list (" + newsList.size() + ") entries");
+
+
+        // Part II. Update entries in database
+        try {
+            updateNewsData(newsList, provider, syncResult);
+        } catch (RemoteException | SQLiteException | OperationApplicationException e) {
+            Log.e(TAG, "Error updating database", e);
+            syncResult.databaseError = true;
+            return;
+        }
+
+        Log.v(TAG, "Updated database; done syncing");
+    }
+
+    private List<NewsEntry> fetchNews() throws IOException, XmlPullParserException {
+
         InputStream stream = null;
         NewsFeedParser parser = null;
-        //List<NewsEntry> entries = new ArrayList<NewsEntry>();
+        List<NewsEntry> entries = new ArrayList<>();
+        NewsEntry entry;
 
         try {
             stream = IodineApiHelper.getPublicNewsFeed();
             parser = new NewsFeedParser(getContext());
             parser.beginFeed(stream);
 
-            NewsEntry entry = parser.nextEntry();
+            entry = parser.nextEntry();
             while (entry != null) {
-                try {
-                    updateDatabase(entry, provider);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException: "+ e);
-                    syncResult.databaseError = true;
-                }
-                //entries.add(entry);
+                entries.add(entry);
                 entry = parser.nextEntry();
             }
-
-            Log.d(TAG, "Sync completed successfully!");
-        } catch (IOException e) {
-            Log.e(TAG, "Connection error: " + e.toString());
-            syncResult.stats.numIoExceptions++;
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "XML error: " + e.toString());
-            syncResult.stats.numParseExceptions++;
         } finally {
             if (parser != null)
                 parser.stopParse();
@@ -77,53 +121,36 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.e(TAG, "IOException when closing stream: " + e);
             }
         }
+
+        return entries;
     }
 
-    /**
-     * Processes an incoming NewsEntry object, fresh from the parser.
-     * If the database already contains it, updates it if necessary;
-     * otherwise, it is inserted into the database.
-     * @param entry NewsEntry to update the database with.
-     */
-    private void updateDatabase(NewsEntry entry,
-                                ContentProviderClient provider) throws RemoteException {
-        // test if record exists
-        Cursor c = provider.query(NewsContract.NewsEntries.CONTENT_URI,
-                null, // columns
-                NewsContract.NewsEntries.KEY_LINK + " = ?", // selection
-                new String[]{ entry.link }, // selectionArgs
-                null // orderBy
-        );
+    private void updateNewsData(@NonNull List<NewsEntry> newsList,
+                                @NonNull ContentProviderClient provider,
+                                @NonNull SyncResult syncResult)
+            throws RemoteException, OperationApplicationException, SQLiteException {
 
-        // Record exists in the database; update if necessary
-        if (c.moveToFirst()) {
-            Log.v(TAG, "NewsEntry with same link already exists (link " + entry.link + ")");
-            ContentValues oldValues = Utils.cursorRowToContentValues(c);
-            NewsEntry oldEntry = NewsContract.NewsEntries.contentValuesToNewsEntry(oldValues);
+        Cursor queryCursor = provider.query(
+                NewsContract.NewsEntries.CONTENT_URI,
+                null, null, null, null);
+        assert queryCursor != null;
 
-            // Record has changed; update it
-            if (!entry.equals(oldEntry)) {
-                Log.v(TAG, "NewsEntry not equal, needs to be updated: " + entry);
-                ContentValues newValues = NewsContract.NewsEntries.newsEntryToContentValues(entry);
+        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+                NewsEntry.class.getSimpleName(),
+                newsList,
+                queryCursor,
+                NewsContract.NewsEntries.CONTENT_URI,
+                MERGE_INTERFACE,
+                syncResult.stats);
 
-                int rowsAffected = provider.update(NewsContract.NewsEntries.CONTENT_URI,
-                        newValues,
-                        NewsContract.NewsEntries.KEY_LINK + "=?", // selection
-                        new String[]{ entry.link } // selectionArgs
-                );
-                Log.v(TAG, rowsAffected + " rows updated.");
-            }
-        }
-        // Record does not exist in the database; insert it
-        else {
-            Log.v(TAG, "New NewsEntry to be inserted (link " + entry.link + ")");
-            ContentValues values = NewsContract.NewsEntries.newsEntryToContentValues(entry);
+        ContentProviderResult[] results = provider.applyBatch(batch);
+        Log.d(TAG, results.length + " operations performed.");
+        // Log.d(TAG, "results: " + Arrays.toString(results));
 
-            Uri uri = provider.insert(NewsContract.NewsEntries.CONTENT_URI, values);
-            Log.v(TAG, "Inserted new entry with uri: " + uri);
-        }
-
-        c.close();
+        final ContentResolver resolver = getContext().getContentResolver();
+        resolver.notifyChange(
+                NewsContract.NewsEntries.CONTENT_URI,
+                null, false);  // IMPORTANT: Do not sync to network
     }
 
     /**

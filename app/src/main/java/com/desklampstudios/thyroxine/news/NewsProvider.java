@@ -1,19 +1,27 @@
 package com.desklampstudios.thyroxine.news;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+
+import com.desklampstudios.thyroxine.util.SelectionBuilder;
+
+import java.util.ArrayList;
 
 import static com.desklampstudios.thyroxine.news.NewsContract.NewsEntries;
 import static com.desklampstudios.thyroxine.news.NewsDatabase.Tables;
 
 public class NewsProvider extends ContentProvider {
     private static final int NEWSENTRIES = 100;
-    private static final int NEWSENTRIES_ID = 101;
+    private static final int NEWSENTRIES_LINK = 102;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private NewsDatabase mDbHelper;
@@ -23,7 +31,7 @@ public class NewsProvider extends ContentProvider {
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
         matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES, NEWSENTRIES);
-        matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES + "/#", NEWSENTRIES_ID);
+        matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES + "/*", NEWSENTRIES_LINK);
 
         return matcher;
     }
@@ -34,52 +42,11 @@ public class NewsProvider extends ContentProvider {
         return true;
     }
 
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-                        String sortOrder) {
-        final SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor retCursor;
-        switch (sUriMatcher.match(uri)) {
-            case NEWSENTRIES_ID: {
-                long entryId = NewsEntries.getEntryId(uri);
-                retCursor = db.query(
-                        Tables.TABLE_NEWSENTRIES,
-                        projection,
-                        NewsEntries._ID + "=?",
-                        new String[]{ String.valueOf(entryId) },
-                        null,
-                        null,
-                        sortOrder
-                );
-                break;
-            }
-            // "news"
-            case NEWSENTRIES: {
-                retCursor = db.query(
-                        Tables.TABLE_NEWSENTRIES,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                        sortOrder
-                );
-                break;
-            }
-            default: {
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
-            }
-        }
-
-        // make sure listeners are notified
-        retCursor.setNotificationUri(getContext().getContentResolver(), uri);
-        return retCursor;
-    }
-
+    @NonNull
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case NEWSENTRIES_ID:
+            case NEWSENTRIES_LINK:
                 return NewsEntries.CONTENT_ITEM_TYPE_NEWSENTRIES;
             case NEWSENTRIES:
                 return NewsEntries.CONTENT_TYPE_NEWSENTRIES;
@@ -89,18 +56,33 @@ public class NewsProvider extends ContentProvider {
     }
 
     @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+                        String sortOrder) {
+        final SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        final SelectionBuilder builder = buildSimpleSelection(uri);
+
+        Cursor cursor = builder
+                .where(selection, selectionArgs)
+                .query(db, projection, sortOrder);
+
+        // make sure listeners are notified
+        Context context = getContext();
+        if (context != null) {
+            cursor.setNotificationUri(context.getContentResolver(), uri);
+        }
+        return cursor;
+    }
+
+    @Override
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
         Uri returnUri;
-        long id;
 
-        switch (sUriMatcher.match(uri)) {
+        switch (match) {
             case NEWSENTRIES: {
-                id = db.insert(Tables.TABLE_NEWSENTRIES, null, values);
-                if (id <= 0) {
-                    throw new SQLException("Failed to insert row into " + uri);
-                }
-                returnUri = NewsEntries.buildEntryUri(id);
+                db.insertOrThrow(Tables.TABLE_NEWSENTRIES, null, values);
+                returnUri = NewsEntries.buildEntryUri(values.getAsString(NewsEntries.KEY_LINK));
                 break;
             }
             default: {
@@ -114,20 +96,13 @@ public class NewsProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String whereClause, String[] whereArgs) {
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int rowsDeleted;
+        final SelectionBuilder builder = buildSimpleSelection(uri);
 
-        switch (sUriMatcher.match(uri)) {
-            case NEWSENTRIES: {
-                rowsDeleted = db.delete(Tables.TABLE_NEWSENTRIES,
-                        whereClause, whereArgs);
-                break;
-            }
-            default: {
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
-            }
-        }
+        int rowsDeleted = builder
+                .where(selection, selectionArgs)
+                .delete(db);
 
         if (rowsDeleted != 0) {
             // make sure listeners are notified
@@ -137,25 +112,64 @@ public class NewsProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int rowsUpdated;
+        final SelectionBuilder builder = buildSimpleSelection(uri);
 
-        switch (sUriMatcher.match(uri)) {
-            case NEWSENTRIES: {
-                rowsUpdated = db.update(NewsDatabase.Tables.TABLE_NEWSENTRIES,
-                        values, whereClause, whereArgs);
-                break;
-            }
-            default: {
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
-            }
-        }
+        int rowsUpdated = builder
+                .where(selection, selectionArgs)
+                .update(db, values);
 
         if (rowsUpdated != 0) {
             // make sure listeners are notified
             getContext().getContentResolver().notifyChange(uri, null);
         }
         return rowsUpdated;
+    }
+
+    /**
+     * Apply the given set of {@link android.content.ContentProviderOperation}, executing inside
+     * a {@link SQLiteDatabase} transaction. All changes will be rolled back if
+     * any single one fails.
+     *
+     * This method was probably copied verbatim from the source code of the Google IO 2014 app.
+     */
+    @Override
+    public ContentProviderResult[] applyBatch(@NonNull ArrayList<ContentProviderOperation> operations)
+            throws OperationApplicationException {
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            final int numOperations = operations.size();
+            final ContentProviderResult[] results = new ContentProviderResult[numOperations];
+            for (int i = 0; i < numOperations; i++) {
+                results[i] = operations.get(i).apply(this, results, i);
+            }
+            db.setTransactionSuccessful();
+            return results;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    // Used by query, update, delete
+    @NonNull
+    private SelectionBuilder buildSimpleSelection(@NonNull Uri uri) {
+        final int match = sUriMatcher.match(uri);
+        final SelectionBuilder builder = new SelectionBuilder();
+        switch (match) {
+            case NEWSENTRIES: {
+                return builder.table(Tables.TABLE_NEWSENTRIES);
+            }
+            case NEWSENTRIES_LINK: {
+                final String link = NewsEntries.getLink(uri);
+                return builder.table(Tables.TABLE_NEWSENTRIES)
+                        .where(NewsEntries.KEY_LINK + "=?", link);
+            }
+
+            default: {
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
+        }
     }
 }

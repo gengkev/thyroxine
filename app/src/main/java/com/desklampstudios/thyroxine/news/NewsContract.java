@@ -25,18 +25,18 @@ class NewsContract {
         static final String KEY_CONTENT = "content";
         static final String KEY_SNIPPET = "content_snippet";
 
-        public static Uri buildEntryUri(long id) {
+        public static Uri buildEntryUri(String link) {
             return CONTENT_URI.buildUpon()
-                    .appendPath(String.valueOf(id))
+                    .appendPath(link)
                     .build();
         }
-        public static long getEntryId(Uri uri) {
-            return Long.parseLong(uri.getPathSegments().get(1));
+        public static String getLink(Uri uri) {
+            return uri.getPathSegments().get(1);
         }
 
         // converting to and from not-really-pojos yooooo
         // this is so yooo i can't even :')
-        static NewsEntry contentValuesToNewsEntry(ContentValues values) {
+        static NewsEntry fromContentValues(ContentValues values) {
             return new NewsEntry(
                     values.getAsString(NewsEntries.KEY_LINK),
                     values.getAsString(NewsEntries.KEY_TITLE),
@@ -45,7 +45,7 @@ class NewsContract {
                     values.getAsString(NewsEntries.KEY_SNIPPET)
             );
         }
-        static ContentValues newsEntryToContentValues(NewsEntry entry) {
+        static ContentValues toContentValues(NewsEntry entry) {
             ContentValues values = new ContentValues();
             values.put(NewsEntries.KEY_TITLE, entry.title);
             values.put(NewsEntries.KEY_DATE, entry.published);

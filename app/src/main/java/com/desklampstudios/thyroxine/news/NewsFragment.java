@@ -30,9 +30,18 @@ import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 public class NewsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
         SyncStatusObserver {
     private static final String TAG = NewsFragment.class.getSimpleName();
-    public static final String EXTRA_NEWS_ID = "com.desklampstudios.thyroxine.news.id";
+    public static final String EXTRA_NEWS_LINK = "com.desklampstudios.thyroxine.news.KEY_LINK";
     public static final String ARG_LOGGED_IN = "loggedIn";
     private static final int NEWS_LOADER = 0;
+
+    private static final String[] NEWS_PROJECTION = new String[] {
+            NewsContract.NewsEntries._ID,
+            NewsContract.NewsEntries.KEY_TITLE,
+            NewsContract.NewsEntries.KEY_DATE,
+            NewsContract.NewsEntries.KEY_LINK,
+            //NewsContract.NewsEntries.KEY_CONTENT,
+            NewsContract.NewsEntries.KEY_SNIPPET
+    };
 
     private NewsListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeLayout;
@@ -78,8 +87,9 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
                 Cursor cursor = mAdapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(pos)) {
-                    long id = cursor.getLong(cursor.getColumnIndex(NewsContract.NewsEntries._ID));
-                    openNewsDetailActivity(id);
+                    String link = cursor.getString(
+                            cursor.getColumnIndex(NewsContract.NewsEntries.KEY_LINK));
+                    openNewsDetailActivity(link);
                 }
             }
         });
@@ -175,11 +185,11 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     // Called when an item in the adapter is clicked
-    private void openNewsDetailActivity(long id) {
+    private void openNewsDetailActivity(String link) {
         // Toast.makeText(getApplicationContext(), "Entry: " + entry, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), NewsDetailActivity.class);
-        intent.putExtra(EXTRA_NEWS_ID, id);
+        intent.putExtra(EXTRA_NEWS_LINK, link);
         startActivity(intent);
     }
 
@@ -195,12 +205,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
             return new CursorLoader(
                     getActivity(),
                     NewsContract.NewsEntries.CONTENT_URI,
-                    new String[] { // columns
-                            NewsContract.NewsEntries._ID,
-                            NewsContract.NewsEntries.KEY_TITLE,
-                            NewsContract.NewsEntries.KEY_DATE,
-                            NewsContract.NewsEntries.KEY_SNIPPET
-                    },
+                    NEWS_PROJECTION,
                     null, // selection
                     null, // selectionArgs
                     NewsContract.NewsEntries.KEY_DATE + " DESC" // orderBy

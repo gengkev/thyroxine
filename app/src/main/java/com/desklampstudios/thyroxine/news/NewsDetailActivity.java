@@ -50,11 +50,11 @@ public class NewsDetailActivity extends ActionBarActivity {
         WebView webView = (WebView) findViewById(R.id.news_entry_webview);
 
         Intent intent = getIntent();
-        long id = intent.getLongExtra(NewsFragment.EXTRA_NEWS_ID, -1);
+        String link = intent.getStringExtra(NewsFragment.EXTRA_NEWS_LINK);
 
         // load from db
         Cursor cursor = getContentResolver().query(
-                NewsContract.NewsEntries.buildEntryUri(id),
+                NewsContract.NewsEntries.buildEntryUri(link),
                 null, // projection
                 null, null, null);
 
@@ -63,7 +63,7 @@ public class NewsDetailActivity extends ActionBarActivity {
             return;
         }
         ContentValues values = Utils.cursorRowToContentValues(cursor);
-        mNewsEntry = NewsContract.NewsEntries.contentValuesToNewsEntry(values);
+        mNewsEntry = NewsContract.NewsEntries.fromContentValues(values);
 
         Log.d(TAG, "Entry: " + mNewsEntry);
 

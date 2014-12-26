@@ -47,18 +47,63 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
 
-    public static final String[] BLOCK_PROJECTION = new String[] {
+    private static final String[] BLOCK_PROJECTION = new String[] {
             EighthContract.Blocks._ID,
             EighthContract.Blocks.KEY_BLOCK_ID,
             EighthContract.Blocks.KEY_TYPE,
             EighthContract.Blocks.KEY_DATE,
             EighthContract.Blocks.KEY_LOCKED
     };
-    public static final String[] SCHEDULE_PROJECTION = new String[] {
+    private static final String[] SCHEDULE_PROJECTION = new String[] {
             EighthContract.Schedule._ID,
             EighthContract.Schedule.KEY_BLOCK_ID,
             EighthContract.Schedule.KEY_ACTV_ID
     };
+
+    private static final Utils.MergeInterface<EighthBlock, Integer> BLOCKS_MERGE_INTERFACE =
+            new Utils.MergeInterface<EighthBlock, Integer>() {
+                @Override
+                public ContentValues toContentValues(EighthBlock item) {
+                    return EighthContract.Blocks.toContentValues(item);
+                }
+                @Override
+                public EighthBlock fromContentValues(ContentValues values) {
+                    return EighthContract.Blocks.fromContentValues(values);
+                }
+                @Override
+                public Integer getId(EighthBlock item) {
+                    return item.blockId;
+                }
+                @Override
+                public Uri buildContentUri(Integer id) {
+                    return EighthContract.Blocks.buildBlockUri(id);
+                }
+            };
+
+    private static final Utils.MergeInterface<Pair<Integer, Integer>, Integer> SCHEDULE_MERGE_INTERFACE =
+            new Utils.MergeInterface<Pair<Integer, Integer>, Integer>() {
+                @Override
+                public ContentValues toContentValues(Pair<Integer, Integer> item) {
+                    ContentValues values = new ContentValues();
+                    values.put(EighthContract.Schedule.KEY_BLOCK_ID, item.first);
+                    values.put(EighthContract.Schedule.KEY_ACTV_ID, item.second);
+                    return values;
+                }
+                @Override
+                public Pair<Integer, Integer> fromContentValues(ContentValues values) {
+                    int blockId = values.getAsInteger(EighthContract.Schedule.KEY_BLOCK_ID);
+                    int actvId = values.getAsInteger(EighthContract.Schedule.KEY_ACTV_ID);
+                    return new Pair<>(blockId, actvId);
+                }
+                @Override
+                public Integer getId(Pair<Integer, Integer> item) {
+                    return item.first;
+                }
+                @Override
+                public Uri buildContentUri(Integer id) {
+                    return EighthContract.Schedule.buildScheduleUri(id);
+                }
+            };
 
     public EighthSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -182,66 +227,21 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                                        @NonNull final SyncResult syncResult)
             throws RemoteException, OperationApplicationException, SQLiteException {
 
-        ArrayList<ContentProviderOperation> batch = new ArrayList<>();
-
-        HashMap<Integer, EighthBlock> entryMap = new HashMap<>();
-        for (EighthBlock block : blockList) {
-            entryMap.put(block.blockId, block);
-        }
-
-        Cursor c = provider.query(EighthContract.Blocks.CONTENT_URI,
+        Cursor queryCursor = provider.query(EighthContract.Blocks.CONTENT_URI,
                 BLOCK_PROJECTION, null, null, null);
-        assert c != null;
+        assert queryCursor != null;
 
-        while (c.moveToNext()) {
-            syncResult.stats.numEntries++;
-            final int blockId = c.getInt(c.getColumnIndex(EighthContract.Blocks.KEY_BLOCK_ID));
-            final Uri blockUri = EighthContract.Blocks.buildBlockUri(blockId);
+        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+                EighthBlock.class.getSimpleName(),
+                blockList,
+                queryCursor,
+                EighthContract.Blocks.CONTENT_URI,
+                BLOCKS_MERGE_INTERFACE,
+                syncResult.stats);
 
-            // Get current database entries
-            final ContentValues oldBlockValues = Utils.cursorRowToContentValues(c);
-            final EighthBlock oldBlock = EighthContract.Blocks.fromContentValues(oldBlockValues);
-
-            // Compare to new data
-            EighthBlock newBlock = entryMap.get(blockId);
-            if (newBlock != null) {
-                // Item exists in the new data; remove to prevent insert later.
-                entryMap.remove(blockId);
-
-                // Check if an update is necessary
-                if (!oldBlock.equals(newBlock)) {
-                    syncResult.stats.numUpdates++;
-                    Log.v(TAG, "blockId=" + blockId + ", scheduling block update");
-                    ContentValues newValues = EighthContract.Blocks.toContentValues(newBlock);
-
-                    batch.add(ContentProviderOperation.newUpdate(blockUri)
-                            .withValues(newValues).build());
-                } else {
-                    Log.v(TAG, "blockId=" + blockId + ", no block update necessary.");
-                }
-            } else {
-                // Item doesn't exist in the new data; remove it from the database.
-                syncResult.stats.numDeletes++;
-                Log.v(TAG, "blockId=" + blockId + ", scheduling block delete");
-                batch.add(ContentProviderOperation.newDelete(blockUri).build());
-            }
-        }
-        c.close();
-
-        // Add new items (everything left in the map not found in the database)
-        for (int blockId : entryMap.keySet()) {
-            syncResult.stats.numInserts++;
-            Log.v(TAG, "blockId=" + blockId + ", scheduling block insert");
-
-            EighthBlock newBlock = entryMap.get(blockId);
-            ContentValues newValues = EighthContract.Blocks.toContentValues(newBlock);
-
-            batch.add(ContentProviderOperation.newInsert(EighthContract.Blocks.CONTENT_URI)
-                    .withValues(newValues).build());
-        }
-
-        Log.d(TAG, "Merge solution ready; applying batch update");
-        provider.applyBatch(batch);
+        ContentProviderResult[] results = provider.applyBatch(batch);
+        Log.d(TAG, results.length + " operations performed.");
+        // Log.d(TAG, "results: " + Arrays.toString(results));
 
         final ContentResolver resolver = getContext().getContentResolver();
         resolver.notifyChange(
@@ -252,77 +252,26 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * This method was highly inspired by the one in BasicSyncAdapter.
      */
-    private void updateSelectedActvData(@NonNull List<Pair<Integer, Integer>> pairs,
+    private void updateSelectedActvData(@NonNull List<Pair<Integer, Integer>> pairList,
                                         @NonNull ContentProviderClient provider,
                                         @NonNull final SyncResult syncResult)
             throws RemoteException, OperationApplicationException, SQLiteException {
 
-        ArrayList<ContentProviderOperation> batch = new ArrayList<>();
-
-        HashMap<Integer, Pair<Integer, Integer>> entryMap = new HashMap<>();
-        for (Pair<Integer, Integer> pair : pairs) {
-            entryMap.put(pair.first, pair);
-        }
-
-        Cursor c = provider.query(EighthContract.Schedule.CONTENT_URI,
+        Cursor queryCursor = provider.query(EighthContract.Schedule.CONTENT_URI,
                 SCHEDULE_PROJECTION, null, null, null);
-        assert c != null;
+        assert queryCursor != null;
 
-        while (c.moveToNext()) {
-            syncResult.stats.numEntries++;
-            final int blockId = c.getInt(c.getColumnIndex(EighthContract.Schedule.KEY_BLOCK_ID));
-            final Uri pairUri = EighthContract.Schedule.buildScheduleUri(blockId);
+        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+                "Schedule",
+                pairList,
+                queryCursor,
+                EighthContract.Blocks.CONTENT_URI,
+                SCHEDULE_MERGE_INTERFACE,
+                syncResult.stats);
 
-            // Get current database entries
-            final int oldActvId = c.getInt(c.getColumnIndex(EighthContract.Schedule.KEY_ACTV_ID));
-
-            // Compare to new data
-            Pair<Integer, Integer> newPair = entryMap.get(blockId);
-            if (newPair != null) {
-                // Item exists in the new data; remove to prevent insert later.
-                entryMap.remove(blockId);
-
-                // Check if an update is necessary
-                if (oldActvId != newPair.second) {
-                    syncResult.stats.numUpdates++;
-                    Log.v(TAG, "blockId=" + blockId + ", scheduling selectedActv update " +
-                                    "(" + oldActvId + " != " + newPair.second + ")");
-                    ContentValues newValues = new ContentValues();
-                    newValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
-                    newValues.put(EighthContract.Schedule.KEY_ACTV_ID, newPair.second);
-                    Log.v(TAG, "newValues=" + newValues);
-
-                    batch.add(ContentProviderOperation.newUpdate(pairUri)
-                            .withValues(newValues).build());
-                } else {
-                    Log.v(TAG, "blockId=" + blockId + ", no selectedActv update necessary.");
-                }
-            } else {
-                // Item doesn't exist in the new data; remove it from the database.
-                syncResult.stats.numDeletes++;
-                Log.v(TAG, "blockId=" + blockId + ", scheduling selectedActv delete");
-                batch.add(ContentProviderOperation.newDelete(pairUri).build());
-            }
-        }
-        c.close();
-
-        // Add new items (everything left in the map not found in the database)
-        for (int blockId : entryMap.keySet()) {
-            syncResult.stats.numInserts++;
-            Log.v(TAG, "blockId=" + blockId + ", scheduling selectedActv insert");
-
-            Pair<Integer, Integer> newPair = entryMap.get(blockId);
-            ContentValues newValues = new ContentValues();
-            newValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
-            newValues.put(EighthContract.Schedule.KEY_ACTV_ID, newPair.second);
-
-            batch.add(ContentProviderOperation.newInsert(EighthContract.Schedule.CONTENT_URI)
-                    .withValues(newValues).build());
-        }
-
-        Log.d(TAG, "Merge solution ready; applying batch update");
         ContentProviderResult[] results = provider.applyBatch(batch);
-        Log.d(TAG, Arrays.toString(results));
+        Log.d(TAG, results.length + " operations performed.");
+        // Log.d(TAG, "results: " + Arrays.toString(results));
 
         final ContentResolver resolver = getContext().getContentResolver();
         resolver.notifyChange(
