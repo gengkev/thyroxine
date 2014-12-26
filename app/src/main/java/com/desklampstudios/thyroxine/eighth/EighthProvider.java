@@ -1,8 +1,11 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,6 +13,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.desklampstudios.thyroxine.util.SelectionBuilder;
+
+import java.util.ArrayList;
 
 import static com.desklampstudios.thyroxine.eighth.EighthContract.ActvInstances;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
@@ -186,6 +191,31 @@ public class EighthProvider extends ContentProvider {
             getContext().getContentResolver().notifyChange(uri, null);
         }
         return rowsUpdated;
+    }
+
+    /**
+     * Apply the given set of {@link ContentProviderOperation}, executing inside
+     * a {@link SQLiteDatabase} transaction. All changes will be rolled back if
+     * any single one fails.
+     *
+     * This method was probably copied verbatim from the source code of the Google IO 2014 app.
+     */
+    @Override
+    public ContentProviderResult[] applyBatch(@NonNull ArrayList<ContentProviderOperation> operations)
+            throws OperationApplicationException {
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            final int numOperations = operations.size();
+            final ContentProviderResult[] results = new ContentProviderResult[numOperations];
+            for (int i = 0; i < numOperations; i++) {
+                results[i] = operations.get(i).apply(this, results, i);
+            }
+            db.setTransactionSuccessful();
+            return results;
+        } finally {
+            db.endTransaction();
+        }
     }
 
     // Used by remove, update

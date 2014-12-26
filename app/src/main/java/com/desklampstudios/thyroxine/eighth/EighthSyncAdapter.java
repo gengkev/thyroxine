@@ -7,9 +7,12 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
@@ -17,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
 
@@ -31,13 +35,30 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = EighthSyncAdapter.class.getSimpleName();
+    private static final String KEY_AUTHTOKEN_RETRY = "authTokenRetry";
 
     // Sync intervals
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+
+    public static final String[] BLOCK_PROJECTION = new String[] {
+            EighthContract.Blocks._ID,
+            EighthContract.Blocks.KEY_BLOCK_ID,
+            EighthContract.Blocks.KEY_TYPE,
+            EighthContract.Blocks.KEY_DATE,
+            EighthContract.Blocks.KEY_LOCKED
+    };
+    public static final String[] SCHEDULE_PROJECTION = new String[] {
+            EighthContract.Schedule._ID,
+            EighthContract.Schedule.KEY_BLOCK_ID,
+            EighthContract.Schedule.KEY_ACTV_ID
+    };
 
     public EighthSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -47,16 +68,13 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
-
         final AccountManager am = AccountManager.get(getContext());
-        AccountManagerFuture<Bundle> future = am.getAuthToken(account,
-                IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, Bundle.EMPTY, true, null, null);
 
+        // Part I. Get auth token
         String authToken;
         try {
-            Bundle bundle = future.getResult();
-            authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-            Log.v(TAG, "Got bundle: " + bundle);
+            authToken = am.blockingGetAuthToken(account,
+                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
         } catch (IOException e) {
             Log.e(TAG, "Connection error: " + e.toString());
             syncResult.stats.numIoExceptions++;
@@ -66,44 +84,70 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numAuthExceptions++;
             return;
         }
+        Log.v(TAG, "Got auth token: " + authToken);
 
-        ArrayList<Pair<EighthBlock, Integer>> schedule;
+
+        // Part II. Get schedule (list of blocks)
+        List<Pair<EighthBlock, Integer>> schedule;
         try {
-            schedule = fetchSchedule(authToken, syncResult);
-            Log.d(TAG, "got schedule (" + schedule.size() + " items)");
-        }
-        catch (IodineAuthException.NotLoggedInException e) {
+            schedule = fetchSchedule(authToken);
+        } catch (IodineAuthException.NotLoggedInException e) {
             Log.d(TAG, "Not logged in, invalidating auth token", e);
             am.invalidateAuthToken(account.type, authToken);
-            // TODO: retry
-            return;
-        }
 
-        // TODO: make faster with transactions?
-        // Update all blocks
-        try {
-            for (Pair<EighthBlock, Integer> pair : schedule) {
-                updateEighthBlock(pair.first, provider);
-                updateSelectedActv(pair.first.blockId, pair.second, provider);
+            // Automatically retry sync, but only once
+            if (!extras.getBoolean(KEY_AUTHTOKEN_RETRY, false)) {
+                extras.putBoolean(KEY_AUTHTOKEN_RETRY, true);
+                Log.d(TAG, "Retrying sync once, recursively. extras: " + extras);
+                onPerformSync(account, extras, authority, provider, syncResult);
+            } else {
+                Log.d(TAG, "Retry token found; will not retry sync again.");
+                syncResult.stats.numAuthExceptions++;
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
-            syncResult.databaseError = true;
             return;
-        } catch (SQLiteException e) {
-            Log.e(TAG, "SQLiteException", e);
+        } catch (IodineAuthException e) {
+            Log.e(TAG, "Iodine auth error", e);
+            syncResult.stats.numAuthExceptions++;
+            return;
+        } catch (IOException e) {
+            Log.e(TAG, "Connection error", e);
+            syncResult.stats.numIoExceptions++;
+            return;
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XML parsing error", e);
+            syncResult.stats.numParseExceptions++;
+            return;
+        }
+        Log.v(TAG, "Got schedule (" + schedule.size() + " blocks)");
+
+
+        // Part III. Update blocks in database
+        ArrayList<EighthBlock> blockList = new ArrayList<>(schedule.size());
+        ArrayList<Pair<Integer, Integer>> selectedActvList = new ArrayList<>(schedule.size());
+        for (Pair<EighthBlock, Integer> pair : schedule) {
+            blockList.add(pair.first);
+            selectedActvList.add(new Pair<>(pair.first.blockId, pair.second));
+        }
+
+        try {
+            updateEighthBlockData(blockList, provider, syncResult);
+            updateSelectedActvData(selectedActvList, provider, syncResult);
+        } catch (RemoteException | SQLiteException | OperationApplicationException e) {
+            Log.e(TAG, "Updating database failed", e);
             syncResult.databaseError = true;
             return;
         }
-
-        Log.d(TAG, "updated database; done syncing");
+        Log.v(TAG, "Updated database; done syncing");
     }
 
-    private ArrayList<Pair<EighthBlock, Integer>> fetchSchedule(String authToken, SyncResult syncResult)
-            throws IodineAuthException.NotLoggedInException {
+
+    private List<Pair<EighthBlock, Integer>> fetchSchedule(String authToken)
+            throws IodineAuthException, IOException, XmlPullParserException {
 
         InputStream stream = null;
         EighthListBlocksParser parser = null;
+        List<Pair<EighthBlock, Integer>> pairList = new ArrayList<>();
+        Pair<EighthBlock, Integer> pair;
 
         try {
             stream = IodineApiHelper.getBlockList(authToken);
@@ -111,128 +155,182 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             parser = new EighthListBlocksParser(getContext());
             parser.beginListBlocks(stream);
 
-            ArrayList<Pair<EighthBlock, Integer>> pairList = new ArrayList<>();
-
-            Pair<EighthBlock, Integer> pair = parser.nextBlock();
+            pair = parser.nextBlock();
             while (pair != null) {
                 pairList.add(pair);
                 pair = parser.nextBlock();
             }
-
-            return pairList;
-        }
-        catch (IOException e) {
-            Log.e(TAG, "Connection error", e);
-            syncResult.stats.numIoExceptions++;
-            return null;
-        }
-        catch (IodineAuthException e) {
-            if (e instanceof IodineAuthException.NotLoggedInException) {
-                throw (IodineAuthException.NotLoggedInException)e;
-            }
-            Log.e(TAG, "Iodine auth error", e);
-            syncResult.stats.numAuthExceptions++;
-            return null;
-        }
-        catch (XmlPullParserException e) {
-            Log.e(TAG, "XML parsing error", e);
-            syncResult.stats.numParseExceptions++;
-            return null;
-        }
-        finally {
+        } finally {
             if (parser != null)
                 parser.stopParse();
             try {
-                if (stream != null) stream.close();
+                if (stream != null)
+                    stream.close();
             } catch (IOException e) {
                 Log.e(TAG, "IOException when closing stream: " + e);
             }
         }
+
+        return pairList;
     }
 
     /**
-     * Updates a block in the database.
-     * @param block Block to update
-     * @param provider Content provider client to access the database with
-     * @throws RemoteException
+     * This method was highly inspired by the one in BasicSyncAdapter.
      */
-    private void updateEighthBlock(@NonNull EighthBlock block,
-                                   @NonNull ContentProviderClient provider) throws RemoteException {
+    private void updateEighthBlockData(@NonNull List<EighthBlock> blockList,
+                                       @NonNull ContentProviderClient provider,
+                                       @NonNull final SyncResult syncResult)
+            throws RemoteException, OperationApplicationException, SQLiteException {
 
-        final ContentValues newValues = EighthContract.Blocks.toContentValues(block);
+        ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
-        // test if record exists
-        Cursor c = provider.query(
-                EighthContract.Blocks.buildBlockUri(block.blockId),
-                new String[] { // projection
-                        EighthContract.Blocks._ID,
-                        EighthContract.Blocks.KEY_BLOCK_ID,
-                        EighthContract.Blocks.KEY_TYPE,
-                        EighthContract.Blocks.KEY_DATE,
-                        EighthContract.Blocks.KEY_LOCKED
-                }, null, null, null);
-
-        if (c.moveToFirst()) { // already exists
-            Log.v(TAG, "EighthBlock with same blockId already exists (bid " + block.blockId + ")");
-
-            ContentValues oldValues = Utils.cursorRowToContentValues(c);
-            EighthBlock oldBlock = EighthContract.Blocks.fromContentValues(oldValues);
-
-            // Compare old values to new values
-            if (!block.equals(oldBlock)) {
-                provider.update(
-                        EighthContract.Blocks.buildBlockUri(block.blockId),
-                        newValues, null, null);
-
-                Log.d(TAG, "EighthBlock updated: " + block);
-                Log.d(TAG, "Old EighthBlock: " + oldBlock);
-            }
-        } else { // must insert
-            Uri uri = provider.insert(EighthContract.Blocks.CONTENT_URI, newValues);
-            Log.v(TAG, "Inserted new EighthBlock with uri: " + uri);
+        HashMap<Integer, EighthBlock> entryMap = new HashMap<>();
+        for (EighthBlock block : blockList) {
+            entryMap.put(block.blockId, block);
         }
 
+        Cursor c = provider.query(EighthContract.Blocks.CONTENT_URI,
+                BLOCK_PROJECTION, null, null, null);
+        assert c != null;
+
+        while (c.moveToNext()) {
+            syncResult.stats.numEntries++;
+            final int blockId = c.getInt(c.getColumnIndex(EighthContract.Blocks.KEY_BLOCK_ID));
+            final Uri blockUri = EighthContract.Blocks.buildBlockUri(blockId);
+
+            // Get current database entries
+            final ContentValues oldBlockValues = Utils.cursorRowToContentValues(c);
+            final EighthBlock oldBlock = EighthContract.Blocks.fromContentValues(oldBlockValues);
+
+            // Compare to new data
+            EighthBlock newBlock = entryMap.get(blockId);
+            if (newBlock != null) {
+                // Item exists in the new data; remove to prevent insert later.
+                entryMap.remove(blockId);
+
+                // Check if an update is necessary
+                if (!oldBlock.equals(newBlock)) {
+                    syncResult.stats.numUpdates++;
+                    Log.v(TAG, "blockId=" + blockId + ", scheduling block update");
+                    ContentValues newValues = EighthContract.Blocks.toContentValues(newBlock);
+
+                    batch.add(ContentProviderOperation.newUpdate(blockUri)
+                            .withValues(newValues).build());
+                } else {
+                    Log.v(TAG, "blockId=" + blockId + ", no block update necessary.");
+                }
+            } else {
+                // Item doesn't exist in the new data; remove it from the database.
+                syncResult.stats.numDeletes++;
+                Log.v(TAG, "blockId=" + blockId + ", scheduling block delete");
+                batch.add(ContentProviderOperation.newDelete(blockUri).build());
+            }
+        }
         c.close();
+
+        // Add new items (everything left in the map not found in the database)
+        for (int blockId : entryMap.keySet()) {
+            syncResult.stats.numInserts++;
+            Log.v(TAG, "blockId=" + blockId + ", scheduling block insert");
+
+            EighthBlock newBlock = entryMap.get(blockId);
+            ContentValues newValues = EighthContract.Blocks.toContentValues(newBlock);
+
+            batch.add(ContentProviderOperation.newInsert(EighthContract.Blocks.CONTENT_URI)
+                    .withValues(newValues).build());
+        }
+
+        Log.d(TAG, "Merge solution ready; applying batch update");
+        provider.applyBatch(batch);
+
+        final ContentResolver resolver = getContext().getContentResolver();
+        resolver.notifyChange(
+                EighthContract.Blocks.CONTENT_URI,
+                null, false); // IMPORTANT: Do not sync to network
     }
 
     /**
-     * Updates the user's selected activity for a given block in the database
-     * @param blockId ID of block to update
-     * @param actvId ID of selected activity for the block
-     * @param provider Content provider client to access the database with
-     * @throws RemoteException
+     * This method was highly inspired by the one in BasicSyncAdapter.
      */
-    private void updateSelectedActv(int blockId, int actvId,
-                                    @NonNull ContentProviderClient provider) throws RemoteException {
+    private void updateSelectedActvData(@NonNull List<Pair<Integer, Integer>> pairs,
+                                        @NonNull ContentProviderClient provider,
+                                        @NonNull final SyncResult syncResult)
+            throws RemoteException, OperationApplicationException, SQLiteException {
 
-        final ContentValues newValues = new ContentValues();
-        newValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
-        newValues.put(EighthContract.Schedule.KEY_ACTV_ID, actvId);
+        ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
-        // test if record exists
-        Cursor c = provider.query(
-                EighthContract.Schedule.buildScheduleUri(blockId),
-                null, // projection
-                null, null, null);
-
-        if (c.moveToFirst()) { // already exists
-            ContentValues oldValues = Utils.cursorRowToContentValues(c);
-            int oldActvId = oldValues.getAsInteger(EighthContract.Schedule.KEY_ACTV_ID);
-
-            // compare old value to new value
-            if (actvId != oldActvId) {
-                provider.update(
-                        EighthContract.Schedule.buildScheduleUri(blockId),
-                        newValues, null, null);
-
-                Log.d(TAG, "current activity updated: " + oldValues + " -> " + newValues);
-            }
-        } else {
-            Uri uri = provider.insert(EighthContract.Schedule.CONTENT_URI, newValues);
-            Log.v(TAG, "current activity inserted: " + newValues + ", uri: " + uri);
+        HashMap<Integer, Pair<Integer, Integer>> entryMap = new HashMap<>();
+        for (Pair<Integer, Integer> pair : pairs) {
+            entryMap.put(pair.first, pair);
         }
 
+        Cursor c = provider.query(EighthContract.Schedule.CONTENT_URI,
+                SCHEDULE_PROJECTION, null, null, null);
+        assert c != null;
+
+        while (c.moveToNext()) {
+            syncResult.stats.numEntries++;
+            final int blockId = c.getInt(c.getColumnIndex(EighthContract.Schedule.KEY_BLOCK_ID));
+            final Uri pairUri = EighthContract.Schedule.buildScheduleUri(blockId);
+
+            // Get current database entries
+            final int oldActvId = c.getInt(c.getColumnIndex(EighthContract.Schedule.KEY_ACTV_ID));
+
+            // Compare to new data
+            Pair<Integer, Integer> newPair = entryMap.get(blockId);
+            if (newPair != null) {
+                // Item exists in the new data; remove to prevent insert later.
+                entryMap.remove(blockId);
+
+                // Check if an update is necessary
+                if (oldActvId != newPair.second) {
+                    syncResult.stats.numUpdates++;
+                    Log.v(TAG, "blockId=" + blockId + ", scheduling selectedActv update " +
+                                    "(" + oldActvId + " != " + newPair.second + ")");
+                    ContentValues newValues = new ContentValues();
+                    newValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
+                    newValues.put(EighthContract.Schedule.KEY_ACTV_ID, newPair.second);
+                    Log.v(TAG, "newValues=" + newValues);
+
+                    batch.add(ContentProviderOperation.newUpdate(pairUri)
+                            .withValues(newValues).build());
+                } else {
+                    Log.v(TAG, "blockId=" + blockId + ", no selectedActv update necessary.");
+                }
+            } else {
+                // Item doesn't exist in the new data; remove it from the database.
+                syncResult.stats.numDeletes++;
+                Log.v(TAG, "blockId=" + blockId + ", scheduling selectedActv delete");
+                batch.add(ContentProviderOperation.newDelete(pairUri).build());
+            }
+        }
         c.close();
+
+        // Add new items (everything left in the map not found in the database)
+        for (int blockId : entryMap.keySet()) {
+            syncResult.stats.numInserts++;
+            Log.v(TAG, "blockId=" + blockId + ", scheduling selectedActv insert");
+
+            Pair<Integer, Integer> newPair = entryMap.get(blockId);
+            ContentValues newValues = new ContentValues();
+            newValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
+            newValues.put(EighthContract.Schedule.KEY_ACTV_ID, newPair.second);
+
+            batch.add(ContentProviderOperation.newInsert(EighthContract.Schedule.CONTENT_URI)
+                    .withValues(newValues).build());
+        }
+
+        Log.d(TAG, "Merge solution ready; applying batch update");
+        ContentProviderResult[] results = provider.applyBatch(batch);
+        Log.d(TAG, Arrays.toString(results));
+
+        final ContentResolver resolver = getContext().getContentResolver();
+        resolver.notifyChange(
+                EighthContract.Schedule.CONTENT_URI,
+                null, false); // IMPORTANT: Do not sync to network
+        resolver.notifyChange(
+                EighthContract.Blocks.CONTENT_URI,
+                null, false); // IMPORTANT: Do not sync to network
     }
 
     /**
