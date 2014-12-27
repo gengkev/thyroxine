@@ -26,10 +26,12 @@ import java.util.ArrayList;
 
 class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv, EighthActvInstance>>> {
     private static final String TAG = FetchBlockTask.class.getSimpleName();
+
     private final Activity mActivity;
     private final Account mAccount;
     private final ActvsResultListener mResultListener;
-    @Nullable private Exception exception = null;
+
+    @Nullable private Exception mException = null;
 
     public FetchBlockTask(Activity activity, Account account, ActvsResultListener listener) {
         this.mActivity = activity;
@@ -51,15 +53,16 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
             Log.v(TAG, "Got bundle: " + bundle);
         } catch (IOException e) {
             Log.e(TAG, "Connection error: "+ e.toString());
-            exception = e;
+            mException = e;
             return null;
         } catch (OperationCanceledException | AuthenticatorException e) {
             Log.e(TAG, "Authentication error: " + e.toString());
-            exception = e;
+            mException = e;
             return null;
         }
 
         final int blockId = params[0];
+
         InputStream stream = null;
         EighthGetBlockParser parser = null;
         Pair<EighthBlock, Integer> blockPair;
@@ -85,15 +88,15 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
             Log.d(TAG, "Not logged in, oh no!", e);
             am.invalidateAuthToken(mAccount.type, authToken);
             // TODO: try again automatically
-            exception = e;
+            mException = e;
             return null;
         } catch (IOException | IodineAuthException e) {
             Log.e(TAG, "Connection error: " + e.toString());
-            exception = e;
+            mException = e;
             return null;
         } catch (XmlPullParserException e) {
             Log.e(TAG, "XML error: " + e.toString());
-            exception = e;
+            mException = e;
             return null;
         } finally {
             if (parser != null)
@@ -105,10 +108,6 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
                 Log.e(TAG, "IOException when closing stream: " + e);
             }
         }
-    }
-
-    @Override
-    protected void onProgressUpdate(Void... args) {
     }
 
     /*
@@ -144,14 +143,8 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
 
     @Override
     protected void onPostExecute(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
-        if (exception != null) {
-            if (exception instanceof IodineAuthException.NotLoggedInException) {
-                Toast.makeText(mActivity, R.string.attempt_login_try_again, Toast.LENGTH_LONG).show();
-            } else {
-                String message = mActivity.getResources().getString(
-                        R.string.unexpected_error, exception.toString());
-                Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show();
-            }
+        if (mException != null) {
+            mResultListener.onError(mException);
             return;
         }
 
@@ -161,5 +154,6 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
 
     public interface ActvsResultListener {
         public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList);
+        public void onError(Exception exception);
     }
 }

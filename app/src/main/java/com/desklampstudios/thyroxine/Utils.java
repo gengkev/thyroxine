@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.text.Html;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
@@ -62,42 +63,34 @@ public class Utils {
         MED_DAYMONTH, // Jan 1
         WEEKDAY; // Mon
 
-        public DateFormat get() {
-            Locale locale = Locale.getDefault();
-
+        public String format(Context context, long millis) {
             if (this == FULL_DATETIME) {
-                return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.SHORT, locale);
+                return DateUtils.formatDateTime(context, millis,
+                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY |
+                                DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME);
             } else if (this == FULL_DATE) {
-                return DateFormat.getDateInstance(DateFormat.FULL);
+                DateFormat format = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault());
+                return format.format(new Date(millis));
             } else if (this == MED_DAYMONTH) {
-                String str;
-                if (Build.VERSION.SDK_INT >= 18) {
-                    str = android.text.format.DateFormat.getBestDateTimePattern(locale, "dMMM");
-                } else if (locale.getLanguage().equals("fr")) { // TODO: remove hack
-                    str = "d MMM";
-                } else {
-                    str = "MMM d";
-                }
-                return new SimpleDateFormat(str, locale);
+                return DateUtils.formatDateTime(context, millis,
+                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
             } else if (this == WEEKDAY) {
-                return new SimpleDateFormat("EEE", locale);
+                DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
+                return format.format(new Date(millis));
             } else {
                 throw new IllegalStateException();
             }
         }
-        public String format(Date date) {
-            return get().format(date);
-        }
-    }
 
-    public static String formatBasicDate(String str, DateFormat dateFormat) {
-        Date date = new Date(0);
-        try {
-            date = FixedDateFormats.BASIC.parse(str);
-        } catch (ParseException e) {
-            Log.e(TAG, "Parsing date failed: " + str);
+        public String formatBasicDate(Context context, String str) {
+            Date date = new Date(0);
+            try {
+                date = FixedDateFormats.BASIC.parse(str);
+            } catch (ParseException e) {
+                Log.e(TAG, "Parsing date failed: " + str);
+            }
+            return format(context, date.getTime());
         }
-        return dateFormat.format(date);
     }
 
     public static String cleanHtml(String in) {
@@ -112,10 +105,10 @@ public class Utils {
         return in;
     }
 
-    public static <T> String join(Iterable<T> array, String sep) {
+    public static <E> String join(Iterable<E> array, String sep) {
         StringBuilder out = new StringBuilder();
         boolean first = true;
-        for (T item : array) {
+        for (E item : array) {
             if (first) {
                 first = false;
             } else {
@@ -189,18 +182,18 @@ public class Utils {
         return values;
     }
 
-    public static <T, U> ArrayList<ContentProviderOperation> createMergeBatch(
+    public static <T, K> ArrayList<ContentProviderOperation> createMergeBatch(
             @NonNull String LOG_TYPE,
             @NonNull List<T> itemList,
             @NonNull Cursor queryCursor,
             @NonNull final Uri BASE_CONTENT_URI,
-            @NonNull MergeInterface<T, U> mergeInterface,
+            @NonNull MergeInterface<T, K> mergeInterface,
             @NonNull SyncStats syncStats)
             throws RemoteException, SQLiteException {
 
         final ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
-        final HashMap<U, T> entryMap = new HashMap<>();
+        final HashMap<K, T> entryMap = new HashMap<>();
         for (T item : itemList) {
             entryMap.put(mergeInterface.getId(item), item);
         }
@@ -213,7 +206,7 @@ public class Utils {
             final ContentValues oldItemValues = Utils.cursorRowToContentValues(queryCursor);
             final T oldItem = mergeInterface.fromContentValues(oldItemValues);
 
-            final U id = mergeInterface.getId(oldItem);
+            final K id = mergeInterface.getId(oldItem);
             final Uri itemUri = mergeInterface.buildContentUri(id);
 
             // Compare to new data
@@ -243,7 +236,7 @@ public class Utils {
         queryCursor.close();
 
         // Add new items (everything left in the map not found in the database)
-        for (U id : entryMap.keySet()) {
+        for (K id : entryMap.keySet()) {
             syncStats.numInserts++;
             Log.v(TAG, LOG_TYPE + " id=" + id + ", scheduling block insert");
 

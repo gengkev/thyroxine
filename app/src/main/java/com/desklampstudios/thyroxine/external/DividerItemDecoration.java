@@ -1,4 +1,9 @@
-package com.desklampstudios.thyroxine.util;
+/*
+ * DividerItemDecoration originally from Android source code, found at:
+ * https://gist.github.com/alexfu/0f464fc3742f134ccd1e
+ * Modifications: changed package name
+ */
+
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *
@@ -14,6 +19,8 @@ package com.desklampstudios.thyroxine.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.desklampstudios.thyroxine.external;
 
 import android.content.Context;
 import android.content.res.TypedArray;

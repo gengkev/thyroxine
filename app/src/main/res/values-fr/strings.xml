@@ -57,11 +57,19 @@
     <string name="block_title">Bloc %1$s</string>
     <string name="block_title_date">%1$s bloc %2$s (%3$s)</string>
 
-    <string name="actvInstance_status_cancelled"><![CDATA[<font color="%1$s">Annulée</font>]]></string>
-    <string name="actvInstance_status_full"><![CDATA[<font color="%1$s">Pleine</font>]]></string>
     <string name="actv_id_placeholder">[Activité %1$d]</string>
+    <string name="actv_toast_text">
+        NOM: %1$s
+        \nSALLES: %2$s
+        \nCOMMENTAIRES: %3$s
+        \nDESCRIPTION: %4$s
+        \nINSCRITS: %5$d / %6$d
+    </string>
+
     <string name="actv_not_selected"><![CDATA[<i>Non selectionnée</i>]]></string>
     <string name="block_status_locked">Fermée</string>
+    <string name="actvInstance_status_cancelled"><![CDATA[<font color="%1$s">Annulée</font>]]></string>
+    <string name="actvInstance_status_full"><![CDATA[<font color="%1$s">Pleine</font>]]></string>
     <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Limitée</font>]]></string>
     <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Oblig.</font>]]></string>
 

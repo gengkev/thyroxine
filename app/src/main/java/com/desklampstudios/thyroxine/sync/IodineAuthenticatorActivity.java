@@ -24,7 +24,7 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.util.AbstractAccountAuthenticatorActivity;
+import com.desklampstudios.thyroxine.external.AccountAuthenticatorActivity;
 
 import java.util.regex.Pattern;
 
@@ -34,7 +34,7 @@ import static com.desklampstudios.thyroxine.IodineAuthException.InvalidUsernameE
 /**
  * A login screen that offers login via username/password.
  */
-public class IodineAuthenticatorActivity extends AbstractAccountAuthenticatorActivity {
+public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
     private final static String TAG = IodineAuthenticatorActivity.class.getSimpleName();
     public final static String ARG_ACCOUNT_TYPE = "ACCOUNT_TYPE";
     public final static String ARG_AUTH_TOKEN_TYPE = "AUTH_TOKEN_TYPE";

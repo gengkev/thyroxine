@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import com.desklampstudios.thyroxine.util.SelectionBuilder;
+import com.desklampstudios.thyroxine.external.SelectionBuilder;
 
 import java.util.ArrayList;
 

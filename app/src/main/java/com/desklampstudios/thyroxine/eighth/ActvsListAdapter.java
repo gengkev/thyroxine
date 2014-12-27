@@ -24,6 +24,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
     private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
     private final Context mContext;
     private OnItemClickListener mListener;
+    private int mSelectedActvId = -1;
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public ActvsListAdapter(Context context) {
@@ -35,6 +36,13 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         this.mListener = listener;
     }
 
+    public void setSelectedActvId(int actvId) {
+        this.mSelectedActvId = actvId;
+        if (mDataset.size() > 0) { // oops, already loaded
+            notifyDataSetChanged();
+        }
+    }
+
     // Create new views (invoked by the layout manager)
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -43,9 +51,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
 
         // set the view's size, margins, paddings and layout parameters
 
-        final ViewHolder vh = new ViewHolder(v);
-
-        return vh;
+        return new ViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -57,62 +63,28 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         EighthActv actv = pair.first;
         EighthActvInstance actvInstance = pair.second;
 
-        holder.mNameView.setText(actv.name);
-        holder.mRoomView.setText(actvInstance.roomsStr);
-
+        String name = actv.name;
+        if (actv.actvId == mSelectedActvId) {
+            name = "*" + name;
+        }
         String description = String.format("%s %s",
-                actvInstance.comment, actv.description)
-                .trim();
+                actvInstance.comment, actv.description
+        ).trim();
+
+        holder.mNameView.setText(name);
+        holder.mRoomView.setText(actvInstance.roomsStr);
         holder.mDescriptionView.setText(description);
 
-        ArrayList<String> statuses = new ArrayList<>();
 
-        int color = resources.getColor((position % 2 == 0) ?
-                R.color.actv_background_default_1 :
-                R.color.actv_background_default_2);
-
-        // restricted
-        if ((actv.flags & EighthActv.FLAG_RESTRICTED) != 0) {
-            int textColor = resources.getColor(R.color.actv_textColor_restricted);
-            statuses.add(resources.getString(R.string.actv_status_restricted,
-                    Utils.colorToHtmlHex(textColor)));
-            color = resources.getColor((position % 2 == 0) ?
-                    R.color.actv_background_restricted_1 :
-                    R.color.actv_background_restricted_2);
-        }
-        // sticky
-        if ((actv.flags & EighthActv.FLAG_STICKY) != 0) {
-            int textColor = resources.getColor(R.color.actv_textColor_sticky);
-            statuses.add(resources.getString(R.string.actv_status_sticky,
-                    Utils.colorToHtmlHex(textColor)));
-        }
-        // capacity full
-        if (actvInstance.memberCount >= actvInstance.capacity) {
-            int textColor = resources.getColor(R.color.actvInstance_textColor_full);
-            statuses.add(resources.getString(R.string.actvInstance_status_full,
-                    Utils.colorToHtmlHex(textColor)));
-        }
-        // cancelled
-        if ((actvInstance.flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
-            int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
-            statuses.clear(); // clear other statuses
-            statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
-                    Utils.colorToHtmlHex(textColor)));
-            color = resources.getColor((position % 2 == 0) ?
-                    R.color.actvInstance_background_cancelled_1 :
-                    R.color.actvInstance_background_cancelled_2);
-        }
-
+        long allFlags = actv.flags | actvInstance.flags;
+        boolean full = actvInstance.memberCount >= actvInstance.capacity;
 
         // display statuses
-        if (statuses.size() > 0) {
-            String statusText = Utils.join(statuses, ", ");
-            holder.mStatusView.setText(Html.fromHtml(statusText));
-        } else {
-            holder.mStatusView.setText("");
-        }
+        String statusText = getActvStatuses(resources, allFlags, full);
+        holder.mStatusView.setText(Html.fromHtml(statusText));
 
         // set background color
+        int color = getActvColor(resources, position, allFlags, full);
         holder.mView.setBackgroundColor(color);
 
         // set event listeners
@@ -127,9 +99,64 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                return mListener != null && mListener.onItemLongClick(view, position);
+                if (mListener != null) {
+                    return mListener.onItemLongClick(view, position);
+                }
+                return false;
             }
         });
+    }
+
+    public int getActvColor(final Resources resources, int position, long flags, boolean full) {
+        int color = resources.getColor((position % 2 == 0) ?
+                R.color.actv_background_default_1 :
+                R.color.actv_background_default_2);
+
+        // restricted
+        if ((flags & EighthActv.FLAG_RESTRICTED) != 0) {
+            color = resources.getColor((position % 2 == 0) ?
+                    R.color.actv_background_restricted_1 :
+                    R.color.actv_background_restricted_2);
+        }
+        // cancelled
+        if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
+            color = resources.getColor((position % 2 == 0) ?
+                    R.color.actvInstance_background_cancelled_1 :
+                    R.color.actvInstance_background_cancelled_2);
+        }
+        return color;
+    }
+
+    public String getActvStatuses(final Resources resources, long flags, boolean full) {
+        ArrayList<String> statuses = new ArrayList<>();
+
+        // restricted
+        if ((flags & EighthActv.FLAG_RESTRICTED) != 0) {
+            int textColor = resources.getColor(R.color.actv_textColor_restricted);
+            statuses.add(resources.getString(R.string.actv_status_restricted,
+                    Utils.colorToHtmlHex(textColor)));
+        }
+        // sticky
+        if ((flags & EighthActv.FLAG_STICKY) != 0) {
+            int textColor = resources.getColor(R.color.actv_textColor_sticky);
+            statuses.add(resources.getString(R.string.actv_status_sticky,
+                    Utils.colorToHtmlHex(textColor)));
+        }
+        // capacity full
+        if (full) {
+            int textColor = resources.getColor(R.color.actvInstance_textColor_full);
+            statuses.add(resources.getString(R.string.actvInstance_status_full,
+                    Utils.colorToHtmlHex(textColor)));
+        }
+        // cancelled
+        if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
+            int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
+            statuses.clear(); // clear other statuses
+            statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
+                    Utils.colorToHtmlHex(textColor)));
+        }
+
+        return Utils.join(statuses, ", ");
     }
 
     public void add(Pair<EighthActv, EighthActvInstance> pair) {

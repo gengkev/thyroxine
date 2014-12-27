@@ -1,4 +1,10 @@
 /*
+ * SelectionBuilder class taken from the BasicSyncAdapter sample project located at:
+ * http://developer.android.com/samples/BasicSyncAdapter/src/com.example.android.common/db/SelectionBuilder.html
+ * Modifications: changed package name, log tag
+ */
+
+/*
  * Copyright 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +26,7 @@
  * -Changed package name
  */
 
-package com.desklampstudios.thyroxine.util;
+package com.desklampstudios.thyroxine.external;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -91,7 +97,7 @@ import java.util.Map;
  * This class is <em>not</em> thread safe.
  */
 public class SelectionBuilder {
-    private static final String TAG = "basicsyncadapter";
+    private static final String TAG = "SelectionBuilder";
 
     private String mTable = null;
     private Map<String, String> mProjectionMap = new HashMap<String, String>();

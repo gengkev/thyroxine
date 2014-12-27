@@ -38,7 +38,6 @@ class BlocksListAdapter extends CursorAdapter {
         // yay ViewHolders!
         final ViewHolder holder = new ViewHolder(view);
         view.setTag(holder);
-
         return view;
     }
 
@@ -46,87 +45,88 @@ class BlocksListAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         final Resources resources = mContext.getResources();
+        final ViewHolder holder = (ViewHolder) view.getTag();
 
         ContentValues values = Utils.cursorRowToContentValues(cursor);
-        ViewHolder holder = (ViewHolder) view.getTag();
-
         Log.d(TAG, "Values: " + values);
 
         EighthBlock block = EighthContract.Blocks.fromContentValues(values);
 
-        String dateStr = Utils.formatBasicDate(block.date, Utils.DateFormats.FULL_DATE.get());
-        String blockStr = mContext.getResources().getString(R.string.block_title, block.type);
-        String nameStr = values.getAsString(EighthContract.Actvs.KEY_NAME);
-
-        holder.mDateView.setText(dateStr);
-        holder.mBlockView.setText(blockStr);
-
-        int actvId;
+        int actvId = -1;
         try {
             actvId = values.getAsInteger(EighthContract.Schedule.KEY_ACTV_ID);
-        } catch (NullPointerException e) {
+        } catch (NullPointerException e) { // it'll just be -1
             Log.w(TAG, "NullPointerException getting activity ID: " + e);
-            actvId = -1;
         }
-
-        if (actvId == 999) {
-            holder.mActivityNameView.setText(Html.fromHtml(
-                    resources.getString(R.string.actv_not_selected)));
-        }
-        else if (nameStr != null) {
-            holder.mActivityNameView.setText(nameStr);
-        }
-        else {
-            holder.mActivityNameView.setText(
-                    resources.getString(R.string.actv_id_placeholder, actvId));
-        }
-
-        // Display flags
-        ArrayList<String> statuses = new ArrayList<>();
 
         long actvFlags = 0;
         long actvInstanceFlags = 0;
         try {
             actvFlags = values.getAsLong(EighthContract.Actvs.KEY_FLAGS);
             actvInstanceFlags = values.getAsLong(EighthContract.ActvInstances.KEY_FLAGS);
-        } catch (NullPointerException e) {
-            // this is okay; they'll just be 0
+        } catch (NullPointerException e) { // they'll just be 0
             Log.w(TAG, "NullPointerException getting actvFlags or actvInstanceFlags: " + e);
         }
 
+
+        String dateStr = Utils.DateFormats.FULL_DATE.formatBasicDate(mContext, block.date);
+        String blockStr = mContext.getResources().getString(R.string.block_title, block.type);
+
+        holder.mDateView.setText(dateStr);
+        holder.mBlockView.setText(blockStr);
+
+
+        CharSequence nameStr = values.getAsString(EighthContract.Actvs.KEY_NAME);
+        if (actvId == 999) {
+            nameStr = Html.fromHtml(resources.getString(R.string.actv_not_selected));
+        } else if (nameStr == null) {
+            nameStr = resources.getString(R.string.actv_id_placeholder, actvId);
+        }
+        holder.mActivityNameView.setText(nameStr);
+
+
+        // Display flags
+        long allFlags = actvFlags | actvInstanceFlags;
+
+        String statusText = getBlockStatuses(resources, allFlags, block.locked);
+        holder.mStatusView.setText(Html.fromHtml(statusText));
+
+        // display statuses
+        if (statusText.isEmpty()) {
+            holder.mStatusView.setPaddingRelative(0, 0, 0, 0);
+        } else {
+            holder.mStatusView.setPaddingRelative(0, 0, 8, 0);
+        }
+    }
+
+    public String getBlockStatuses(final Resources resources, long flags, boolean locked) {
+        ArrayList<String> statuses = new ArrayList<>();
+
         // locked
-        if (block.locked) {
+        if (locked) {
             statuses.add(resources.getString(R.string.block_status_locked));
         }
-        // cancelled
-        if ((actvInstanceFlags & EighthActvInstance.FLAG_CANCELLED) != 0) {
-            int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
-            statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
-                    Utils.colorToHtmlHex(textColor)));
-        }
         // restricted
-        if ((actvFlags & EighthActv.FLAG_RESTRICTED) != 0) {
+        if ((flags & EighthActv.FLAG_RESTRICTED) != 0) {
             int textColor = resources.getColor(R.color.actv_textColor_restricted);
             statuses.add(resources.getString(R.string.actv_status_restricted,
                     Utils.colorToHtmlHex(textColor)));
         }
         // sticky
-        if ((actvFlags & EighthActv.FLAG_STICKY) != 0) {
+        if ((flags & EighthActv.FLAG_STICKY) != 0) {
             int textColor = resources.getColor(R.color.actv_textColor_sticky);
             statuses.add(resources.getString(R.string.actv_status_sticky,
                     Utils.colorToHtmlHex(textColor)));
         }
-
-        // display statuses
-        if (statuses.size() > 0) {
-            holder.mStatusView.setPaddingRelative(0, 0, 8, 0);
-
-            String statusText = "(" + Utils.join(statuses, ", ") + ")";
-            holder.mStatusView.setText(Html.fromHtml(statusText));
-        } else {
-            holder.mStatusView.setPaddingRelative(0, 0, 0, 0);
-            holder.mStatusView.setText("");
+        // cancelled
+        if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
+            int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
+            statuses.clear(); // clear other statuses
+            statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
+                    Utils.colorToHtmlHex(textColor)));
         }
+
+        return Utils.join(statuses, ", ");
     }
 
     // Provide a reference to the views for each data item

@@ -59,7 +59,13 @@
     <string name="block_title_date">%1$s %2$s Block (%3$s)</string>
 
     <string name="actv_id_placeholder">[Activity %1$d]</string>
-
+    <string name="actv_toast_text">
+        NAME: %1$s
+        \nROOMS: %2$s
+        \nCOMMENTS: %3$s
+        \nDESCRIPTION: %4$s
+        \nSIGNED UP: %5$d / %6$d
+    </string>
 
     <string name="actv_not_selected"><![CDATA[<i>Not selected</i>]]></string>
     <string name="block_status_locked">Locked</string>

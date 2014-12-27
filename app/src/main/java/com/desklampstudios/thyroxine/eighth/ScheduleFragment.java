@@ -50,7 +50,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     };
 
     private BlocksListAdapter mAdapter;
-    private SwipeRefreshLayout mSwipeLayout;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private Object mSyncObserverHandle; // obtained in onResume
 
@@ -95,9 +95,9 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             }
         });
 
-        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
-        mSwipeLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
-        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 retrieveSchedule();
@@ -160,10 +160,10 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             @Override
             public void run() {
                 if (account == null) {
-                    mSwipeLayout.setRefreshing(false);
+                    mSwipeRefreshLayout.setRefreshing(false);
                     return;
                 }
-                mSwipeLayout.setRefreshing(syncActive || syncPending);
+                mSwipeRefreshLayout.setRefreshing(syncActive || syncPending);
             }
         });
     }

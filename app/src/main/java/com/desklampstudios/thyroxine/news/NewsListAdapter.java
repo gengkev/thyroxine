@@ -17,8 +17,11 @@ import com.desklampstudios.thyroxine.Utils;
 class NewsListAdapter extends CursorAdapter {
     private static final String TAG = NewsListAdapter.class.getSimpleName();
 
+    private Context mContext;
+
     public NewsListAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
+        mContext = context;
     }
 
     @Override
@@ -41,7 +44,7 @@ class NewsListAdapter extends CursorAdapter {
 
         holder.mTitleView.setText(
                 values.getAsString(NewsContract.NewsEntries.KEY_TITLE));
-        holder.mPublishedView.setText(Utils.DateFormats.MED_DAYMONTH.get().format(
+        holder.mPublishedView.setText(Utils.DateFormats.MED_DAYMONTH.format(mContext,
                 values.getAsLong(NewsContract.NewsEntries.KEY_DATE)));
         holder.mSnippetView.setText(
                 values.getAsString(NewsContract.NewsEntries.KEY_SNIPPET));

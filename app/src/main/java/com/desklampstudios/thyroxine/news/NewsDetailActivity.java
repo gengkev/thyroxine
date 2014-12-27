@@ -68,7 +68,7 @@ public class NewsDetailActivity extends ActionBarActivity {
         Log.d(TAG, "Entry: " + mNewsEntry);
 
         title.setText(mNewsEntry.title);
-        published.setText(Utils.DateFormats.FULL_DATETIME.format(new Date(mNewsEntry.published)));
+        published.setText(Utils.DateFormats.FULL_DATETIME.format(this, mNewsEntry.published));
         //content.setText(Html.fromHtml(mNewsEntry.contentRaw));
         webView.loadData(mNewsEntry.contentRaw, "text/html;charset=utf-8", null);
         webView.setBackgroundColor(getResources().getColor(R.color.background));

@@ -102,13 +102,7 @@ public class SignupActvTask extends AsyncTask<Integer, Void, Integer> {
     @Override
     protected void onPostExecute(Integer result) {
         if (mException != null || result == null) {
-            if (mException instanceof IodineAuthException.NotLoggedInException) {
-                Toast.makeText(mActivity, R.string.attempt_login_try_again, Toast.LENGTH_LONG).show();
-            } else {
-                String message = mActivity.getResources().getString(
-                        R.string.unexpected_error, String.valueOf(mException));
-                Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show();
-            }
+            mResultListener.onError(mException);
             return;
         }
 
@@ -118,5 +112,6 @@ public class SignupActvTask extends AsyncTask<Integer, Void, Integer> {
 
     public interface SignupResultListener {
         public void onSignupResult(int result);
+        public void onError(Exception e);
     }
 }

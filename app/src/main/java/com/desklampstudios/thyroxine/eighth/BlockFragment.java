@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
@@ -50,7 +51,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Nullable private SignupActvTask mSignupActvTask;
 
     private ActvsListAdapter mAdapter;
-    private SwipeRefreshLayout mSwipeLayout;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public BlockFragment() {
     }
@@ -113,9 +114,9 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         //        getActivity(), DividerItemDecoration.VERTICAL_LIST);
         //recyclerView.addItemDecoration(itemDecoration);
 
-        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
-        mSwipeLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
-        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 retrieveBlock();
@@ -136,7 +137,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
             // load actvs from server
             // http://stackoverflow.com/a/26910973/689161
-            mSwipeLayout.post(new Runnable() {
+            mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
                     retrieveBlock();
@@ -147,7 +148,15 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     // Called when an item in the adapter is clicked
     public void onActvClick(Pair<EighthActv, EighthActvInstance> pair) {
-        Toast.makeText(getActivity(), pair.first + "\n" + pair.second, Toast.LENGTH_LONG).show();
+        String text = getString(R.string.actv_toast_text,
+                pair.first.name,
+                pair.second.roomsStr,
+                pair.second.comment,
+                pair.first.description,
+                pair.second.memberCount,
+                pair.second.capacity
+        );
+        Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
     }
 
     private boolean checkLoginState() {
@@ -169,25 +178,30 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
         // make sure user is logged in
         if (!checkLoginState()) {
-            mSwipeLayout.setRefreshing(false);
+            mSwipeRefreshLayout.setRefreshing(false);
             return;
         }
 
         // indicate syncing
-        mSwipeLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setRefreshing(true);
 
         // Load stuff using AsyncTask
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         mFetchBlockTask = new FetchBlockTask(getActivity(), account, new FetchBlockTask.ActvsResultListener() {
             @Override
             public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
-                Log.d(TAG, "syncing done");
-
                 mFetchBlockTask = null;
-                mSwipeLayout.setRefreshing(false); // syncing done
+                mSwipeRefreshLayout.setRefreshing(false); // syncing done
 
                 mAdapter.clear();
                 mAdapter.addAll(pairList);
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                mFetchBlockTask = null;
+                mSwipeRefreshLayout.setRefreshing(false); // syncing done
+                handleAsyncTaskError(exception);
             }
         });
         mFetchBlockTask.execute(blockId);
@@ -199,6 +213,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             return;
         }
+
         String message = getActivity().getString(R.string.signup_changing, pair.first.name);
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
 
@@ -207,28 +222,50 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             @Override
             public void onSignupResult(int result) {
                 mSignupActvTask = null;
-                if (result == 0) {
+                if (result == 0) { // success
                     String message = getActivity().getString(R.string.signup_success, pair.first.name);
                     Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                } else {
+                } else { // error
                     String message = getActivity().getString(R.string.signup_failure, pair.first.name);
-
-                    final String[] arr = getActivity().getResources().getStringArray(R.array.eighth_signup_error);
-                    for (int i = 0; i < arr.length; i++) {
-                        if ((result & (1 << i)) != 0) {
-                            message += "\n" + arr[i];
-                        }
-                    }
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                    String errors = getSignupErrorString(result);
+                    Toast.makeText(getActivity(), message + errors, Toast.LENGTH_LONG).show();
                 }
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                mSignupActvTask = null;
+                handleAsyncTaskError(exception);
             }
         });
         mSignupActvTask.execute(blockId, pair.first.actvId);
     }
 
+    public void handleAsyncTaskError(Exception exception) {
+        if (exception instanceof IodineAuthException.NotLoggedInException) {
+            Toast.makeText(getActivity(), R.string.attempt_login_try_again, Toast.LENGTH_LONG).show();
+        } else {
+            String message = getString(
+                    R.string.unexpected_error, String.valueOf(exception));
+            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public String getSignupErrorString(int result) {
+        final String[] arr = getResources().getStringArray(R.array.eighth_signup_error);
+
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < arr.length; i++) {
+            if ((result & (1 << i)) != 0) {
+                out.append("\n").append(arr[i]);
+            }
+        }
+        return out.toString();
+    }
+
     private void displayBlock(@NonNull EighthBlock block) {
-        String dateStr = Utils.formatBasicDate(block.date, Utils.DateFormats.MED_DAYMONTH.get());
-        String weekday = Utils.formatBasicDate(block.date, Utils.DateFormats.WEEKDAY.get());
+        String dateStr = Utils.DateFormats.MED_DAYMONTH.formatBasicDate(getActivity(), block.date);
+        String weekday = Utils.DateFormats.WEEKDAY.formatBasicDate(getActivity(), block.date);
         String displayStr = getResources().getString(R.string.block_title_date,
                 weekday, block.type, dateStr);
 
@@ -264,8 +301,9 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             EighthBlock block = EighthContract.Blocks.fromContentValues(blockValues);
             displayBlock(block);
 
-            // TODO: do stuff with current actvId
-            int curActvId = cursor.getInt(cursor.getColumnIndex(EighthContract.Schedule.KEY_ACTV_ID));
+            int curActvId = cursor.getInt(
+                    cursor.getColumnIndex(EighthContract.Schedule.KEY_ACTV_ID));
+            mAdapter.setSelectedActvId(curActvId);
 
             Log.d(TAG, "Got block: " + block + ", curActvId: " + curActvId);
         } else {
