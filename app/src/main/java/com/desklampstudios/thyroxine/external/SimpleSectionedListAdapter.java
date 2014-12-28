@@ -1,7 +1,7 @@
 /*
  * SimpleSectionedListAdapter taken from the source code of the Google I/O 2014 app, found at:
  * https://github.com/google/iosched/blob/master/android/src/main/java/com/google/samples/apps/iosched/ui/SimpleSectionedListAdapter.java
- * Modifications: changed package name, changed to use mTextViewId field
+ * Modifications: changed package name, changed to use mTextViewId and mDividerId
  */
 
 /*
@@ -40,6 +40,7 @@ public class SimpleSectionedListAdapter extends BaseAdapter {
     private boolean mValid = true;
     private int mSectionResourceId;
     private int mTextViewId;
+    private int mDividerId;
     private LayoutInflater mLayoutInflater;
     private ListAdapter mBaseAdapter;
     private SparseArray<Section> mSections = new SparseArray<Section>();
@@ -60,10 +61,11 @@ public class SimpleSectionedListAdapter extends BaseAdapter {
     }
 
     public SimpleSectionedListAdapter(Context context, int sectionResourceId, int textViewId,
-                                      ListAdapter baseAdapter) {
+                                      int dividerId, ListAdapter baseAdapter) {
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mSectionResourceId = sectionResourceId;
         mTextViewId = textViewId;
+        mDividerId = dividerId;
         mBaseAdapter = baseAdapter;
         mBaseAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -193,8 +195,13 @@ public class SimpleSectionedListAdapter extends BaseAdapter {
             if (view == null) {
                 view = mLayoutInflater.inflate(mSectionResourceId, parent, false);
             }
+            View dividerView = view.findViewById(mDividerId);
+            dividerView.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
+
             TextView textView = (TextView) view.findViewById(mTextViewId);
             textView.setText(mSections.get(position).title);
+            textView.setVisibility(position == getCount() - 1 ? View.GONE : View.VISIBLE);
+
             return view;
 
         } else {

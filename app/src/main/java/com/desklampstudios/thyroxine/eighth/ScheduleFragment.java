@@ -80,8 +80,12 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         // create list adapter
         mAdapter = new BlocksListAdapter(getActivity(), null, 0);
 
-        mSectionedAdapter = new SimpleSectionedListAdapter(getActivity(),
-                R.layout.schedule_header_textview, android.R.id.text1, mAdapter);
+        mSectionedAdapter = new SimpleSectionedListAdapter(
+                getActivity(),
+                R.layout.schedule_header_textview,
+                R.id.schedule_header_textview,
+                R.id.schedule_header_divider,
+                mAdapter);
     }
 
     @Override
@@ -231,6 +235,9 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             previousBlockDate = blockDate;
             cursor.moveToNext();
         }
+
+        sections.add(new SimpleSectionedListAdapter.Section(
+                cursor.getCount(), null));
 
         SimpleSectionedListAdapter.Section[] sections1 =
                 new SimpleSectionedListAdapter.Section[sections.size()];
