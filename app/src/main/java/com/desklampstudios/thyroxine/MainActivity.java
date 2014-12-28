@@ -73,32 +73,36 @@ public class MainActivity extends ActionBarActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         // select an item in drawer
-        selectItem(mDrawerSelectedPosition);
+        selectItem(mDrawerSelectedPosition, false);
     }
 
     /** Swaps fragments in the main content view */
-    private void selectItem(int position) {
+    private void selectItem(int position, boolean force) {
         mDrawerSelectedPosition = position;
-
-        Fragment fragment;
-        switch (position) {
-            case 0:
-                fragment = NewsFragment.newInstance();
-                break;
-            case 1:
-                fragment = ScheduleFragment.newInstance();
-                break;
-            default:
-                fragment = PlaceholderFragment.newInstance(
-                        mNavTitles[position] + " (placeholder)");
-                break;
-        }
-
-        // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, fragment)
-                .commit();
+        Fragment oldFragment = fragmentManager.findFragmentById(R.id.container);
+
+        // Only swap fragment if necessary, or if one doesn't exist already
+        if (force || oldFragment == null) {
+            Fragment fragment;
+            switch (position) {
+                case 0:
+                    fragment = NewsFragment.newInstance();
+                    break;
+                case 1:
+                    fragment = ScheduleFragment.newInstance();
+                    break;
+                default:
+                    fragment = PlaceholderFragment.newInstance(
+                            mNavTitles[position] + " (placeholder)");
+                    break;
+            }
+
+            // Insert the fragment by replacing any existing fragment
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .commit();
+        }
 
         // Highlight the selected item, update the title, and close the drawer
         mDrawerAdapter.setSelectedPosition(position);
@@ -207,7 +211,7 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View view) {
                     int position = holder.getPosition();
-                    selectItem(position);
+                    selectItem(position, true);
                 }
             });
             return holder;
