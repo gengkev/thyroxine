@@ -11,7 +11,9 @@ import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +24,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.external.SimpleSectionedListAdapter;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -45,14 +53,15 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             EighthContract.Actvs.KEY_FLAGS,
             EighthContract.Actvs.KEY_ACTV_ID,
             EighthContract.ActvInstances.KEY_FLAGS,
-            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
-            EighthContract.ActvInstances.KEY_CAPACITY
+            EighthContract.ActvInstances.KEY_ROOMS_STR
     };
 
+    private SimpleSectionedListAdapter mSectionedAdapter;
     private BlocksListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private Object mSyncObserverHandle; // obtained in onResume
+    private SimpleSectionedListAdapter.Section[] mSections;
 
     public ScheduleFragment() {
     }
@@ -70,6 +79,9 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
         // create list adapter
         mAdapter = new BlocksListAdapter(getActivity(), null, 0);
+
+        mSectionedAdapter = new SimpleSectionedListAdapter(getActivity(),
+                R.layout.schedule_header_textview, android.R.id.text1, mAdapter);
     }
 
     @Override
@@ -80,7 +92,8 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         View view = inflater.inflate(R.layout.fragment_eighth_schedule, container, false);
 
         ListView listView = (ListView) view.findViewById(R.id.blocks_list);
-        listView.setAdapter(mAdapter);
+        listView.setAdapter(mSectionedAdapter);
+        listView.setDividerHeight(0);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -198,6 +211,32 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         EighthSyncAdapter.syncImmediately(getActivity());
     }
 
+    private SimpleSectionedListAdapter.Section[] createSections(@Nullable Cursor cursor) {
+        if (cursor == null) {
+            Log.w(TAG, "createSections: cursor was null");
+            return new SimpleSectionedListAdapter.Section[0];
+        }
+        List<SimpleSectionedListAdapter.Section> sections = new ArrayList<>();
+        String previousBlockDate = "";
+        String blockDate;
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            blockDate = cursor.getString(cursor.getColumnIndex(EighthContract.Blocks.KEY_DATE));
+            if (!previousBlockDate.equals(blockDate)) {
+                String dateStr = Utils.DateFormats.FULL_DATE.formatBasicDate(getActivity(), blockDate);
+                sections.add(new SimpleSectionedListAdapter.Section(
+                        cursor.getPosition(), dateStr));
+            }
+            previousBlockDate = blockDate;
+            cursor.moveToNext();
+        }
+
+        SimpleSectionedListAdapter.Section[] sections1 =
+                new SimpleSectionedListAdapter.Section[sections.size()];
+        return sections.toArray(sections1);
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
@@ -219,11 +258,17 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        mSections = createSections(cursor);
+        mSectionedAdapter.setSections(mSections);
+
         mAdapter.swapCursor(cursor);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        mSections = new SimpleSectionedListAdapter.Section[0];
+        mSectionedAdapter.setSections(mSections);
+
         mAdapter.swapCursor(null);
     }
 }

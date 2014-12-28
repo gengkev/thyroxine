@@ -68,13 +68,8 @@ class BlocksListAdapter extends CursorAdapter {
             Log.w(TAG, "NullPointerException getting actvFlags or actvInstanceFlags: " + e);
         }
 
-
-        String dateStr = Utils.DateFormats.FULL_DATE.formatBasicDate(mContext, block.date);
-        String blockStr = mContext.getResources().getString(R.string.block_title, block.type);
-
-        holder.mDateView.setText(dateStr);
-        holder.mBlockView.setText(blockStr);
-
+        //String blockStr = mContext.getResources().getString(R.string.block_title, block.type);
+        holder.mBlockView.setText(block.type);
 
         CharSequence nameStr = values.getAsString(EighthContract.Actvs.KEY_NAME);
         if (actvId == 999) {
@@ -84,19 +79,18 @@ class BlocksListAdapter extends CursorAdapter {
         }
         holder.mActivityNameView.setText(nameStr);
 
+        String roomsStr = values.getAsString(EighthContract.ActvInstances.KEY_ROOMS_STR);
+        if (roomsStr == null) {
+            roomsStr = "(Rooms go here)";
+        }
+        holder.mActivityRoomsView.setText(roomsStr);
 
-        // Display flags
         long allFlags = actvFlags | actvInstanceFlags;
 
+        // Display statuses
         String statusText = getBlockStatuses(resources, allFlags, block.locked);
+        Log.d(TAG, "statusText=" + statusText);
         holder.mStatusView.setText(Html.fromHtml(statusText));
-
-        // display statuses
-        if (statusText.isEmpty()) {
-            holder.mStatusView.setPaddingRelative(0, 0, 0, 0);
-        } else {
-            holder.mStatusView.setPaddingRelative(0, 0, 8, 0);
-        }
     }
 
     public String getBlockStatuses(final Resources resources, long flags, boolean locked) {
@@ -126,24 +120,26 @@ class BlocksListAdapter extends CursorAdapter {
                     Utils.colorToHtmlHex(textColor)));
         }
 
+        statuses.add("[Status]");
+
         return Utils.join(statuses, ", ");
     }
 
     // Provide a reference to the views for each data item
     public static class ViewHolder extends RecyclerView.ViewHolder {
         @NonNull public final View mView;
-        @NonNull public final TextView mDateView;
         @NonNull public final TextView mBlockView;
         @NonNull public final TextView mActivityNameView;
         @NonNull public final TextView mStatusView;
+        @NonNull public final TextView mActivityRoomsView;
 
         public ViewHolder(@NonNull View v) {
             super(v);
             mView = v;
-            mDateView = (TextView) v.findViewById(R.id.eighth_date);
             mBlockView = (TextView) v.findViewById(R.id.eighth_block);
             mActivityNameView = (TextView) v.findViewById(R.id.eighth_activity_name);
             mStatusView = (TextView) v.findViewById(R.id.eighth_activity_status);
+            mActivityRoomsView = (TextView) v.findViewById(R.id.eighth_activity_rooms);
         }
     }
 }
