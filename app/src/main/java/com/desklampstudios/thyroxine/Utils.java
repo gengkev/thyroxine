@@ -69,8 +69,9 @@ public class Utils {
                         DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY |
                                 DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_TIME);
             } else if (this == FULL_DATE) {
-                DateFormat format = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault());
-                return format.format(new Date(millis));
+                return DateUtils.formatDateTime(context, millis,
+                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY |
+                                DateUtils.FORMAT_SHOW_YEAR);
             } else if (this == MED_DAYMONTH) {
                 return DateUtils.formatDateTime(context, millis,
                         DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
@@ -169,7 +170,9 @@ public class Utils {
             // we can enable inexact timers in our periodic sync
             SyncRequest request = new SyncRequest.Builder()
                     .syncPeriodic(syncInterval, flexTime)
-                    .setSyncAdapter(account, authority).build();
+                    .setSyncAdapter(account, authority)
+                    .setExtras(Bundle.EMPTY)
+                    .build();
             ContentResolver.requestSync(request);
         } else {
             ContentResolver.addPeriodicSync(account, authority, Bundle.EMPTY, syncInterval);
