@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -34,7 +36,7 @@ public class MainActivity extends ActionBarActivity {
     private String[] mNavTitles;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -117,7 +119,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // If the drawer toggle handles it, it will return true
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -125,7 +127,7 @@ public class MainActivity extends ActionBarActivity {
 
         switch (item.getItemId()) {
             case R.id.action_login:
-                IodineAuthenticator.addAccount(this);
+                IodineAuthenticator.attemptAddAccount(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -144,7 +146,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         // save drawer state
@@ -170,6 +172,7 @@ public class MainActivity extends ActionBarActivity {
         public PlaceholderFragment() {
         }
 
+        @NonNull
         public static PlaceholderFragment newInstance(String title) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
@@ -179,7 +182,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
@@ -201,8 +204,9 @@ public class MainActivity extends ActionBarActivity {
             notifyItemChanged(selected);
         }
 
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.navdrawer_item, parent, false);
 
@@ -218,7 +222,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             String title = mNavTitles[position];
             holder.mTextView.setText(title);
             holder.mView.setActivated(position == mSelected);
@@ -231,9 +235,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mTextView;
-        public ViewHolder(View v) {
+        @NonNull public final View mView;
+        @NonNull public final TextView mTextView;
+        public ViewHolder(@NonNull View v) {
             super(v);
             mView = v;
             mTextView = (TextView) v.findViewById(R.id.navdrawer_item_text);

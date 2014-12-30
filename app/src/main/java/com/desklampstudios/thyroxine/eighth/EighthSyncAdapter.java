@@ -165,8 +165,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @Override
-    public void onPerformSync(Account account, Bundle extras, String authority,
-                              ContentProviderClient provider, SyncResult syncResult) {
+    public void onPerformSync(@NonNull Account account, @NonNull Bundle extras, String authority,
+                              @NonNull ContentProviderClient provider, @NonNull SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
         final AccountManager am = AccountManager.get(getContext());
 
@@ -248,6 +248,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
 
+    @NonNull
     private List<EighthBlockAndActv> fetchSchedule(String authToken)
             throws IodineAuthException, IOException, XmlPullParserException {
 
@@ -409,7 +410,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
      * Helper method to have the sync adapter sync immediately
      * @param context The context used to access the account service
      */
-    public static void syncImmediately(Context context) {
+    public static void syncImmediately(@NonNull Context context) {
         Log.d(TAG, "Immediate sync requested");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -423,7 +424,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
      * Configures sync scheduling. Called from MainActivity.
      * @param newAccount The stub account that was created.
      */
-    public static void configureSync(Account newAccount) {
+    public static void configureSync(@NonNull Account newAccount) {
         final String authority = EighthContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically

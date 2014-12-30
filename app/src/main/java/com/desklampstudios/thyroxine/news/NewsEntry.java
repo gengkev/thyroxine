@@ -5,11 +5,11 @@ import android.support.annotation.NonNull;
 import java.util.Date;
 
 class NewsEntry {
-    @NonNull public String link;
-    @NonNull public String title;
-    public long published;
-    @NonNull public String contentRaw;
-    @NonNull public String contentSnippet;
+    @NonNull public final String link;
+    @NonNull public final String title;
+    public final long published;
+    @NonNull public final String contentRaw;
+    @NonNull public final String contentSnippet;
 
     public NewsEntry(@NonNull String link, @NonNull String title, long published,
                      @NonNull String contentRaw, @NonNull String contentSnippet) {

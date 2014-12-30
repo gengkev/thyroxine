@@ -13,7 +13,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.format.DateUtils;
@@ -94,9 +93,12 @@ public class Utils {
         }
     }
 
+    @NonNull
     public static String cleanHtml(String in) {
         return Html.fromHtml(in).toString().trim();
     }
+
+    @NonNull
     public static String getSnippet(String in, int length) {
         in = cleanHtml(in);
         in = in.replaceAll("\\s+", " ");
@@ -106,7 +108,8 @@ public class Utils {
         return in;
     }
 
-    public static <E> String join(Iterable<E> array, String sep) {
+    @NonNull
+    public static <E> String join(@NonNull Iterable<E> array, String sep) {
         StringBuilder out = new StringBuilder();
         boolean first = true;
         for (E item : array) {
@@ -120,6 +123,7 @@ public class Utils {
         return out.toString();
     }
 
+    @NonNull
     public static String colorToHtmlHex(int color) {
         String str = Integer.toHexString(color);
         while (str.length() < 8) {
@@ -136,7 +140,7 @@ public class Utils {
      * @param is The input stream to be read.
      * @return The contents of the stream, decoded with UTF-8.
      */
-    public static String readInputStream(InputStream is) {
+    public static String readInputStream(@NonNull InputStream is) {
         return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
     }
 
@@ -145,7 +149,7 @@ public class Utils {
      * and configuring periodic synchronization with the SyncAdapters.
      * @param context Context used to get accounts
      */
-    public static void configureSync(Context context) {
+    public static void configureSync(@NonNull Context context) {
         // Make sure stub account exists
         Account stubAccount = StubAuthenticator.getStubAccount(context);
         // Configure News sync with stub account
@@ -179,20 +183,22 @@ public class Utils {
         }
     }
 
+    @NonNull
     public static ContentValues cursorRowToContentValues(Cursor cursor) {
         ContentValues values = new ContentValues();
         DatabaseUtils.cursorRowToContentValues(cursor, values);
         return values;
     }
 
+    @NonNull
     public static <T, K> ArrayList<ContentProviderOperation> createMergeBatch(
             @NonNull String LOG_TYPE,
             @NonNull List<T> itemList,
             @NonNull Cursor queryCursor,
-            @NonNull final Uri BASE_CONTENT_URI,
+            @NonNull Uri BASE_CONTENT_URI,
             @NonNull MergeInterface<T, K> mergeInterface,
             @NonNull SyncStats syncStats)
-            throws RemoteException, SQLiteException {
+            throws SQLiteException {
 
         final ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 

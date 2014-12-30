@@ -1,6 +1,8 @@
 package com.desklampstudios.thyroxine.news;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
@@ -37,6 +39,7 @@ class NewsFeedParser extends AbstractXMLParser {
         parsingBegun = true;
     }
 
+    @Nullable
     public NewsEntry nextEntry() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
@@ -62,7 +65,8 @@ class NewsFeedParser extends AbstractXMLParser {
 
     // Parses the contents of an entry. If it encounters a title, published, link, or content tag,
     // those are handed off to their respective "read" methods. Other tags are ignored.
-    private static NewsEntry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
+    @NonNull
+    private static NewsEntry readEntry(@NonNull XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "item");
 
         String title = "";
@@ -103,9 +107,9 @@ class NewsFeedParser extends AbstractXMLParser {
     }
 
     // Process published tags in the feed.
-    private static Long readPublished(XmlPullParser parser) throws IOException, XmlPullParserException {
+    private static long readPublished(XmlPullParser parser) throws IOException, XmlPullParserException {
         String publishedStr = readText(parser, "pubDate");
-        Long published = null;
+        long published = 0;
         try {
             Date date = Utils.FixedDateFormats.NEWS_FEED.parse(publishedStr);
             published = date.getTime();

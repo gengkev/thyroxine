@@ -26,6 +26,7 @@ public class NewsProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private NewsDatabase mDbHelper;
 
+    @NonNull
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = NewsContract.CONTENT_AUTHORITY;
@@ -44,7 +45,7 @@ public class NewsProvider extends ContentProvider {
 
     @NonNull
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case NEWSENTRIES_LINK:
                 return NewsEntries.CONTENT_ITEM_TYPE_NEWSENTRIES;
@@ -56,7 +57,7 @@ public class NewsProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
         final SQLiteDatabase db = mDbHelper.getReadableDatabase();
         final SelectionBuilder builder = buildSimpleSelection(uri);
@@ -74,7 +75,7 @@ public class NewsProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, @NonNull ContentValues values) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         Uri returnUri;
@@ -96,7 +97,7 @@ public class NewsProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         final SelectionBuilder builder = buildSimpleSelection(uri);
 
@@ -112,7 +113,7 @@ public class NewsProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         final SelectionBuilder builder = buildSimpleSelection(uri);
 
@@ -134,6 +135,7 @@ public class NewsProvider extends ContentProvider {
      *
      * This method was probably copied verbatim from the source code of the Google IO 2014 app.
      */
+    @NonNull
     @Override
     public ContentProviderResult[] applyBatch(@NonNull ArrayList<ContentProviderOperation> operations)
             throws OperationApplicationException {

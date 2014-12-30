@@ -1,6 +1,8 @@
 package com.desklampstudios.thyroxine;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -25,6 +27,7 @@ public class AuthErrorParser extends AbstractXMLParser {
         parsingBegun = true;
     }
 
+    @Nullable
     public IodineAuthException nextAuth() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
@@ -48,11 +51,12 @@ public class AuthErrorParser extends AbstractXMLParser {
         return null;
     }
 
-    public static IodineAuthException readAuth(XmlPullParser parser, Context context)
+    @NonNull
+    public static IodineAuthException readAuth(@NonNull XmlPullParser parser, Context context)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "auth");
 
-        IodineAuthException ex = null;
+        IodineAuthException ex = new IodineAuthException("No exception found");
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -72,12 +76,12 @@ public class AuthErrorParser extends AbstractXMLParser {
         return ex;
     }
 
-    private static IodineAuthException readError(XmlPullParser parser, Context context)
+    private static IodineAuthException readError(@NonNull XmlPullParser parser, Context context)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "error");
 
-        Integer id = null;
-        String message = null;
+        int id = -1;
+        String message = "";
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {

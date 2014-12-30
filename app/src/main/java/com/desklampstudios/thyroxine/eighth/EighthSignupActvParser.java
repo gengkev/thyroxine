@@ -2,7 +2,6 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.util.Pair;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
 import com.desklampstudios.thyroxine.AuthErrorParser;
@@ -14,7 +13,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class EighthSignupActvParser extends AbstractXMLParser {
+class EighthSignupActvParser extends AbstractXMLParser {
     public EighthSignupActvParser(Context context) throws XmlPullParserException {
         super(context);
     }

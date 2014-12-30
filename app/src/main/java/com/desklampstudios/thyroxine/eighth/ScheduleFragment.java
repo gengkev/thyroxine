@@ -58,7 +58,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     private BlocksListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
-    private Object mSyncObserverHandle; // obtained in onResume
+    @Nullable private Object mSyncObserverHandle; // obtained in onResume
     private SimpleSectionedListAdapter.Section[] mSections;
 
     public ScheduleFragment() {
@@ -87,7 +87,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -199,7 +199,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
-            IodineAuthenticator.addAccount(getActivity());
+            IodineAuthenticator.attemptAddAccount(getActivity());
             return false;
         }
         return true;
@@ -216,11 +216,8 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         EighthSyncAdapter.syncImmediately(getActivity());
     }
 
-    private SimpleSectionedListAdapter.Section[] createSections(@Nullable Cursor cursor) {
-        if (cursor == null) {
-            Log.w(TAG, "createSections: cursor was null");
-            return new SimpleSectionedListAdapter.Section[0];
-        }
+    @NonNull
+    private SimpleSectionedListAdapter.Section[] createSections(@NonNull Cursor cursor) {
         List<SimpleSectionedListAdapter.Section> sections = new ArrayList<>();
         String previousBlockDate = "";
         String blockDate;
@@ -245,6 +242,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         return sections.toArray(sections1);
     }
 
+    @Nullable
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,7 @@ import com.desklampstudios.thyroxine.Utils;
 class NewsListAdapter extends CursorAdapter {
     private static final String TAG = NewsListAdapter.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
 
     public NewsListAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
@@ -25,7 +26,7 @@ class NewsListAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+    public View newView(@NonNull Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.news_list_textview, parent, false);
 
@@ -37,7 +38,7 @@ class NewsListAdapter extends CursorAdapter {
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(@NonNull View view, Context context, Cursor cursor) {
         ContentValues values = new ContentValues();
         DatabaseUtils.cursorRowToContentValues(cursor, values);
         ViewHolder holder = (ViewHolder) view.getTag();
@@ -53,12 +54,12 @@ class NewsListAdapter extends CursorAdapter {
     // Provide a reference to the views for each data item
     // There is a 0.000% need to continue extending RecyclerView.ViewHolder but why not.
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mTitleView;
-        public final TextView mPublishedView;
-        public final TextView mSnippetView;
+        @NonNull public final View mView;
+        @NonNull public final TextView mTitleView;
+        @NonNull public final TextView mPublishedView;
+        @NonNull public final TextView mSnippetView;
 
-        public ViewHolder(View v) {
+        public ViewHolder(@NonNull View v) {
             super(v);
             mView = v;
             mTitleView = (TextView) v.findViewById(R.id.news_entry_title);

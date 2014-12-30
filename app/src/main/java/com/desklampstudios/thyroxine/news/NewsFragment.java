@@ -11,6 +11,8 @@ import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +48,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     private NewsListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
-    private Object mSyncObserverHandle; // obtained in onResume
+    @Nullable private Object mSyncObserverHandle; // obtained in onResume
 
     public NewsFragment() {
     }
@@ -57,6 +59,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
      *
      * @return A new instance of fragment NewsFragment.
      */
+    @NonNull
     public static NewsFragment newInstance() {
         NewsFragment fragment = new NewsFragment();
         fragment.setArguments(Bundle.EMPTY);
@@ -72,7 +75,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -198,6 +201,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         NewsSyncAdapter.syncImmediately(getActivity());
     }
 
+    @Nullable
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {

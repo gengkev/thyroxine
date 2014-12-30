@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 
 class NewsContract {
     // Warning: for now, also declared in strings.xml
@@ -25,18 +26,21 @@ class NewsContract {
         static final String KEY_CONTENT = "content";
         static final String KEY_SNIPPET = "content_snippet";
 
+        @NonNull
         public static Uri buildEntryUri(String link) {
             return CONTENT_URI.buildUpon()
                     .appendPath(link)
                     .build();
         }
-        public static String getLink(Uri uri) {
+        @NonNull
+        public static String getLink(@NonNull Uri uri) {
             return uri.getPathSegments().get(1);
         }
 
         // converting to and from not-really-pojos yooooo
         // this is so yooo i can't even :')
-        static NewsEntry fromContentValues(ContentValues values) {
+        @NonNull
+        static NewsEntry fromContentValues(@NonNull ContentValues values) {
             return new NewsEntry(
                     values.getAsString(NewsEntries.KEY_LINK),
                     values.getAsString(NewsEntries.KEY_TITLE),
@@ -45,7 +49,8 @@ class NewsContract {
                     values.getAsString(NewsEntries.KEY_SNIPPET)
             );
         }
-        static ContentValues toContentValues(NewsEntry entry) {
+        @NonNull
+        static ContentValues toContentValues(@NonNull NewsEntry entry) {
             ContentValues values = new ContentValues();
             values.put(NewsEntries.KEY_TITLE, entry.title);
             values.put(NewsEntries.KEY_DATE, entry.published);

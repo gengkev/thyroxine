@@ -1,6 +1,7 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 class EighthActv {
     public static final int NOT_SELECTED_AID = 999;
@@ -14,10 +15,10 @@ class EighthActv {
     public static final int FLAG_SPECIAL = 32;
     //public static final int FLAG_CALENDAR = 64;
 
-    public int actvId;
-    @NonNull public String name;
-    @NonNull public String description;
-    public long flags;
+    public final int actvId;
+    @NonNull public final String name;
+    @NonNull public final String description;
+    public final long flags;
 
     public EighthActv(int actvId, @NonNull String name, @NonNull String description, long flags) {
         this.actvId = actvId;
@@ -26,6 +27,7 @@ class EighthActv {
         this.flags = flags;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format("EighthActv[actvId=%d, name=%s, description=%s, flags=%d]",
@@ -33,7 +35,7 @@ class EighthActv {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof EighthActv)) return false;
         EighthActv actv = (EighthActv) o;
         return actvId == actv.actvId && name.equals(actv.name) &&

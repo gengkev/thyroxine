@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -19,9 +21,6 @@ import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
-
-import java.util.Date;
-
 
 public class NewsDetailActivity extends ActionBarActivity {
     private static final String TAG = NewsDetailActivity.class.getSimpleName();
@@ -75,7 +74,7 @@ public class NewsDetailActivity extends ActionBarActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.entry_detail, menu);
 
@@ -90,6 +89,7 @@ public class NewsDetailActivity extends ActionBarActivity {
         return true;
     }
 
+    @Nullable
     private Intent createShareIntent() {
         if (mNewsEntry == null)
             return null;
@@ -106,14 +106,14 @@ public class NewsDetailActivity extends ActionBarActivity {
     }
 
     // Call to update the share intent
-    private void setShareIntent(Intent shareIntent) {
-        if (mShareActionProvider != null) {
+    private void setShareIntent(@Nullable Intent shareIntent) {
+        if (mShareActionProvider != null && shareIntent != null) {
             mShareActionProvider.setShareIntent(shareIntent);
         }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);

@@ -3,6 +3,7 @@ package com.desklampstudios.thyroxine.news;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import static com.desklampstudios.thyroxine.news.NewsContract.NewsEntries;
@@ -23,7 +24,7 @@ class NewsDatabase extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onCreate(@NonNull SQLiteDatabase db) {
         final String SQL_CREATE_NEWSENTRIES_TABLE =
                 "CREATE TABLE " + Tables.TABLE_NEWSENTRIES + " (" +
                         NewsEntries._ID + " INTEGER PRIMARY KEY, " +
@@ -39,7 +40,7 @@ class NewsDatabase extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + Tables.TABLE_NEWSENTRIES);
         this.onCreate(db);
     }

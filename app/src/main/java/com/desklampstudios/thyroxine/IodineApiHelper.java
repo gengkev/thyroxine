@@ -1,6 +1,8 @@
 package com.desklampstudios.thyroxine;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -31,6 +33,7 @@ public class IodineApiHelper {
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
 
+    @NonNull
     public static InputStream getPublicNewsFeed() throws IOException {
         URL url = new URL(PUBLIC_NEWS_FEED_URL);
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -42,6 +45,7 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
+    @NonNull
     public static InputStream getBlock(int blockId, String cookieHeader) throws IOException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
@@ -56,6 +60,7 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
+    @NonNull
     public static InputStream getBlockList(String cookieHeader) throws IOException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
@@ -70,8 +75,9 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
+    @NonNull
     public static InputStream signupActivity(int blockId, int actvId, String cookieHeader)
-            throws IodineAuthException, IOException, XmlPullParserException {
+            throws IOException {
 
         // create query params
         String query = "bid=" + URLEncoder.encode(String.valueOf(blockId), "UTF-8") +
@@ -96,6 +102,7 @@ public class IodineApiHelper {
         return new BufferedInputStream(conn.getInputStream());
     }
 
+    @Nullable
     public static String attemptLogin(String username, String password, Context context)
             throws IodineAuthException, IOException, XmlPullParserException {
 

@@ -1,6 +1,8 @@
 package com.desklampstudios.thyroxine;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Xml;
 
@@ -12,11 +14,11 @@ import java.io.InputStream;
 
 public abstract class AbstractXMLParser {
     private static final String TAG = AbstractXMLParser.class.getSimpleName();
-    protected static final String ns = null; // don't use namespaces
+    @Nullable protected static final String ns = null; // don't use namespaces
 
     protected final Context mContext;
-    protected final XmlPullParser mParser;
-    protected InputStream mInputStream;
+    @NonNull protected final XmlPullParser mParser;
+    @Nullable protected InputStream mInputStream;
     protected boolean parsingBegun = false;
 
     protected AbstractXMLParser(Context context) throws XmlPullParserException {
@@ -37,16 +39,19 @@ public abstract class AbstractXMLParser {
         mInputStream = null;
     }
 
-    protected static String readText(XmlPullParser parser, String tagName) throws XmlPullParserException, IOException {
+    @NonNull
+    protected static String readText(@NonNull XmlPullParser parser, String tagName)
+            throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, tagName);
         String str = parser.nextText();
         parser.require(XmlPullParser.END_TAG, ns, tagName);
-        return str;
+        return str == null ? "" : str;
     }
 
-    protected static Integer readInt(XmlPullParser parser, String tagName) throws XmlPullParserException, IOException {
+    protected static int readInt(@NonNull XmlPullParser parser, String tagName)
+            throws XmlPullParserException, IOException {
         String str = readText(parser, tagName);
-        Integer integer = null;
+        int integer = -1;
         try {
             integer = Integer.parseInt(str);
         } catch (NumberFormatException e) {
@@ -55,7 +60,7 @@ public abstract class AbstractXMLParser {
         return integer;
     }
 
-    protected static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
+    protected static void skip(@NonNull XmlPullParser parser) throws XmlPullParserException, IOException {
         if (parser.getEventType() != XmlPullParser.START_TAG) {
             throw new IllegalStateException();
         }

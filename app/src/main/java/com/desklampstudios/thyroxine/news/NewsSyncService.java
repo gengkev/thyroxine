@@ -3,6 +3,7 @@ package com.desklampstudios.thyroxine.news;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 /**
@@ -13,7 +14,7 @@ import android.util.Log;
 public class NewsSyncService extends Service {
     private static final String TAG = NewsSyncService.class.getSimpleName();
 
-    private static NewsSyncAdapter sSyncAdapter = null;
+    @Nullable private static NewsSyncAdapter sSyncAdapter = null;
     private static final Object sSyncAdapterLock = new Object();
 
     @Override
@@ -40,6 +41,8 @@ public class NewsSyncService extends Service {
          * in the base class code when the SyncAdapter
          * constructors call super()
          */
+        if (sSyncAdapter == null)
+            throw new IllegalStateException();
         return sSyncAdapter.getSyncAdapterBinder();
     }
 }

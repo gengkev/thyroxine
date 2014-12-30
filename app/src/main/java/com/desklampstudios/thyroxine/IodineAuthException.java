@@ -1,13 +1,17 @@
 package com.desklampstudios.thyroxine;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 public class IodineAuthException extends Exception {
     public IodineAuthException(String msg) {
         super(msg);
     }
 
-    public static IodineAuthException create(Integer errCode, String msg, Context context) {
+    @Nullable
+    public static IodineAuthException create(@Nullable Integer errCode, @NonNull String msg,
+                                             @NonNull Context context) {
         String[] arr = context.getResources().getStringArray(R.array.iodine_auth_error);
 
         if (msg.trim().equals("You are not logged in.")) {

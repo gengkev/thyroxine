@@ -1,6 +1,7 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 class EighthActvInstance {
     public static final int FLAG_ALL = 7168;
@@ -8,14 +9,14 @@ class EighthActvInstance {
     public static final int FLAG_CANCELLED = 2048;
     //public static final int FLAG_ROOMCHANGED = 4096;
 
-    public int actvId;
-    public int blockId;
-    @NonNull public String comment;
-    public long flags;
+    public final int actvId;
+    public final int blockId;
+    @NonNull public final String comment;
+    public final long flags;
 
-    @NonNull public String roomsStr = "";
-    public int memberCount = 0;
-    public int capacity = -1;
+    @NonNull public final String roomsStr;
+    public final int memberCount;
+    public final int capacity;
 
     public EighthActvInstance(int actvId, int blockId, @NonNull String comment, long flags,
                               @NonNull String roomsStr, int memberCount, int capacity) {
@@ -28,6 +29,7 @@ class EighthActvInstance {
         this.capacity = capacity;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format("EighthActvInstance[actvId=%d, blockId=%d, comment=%s, flags=%s, " +
@@ -36,7 +38,7 @@ class EighthActvInstance {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof EighthActvInstance)) return false;
         EighthActvInstance other = (EighthActvInstance) o;
         return actvId == other.actvId && blockId == other.blockId && flags == other.flags &&

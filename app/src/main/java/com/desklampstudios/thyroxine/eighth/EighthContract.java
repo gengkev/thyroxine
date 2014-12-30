@@ -34,11 +34,13 @@ class EighthContract {
         /** Default "ORDER BY" clause */
         public static final String DEFAULT_SORT = KEY_DATE + " ASC, " + KEY_TYPE + " ASC";
 
+        @NonNull
         public static Uri buildBlockUri(int blockId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(blockId))
                     .build();
         }
+        @NonNull
         public static Uri buildBlockWithActvInstancesUri(int blockId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(blockId))
@@ -86,11 +88,13 @@ class EighthContract {
         /** Default "ORDER BY" clause */
         public static final String DEFAULT_SORT = KEY_NAME + " ASC";
 
+        @NonNull
         public static Uri buildActvUri(int actvId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(actvId))
                     .build();
         }
+        @NonNull
         public static Uri buildActvWithActvInstancesUri(int actvId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(actvId))
@@ -138,6 +142,7 @@ class EighthContract {
         public static final String KEY_MEMBER_COUNT = "actvInstance_member_count";
         public static final String KEY_CAPACITY = "actvInstance_capacity";
 
+        @NonNull
         public static Uri buildActvInstanceUri(int blockId, int actvId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(blockId))
@@ -189,6 +194,7 @@ class EighthContract {
         public static final String KEY_BLOCK_ID = Blocks.KEY_BLOCK_ID;
         public static final String KEY_ACTV_ID = Actvs.KEY_ACTV_ID;
 
+        @NonNull
         public static Uri buildScheduleUri(int blockId) {
             return CONTENT_URI.buildUpon()
                     .appendPath(String.valueOf(blockId))

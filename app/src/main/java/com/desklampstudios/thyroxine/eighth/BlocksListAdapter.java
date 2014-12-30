@@ -22,7 +22,7 @@ import java.util.ArrayList;
 class BlocksListAdapter extends CursorAdapter {
     private static final String TAG = BlocksListAdapter.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
 
     public BlocksListAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
@@ -31,7 +31,7 @@ class BlocksListAdapter extends CursorAdapter {
 
     // Create new views (invoked by the layout manager)
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+    public View newView(@NonNull Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.block_list_textview, parent, false);
 
@@ -43,7 +43,7 @@ class BlocksListAdapter extends CursorAdapter {
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(@NonNull View view, Context context, Cursor cursor) {
         final Resources resources = mContext.getResources();
         final ViewHolder holder = (ViewHolder) view.getTag();
 
@@ -72,7 +72,7 @@ class BlocksListAdapter extends CursorAdapter {
         holder.mBlockView.setText(block.type);
 
         CharSequence name = values.getAsString(EighthContract.Actvs.KEY_NAME);
-        if (actvId == 999) {
+        if (actvId == EighthActv.NOT_SELECTED_AID) {
             name = Html.fromHtml(resources.getString(R.string.actv_not_selected));
         } else if (name == null) {
             name = resources.getString(R.string.actv_id_placeholder, actvId);
@@ -94,7 +94,8 @@ class BlocksListAdapter extends CursorAdapter {
         holder.mStatusView.setText(Html.fromHtml(statusText));
     }
 
-    public String getBlockStatuses(final Resources resources, long flags, boolean locked) {
+    @NonNull
+    private String getBlockStatuses(@NonNull final Resources resources, long flags, boolean locked) {
         ArrayList<String> statuses = new ArrayList<>();
 
         // locked

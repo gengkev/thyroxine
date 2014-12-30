@@ -21,6 +21,7 @@ import java.util.List;
 class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder> {
     private static final String TAG = ActvsListAdapter.class.getSimpleName();
 
+    @NonNull
     private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
     private final Context mContext;
     private OnItemClickListener mListener;
@@ -44,8 +45,9 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
     }
 
     // Create new views (invoked by the layout manager)
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.actv_list_textview, parent, false);
 
@@ -56,7 +58,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         final Resources resources = mContext.getResources();
 
         Pair<EighthActv, EighthActvInstance> pair = mDataset.get(position);
@@ -92,7 +94,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         holder.mStatusView.setText(Html.fromHtml(statusText));
 
         // set background color
-        int color = getActvColor(resources, position, allFlags, full);
+        int color = getActvColor(resources, position, allFlags);
         holder.mView.setBackgroundColor(color);
 
         // set event listeners
@@ -115,7 +117,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         });
     }
 
-    public int getActvColor(final Resources resources, int position, long flags, boolean full) {
+    private int getActvColor(@NonNull final Resources resources, int position, long flags) {
         int color = resources.getColor((position % 2 == 0) ?
                 R.color.actv_background_default_1 :
                 R.color.actv_background_default_2);
@@ -135,7 +137,8 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         return color;
     }
 
-    public String getActvStatuses(final Resources resources, long flags, boolean full) {
+    @NonNull
+    private String getActvStatuses(@NonNull final Resources resources, long flags, boolean full) {
         ArrayList<String> statuses = new ArrayList<>();
 
         // restricted
@@ -167,16 +170,16 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
         return Utils.join(statuses, ", ");
     }
 
-    public void add(Pair<EighthActv, EighthActvInstance> pair) {
+    public void add(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
         add(mDataset.size(), pair);
     }
 
-    public void add(int pos, Pair<EighthActv, EighthActvInstance> pair) {
+    public void add(int pos, @NonNull Pair<EighthActv, EighthActvInstance> pair) {
         mDataset.add(pos, pair);
         notifyItemInserted(pos);
     }
 
-    public void addAll(Collection<Pair<EighthActv, EighthActvInstance>> pairList) {
+    public void addAll(@NonNull Collection<Pair<EighthActv, EighthActvInstance>> pairList) {
         int size = mDataset.size();
         mDataset.addAll(pairList);
         notifyItemRangeInserted(size, size + pairList.size());

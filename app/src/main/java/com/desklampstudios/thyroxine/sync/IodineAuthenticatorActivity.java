@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -44,6 +46,7 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
+    @Nullable
     private UserLoginTask mAuthTask = null;
 
     // UI references
@@ -144,7 +147,7 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
 
     }
 
-    private void finishLogin(Intent intent) {
+    private void finishLogin(@NonNull Intent intent) {
         String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
         String accountPassword = intent.getStringExtra(PARAM_USER_PASS);
         String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
@@ -221,6 +224,7 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
             mPassword = password;
         }
 
+        @Nullable
         @Override
         protected Intent doInBackground(Void... params) {
             String authToken;
@@ -242,7 +246,7 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
         }
 
         @Override
-        protected void onPostExecute(final Intent intent) {
+        protected void onPostExecute(@Nullable final Intent intent) {
             mAuthTask = null;
             showProgress(false);
 

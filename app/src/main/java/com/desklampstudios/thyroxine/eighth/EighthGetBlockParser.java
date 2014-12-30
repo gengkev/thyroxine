@@ -28,7 +28,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
 
     // after this, call nextActivity until it returns null
     @NonNull
-    public EighthBlockAndActv beginGetBlock(InputStream in)
+    public EighthBlockAndActv beginGetBlock(@NonNull InputStream in)
             throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
             stopParse();
@@ -175,6 +175,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
     }
 
     // TODO: maybe actually get rooms at some point??
+    @NonNull
     private static String readBlockRooms(@NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "block_rooms");
@@ -199,6 +200,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
 
         return Utils.join(rooms, ", ");
     }
+    @NonNull
     private static String readRoom(@NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "room");

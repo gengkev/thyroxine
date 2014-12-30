@@ -8,13 +8,12 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
-import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -23,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class SignupActvTask extends AsyncTask<Integer, Void, Integer> {
+class SignupActvTask extends AsyncTask<Integer, Void, Integer> {
     private static final String TAG = SignupActvTask.class.getSimpleName();
 
     private final Activity mActivity;
@@ -54,7 +53,7 @@ public class SignupActvTask extends AsyncTask<Integer, Void, Integer> {
             Log.e(TAG, "Connection error: "+ e.toString());
             mException = e;
             return null;
-        } catch (OperationCanceledException | AuthenticatorException e) {
+        } catch (@NonNull OperationCanceledException | AuthenticatorException e) {
             Log.e(TAG, "Authentication error: " + e.toString());
             mException = e;
             return null;
@@ -79,7 +78,7 @@ public class SignupActvTask extends AsyncTask<Integer, Void, Integer> {
             // TODO: try again automatically
             mException = e;
             return null;
-        } catch (IOException | IodineAuthException e) {
+        } catch (@NonNull IOException | IodineAuthException e) {
             Log.e(TAG, "Connection error: " + e.toString());
             mException = e;
             return null;
@@ -100,7 +99,7 @@ public class SignupActvTask extends AsyncTask<Integer, Void, Integer> {
     }
 
     @Override
-    protected void onPostExecute(Integer result) {
+    protected void onPostExecute(@Nullable Integer result) {
         if (mException != null || result == null) {
             mResultListener.onError(mException);
             return;

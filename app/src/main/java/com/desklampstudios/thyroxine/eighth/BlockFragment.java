@@ -149,7 +149,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     // Called when an item in the adapter is clicked
-    public void onActvClick(Pair<EighthActv, EighthActvInstance> pair) {
+    public void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
         String text = getString(R.string.actv_toast_text,
                 pair.first.name,
                 pair.second.roomsStr,
@@ -165,7 +165,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
-            IodineAuthenticator.addAccount(getActivity());
+            IodineAuthenticator.attemptAddAccount(getActivity());
             return false;
         }
         return true;
@@ -209,7 +209,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mFetchBlockTask.execute(blockId);
     }
 
-    public void changeSelectedActv(final Pair<EighthActv, EighthActvInstance> pair) {
+    private void changeSelectedActv(@NonNull final Pair<EighthActv, EighthActvInstance> pair) {
         if (mSignupActvTask != null) {
             String message = getActivity().getString(R.string.signup_changing_wait);
             Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
@@ -254,6 +254,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
     }
 
+    @NonNull
     private String getSignupErrorString(int result) {
         final String[] arr = getResources().getStringArray(R.array.eighth_signup_error);
 
@@ -267,7 +268,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     // TODO: make less hacky
-    private void updateDatabase(int blockId, EighthActv actv, EighthActvInstance actvInstance) {
+    private void updateDatabase(int blockId, @NonNull EighthActv actv, @NonNull EighthActvInstance actvInstance) {
         // push to db, or something
         final ContentResolver resolver = getActivity().getContentResolver();
 
@@ -342,6 +343,5 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        // ???
     }
 }

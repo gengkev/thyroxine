@@ -3,6 +3,7 @@ package com.desklampstudios.thyroxine.eighth;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 
 import static com.desklampstudios.thyroxine.eighth.EighthContract.ActvInstances;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
@@ -37,7 +38,7 @@ class EighthDatabase extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onCreate(@NonNull SQLiteDatabase db) {
         final String SQL_CREATE_BLOCK_TABLE =
                 "CREATE TABLE " + Tables.BLOCKS + " (" +
                         Blocks._ID + " INTEGER PRIMARY KEY, " +
@@ -91,7 +92,7 @@ class EighthDatabase extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + Tables.BLOCKS);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.ACTVS);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.ACTVINSTANCES);

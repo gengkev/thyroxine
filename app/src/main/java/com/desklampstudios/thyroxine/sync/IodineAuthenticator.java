@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
@@ -43,6 +44,7 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         this.mContext = context;
     }
 
+    @NonNull
     private Intent createAuthenticateIntent(AccountAuthenticatorResponse response,
                                              String accountType, String authTokenType,
                                              boolean newAccount) {
@@ -54,6 +56,7 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         return intent;
     }
 
+    @NonNull
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
                              String authTokenType, String[] requiredFeatures,
@@ -85,8 +88,9 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
     }
 
 
+    @NonNull
     @Override
-    public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account,
+    public Bundle updateCredentials(AccountAuthenticatorResponse response, @NonNull Account account,
                                     String authTokenType,
                                     Bundle options) throws NetworkErrorException {
         final Intent intent = createAuthenticateIntent(response, account.type, authTokenType, false);
@@ -95,9 +99,10 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         return bundle;
     }
 
+    @NonNull
     @Override
-    public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account,
-                               String authTokenType, Bundle options) throws NetworkErrorException {
+    public Bundle getAuthToken(AccountAuthenticatorResponse response, @NonNull Account account,
+                               @NonNull String authTokenType, Bundle options) throws NetworkErrorException {
         if (!authTokenType.equals(IODINE_COOKIE_AUTH_TOKEN)) {
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType");
@@ -149,17 +154,20 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
         throw new UnsupportedOperationException();
     }
 
+    @Nullable
     @Override
     public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account,
                                      Bundle options) throws NetworkErrorException {
         return null;
     }
 
+    @NonNull
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account,
                               String[] features) throws NetworkErrorException {
@@ -176,7 +184,7 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
      * @return The Iodine account, or null
      */
     @Nullable
-    public static Account getIodineAccount(Context context) {
+    public static Account getIodineAccount(@NonNull Context context) {
         // Get an instance of the Android account manager
         AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
@@ -196,7 +204,7 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
      * Attempts to add an Iodine account.
      * @param activity The activity used to open the login activity and as a context.
      */
-    public static void addAccount(final Activity activity) {
+    public static void attemptAddAccount(@Nullable final Activity activity) {
         final AccountManager am = AccountManager.get(activity);
         final AccountManagerCallback<Bundle> callback = new AccountManagerCallback<Bundle>() {
             @Override

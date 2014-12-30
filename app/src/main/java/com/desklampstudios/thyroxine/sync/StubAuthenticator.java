@@ -8,6 +8,8 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -28,11 +30,13 @@ public class StubAuthenticator extends AbstractAccountAuthenticator {
         mContext = context;
     }
 
+    @NonNull
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
                              String authTokenType, String[] requiredFeatures,
@@ -53,23 +57,27 @@ public class StubAuthenticator extends AbstractAccountAuthenticator {
         return bundle;
     }
 
+    @Nullable
     @Override
     public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account,
                                      Bundle options) throws NetworkErrorException {
         return null;
     }
 
+    @NonNull
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account,
                                String authTokenType, Bundle options) throws NetworkErrorException {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public String getAuthTokenLabel(String authTokenType) {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account,
                                     String authTokenType,
@@ -77,6 +85,7 @@ public class StubAuthenticator extends AbstractAccountAuthenticator {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account,
                               String[] features) throws NetworkErrorException {
@@ -88,7 +97,8 @@ public class StubAuthenticator extends AbstractAccountAuthenticator {
      * @param context The context used to access the account service
      * @return a fake account
      */
-    public static Account getStubAccount(Context context) {
+    @Nullable
+    public static Account getStubAccount(@NonNull Context context) {
         // Get an instance of the Android account manager
         AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 

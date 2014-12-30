@@ -60,10 +60,9 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         super(context, autoInitialize);
     }
 
-    // TODO: improve. syncResult?
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
-                              ContentProviderClient provider, SyncResult syncResult) {
+                              @NonNull ContentProviderClient provider, @NonNull SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
 
         // Part I. Get news list
@@ -94,6 +93,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.v(TAG, "Updated database; done syncing");
     }
 
+    @NonNull
     private List<NewsEntry> fetchNews() throws IOException, XmlPullParserException {
 
         InputStream stream = null;

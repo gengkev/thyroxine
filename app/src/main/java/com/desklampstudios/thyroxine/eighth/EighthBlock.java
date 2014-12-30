@@ -1,13 +1,14 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 class EighthBlock {
-    public int blockId;
-    @NonNull public String date;
-    @NonNull public String type;
+    public final int blockId;
+    @NonNull public final String date;
+    @NonNull public final String type;
 
-    public boolean locked = false;
+    public final boolean locked;
 
     public EighthBlock(int blockId, @NonNull String date, @NonNull String type, boolean locked) {
         this.blockId = blockId;
@@ -16,6 +17,7 @@ class EighthBlock {
         this.locked = locked;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format("EighthBlock[blockId=%d, date=%s, type=%s, locked=%s]",
@@ -23,7 +25,7 @@ class EighthBlock {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof EighthBlock)) return false;
         EighthBlock block = (EighthBlock) o;
         return blockId == block.blockId && date.equals(block.date) &&

@@ -17,6 +17,10 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
 
+    <!-- Permission to protect SyncAdapters -->
+    <permission android:name="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER"
+        android:protectionLevel="signature" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -88,7 +92,8 @@
         <!-- SyncAdapter service for News -->
         <service android:name=".news.NewsSyncService"
             android:exported="true"
-            android:process=":sync">
+            android:process=":sync"
+            android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
@@ -100,7 +105,8 @@
         <!-- SyncAdapter service for Eighth -->
         <service android:name=".eighth.EighthSyncService"
             android:exported="true"
-            android:process=":sync">
+            android:process=":sync"
+            android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>

@@ -27,7 +27,8 @@ class EighthListBlocksParser extends AbstractXMLParser {
     }
 
     // after this, call nextBlock until it returns null
-    public void beginListBlocks(InputStream in) throws XmlPullParserException, IOException, IodineAuthException {
+    public void beginListBlocks(@NonNull InputStream in)
+            throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
             stopParse();
         }
@@ -168,13 +169,13 @@ class EighthListBlocksParser extends AbstractXMLParser {
     }
 
     public static class EighthBlockAndActv {
-        public EighthBlock block;
-        public EighthActv actv;
-        public EighthActvInstance actvInstance;
+        @NonNull public final EighthBlock block;
+        @NonNull public final EighthActv actv;
+        @NonNull public final EighthActvInstance actvInstance;
 
-        public EighthBlockAndActv(EighthBlock block,
-                                  EighthActv actv,
-                                  EighthActvInstance actvInstance) {
+        public EighthBlockAndActv(@NonNull EighthBlock block,
+                                  @NonNull EighthActv actv,
+                                  @NonNull EighthActvInstance actvInstance) {
             this.block = block;
             this.actv = actv;
             this.actvInstance = actvInstance;

@@ -1,6 +1,7 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -9,7 +10,7 @@ import com.desklampstudios.thyroxine.R;
 public class BlockActivity extends ActionBarActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_block);
 

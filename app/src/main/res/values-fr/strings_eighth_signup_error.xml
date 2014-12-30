@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr">
     <string-array name="eighth_signup_error">
         <!-- 1: Cancelled -->
         <item>
