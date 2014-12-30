@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- TODO: get padding right -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="72dp"
@@ -17,7 +18,7 @@
             android:gravity="center"
             android:background="@color/colorAccent"
             android:textColor="#FFFFFF"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
 
     </RelativeLayout>
 
@@ -37,18 +38,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="16sp"
-                android:lineSpacingExtra="2dp"
                 android:textColor="?android:textColorPrimary"
                 android:lines="1"
                 android:ellipsize="end" />
-
-            <TextView android:id="@+id/eighth_activity_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="8dp"
-                android:paddingEnd="0dp"
-                android:textSize="14sp"
-                android:lines="1" />
 
         </LinearLayout>
 
@@ -57,10 +49,18 @@
             android:layout_height="wrap_content">
 
             <TextView android:id="@+id/eighth_activity_rooms"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:textSize="14sp"
                 android:textColor="?android:textColorSecondary"
+                android:lines="1" />
+
+            <TextView android:id="@+id/eighth_activity_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textSize="14sp"
                 android:lines="1" />
 
         </LinearLayout>
