@@ -3,10 +3,12 @@ package com.desklampstudios.thyroxine.eighth;
 import android.accounts.Account;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -225,6 +227,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                 if (result == 0) { // success
                     String message = getActivity().getString(R.string.signup_success, pair.first.name);
                     Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    updateDatabase(blockId, pair.first, pair.second);
                 } else { // error
                     String message = getActivity().getString(R.string.signup_failure, pair.first.name);
                     String errors = getSignupErrorString(result);
@@ -241,7 +244,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mSignupActvTask.execute(blockId, pair.first.actvId);
     }
 
-    public void handleAsyncTaskError(Exception exception) {
+    private void handleAsyncTaskError(Exception exception) {
         if (exception instanceof IodineAuthException.NotLoggedInException) {
             Toast.makeText(getActivity(), R.string.attempt_login_try_again, Toast.LENGTH_LONG).show();
         } else {
@@ -251,7 +254,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
     }
 
-    public String getSignupErrorString(int result) {
+    private String getSignupErrorString(int result) {
         final String[] arr = getResources().getStringArray(R.array.eighth_signup_error);
 
         StringBuilder out = new StringBuilder();
@@ -261,6 +264,32 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             }
         }
         return out.toString();
+    }
+
+    // TODO: make less hacky
+    private void updateDatabase(int blockId, EighthActv actv, EighthActvInstance actvInstance) {
+        // push to db, or something
+        final ContentResolver resolver = getActivity().getContentResolver();
+
+        // Update schedule
+        ContentValues scheduleValues = new ContentValues();
+        scheduleValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
+        scheduleValues.put(EighthContract.Schedule.KEY_ACTV_ID, actv.actvId);
+        Uri scheduleUri = resolver.insert(EighthContract.Schedule.CONTENT_URI, scheduleValues);
+        Log.d(TAG, "updated schedule: inserted with uri " + scheduleUri);
+
+        // Update EighthActv
+        ContentValues actvValues = EighthContract.Actvs.toContentValues(actv);
+        Uri actvUri = resolver.insert(EighthContract.Actvs.CONTENT_URI, actvValues);
+        Log.d(TAG, "updated actv: inserted with uri " + actvUri);
+
+        // Update EighthActvInstance
+        ContentValues actvInstanceValues = EighthContract.ActvInstances.toContentValues(actvInstance);
+        Uri actvInstanceUri = resolver.insert(EighthContract.ActvInstances.CONTENT_URI, actvInstanceValues);
+        Log.d(TAG, "updated actvInstance: inserted with uri " + actvInstanceUri);
+
+        // notify changes
+        resolver.notifyChange(EighthContract.Blocks.CONTENT_URI, null, false);
     }
 
     private void displayBlock(@NonNull EighthBlock block) {
