@@ -38,7 +38,8 @@ https://developer.android.com/training/implementing-navigation/nav-drawer.html
             android:layout_width="@dimen/navigation_drawer_width"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="@color/background_white">
+            android:background="@color/background_white"
+            android:elevation="5dp">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/left_drawer_list"

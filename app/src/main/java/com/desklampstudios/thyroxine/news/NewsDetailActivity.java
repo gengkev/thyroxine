@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -126,4 +127,21 @@ public class NewsDetailActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onSupportActionModeStarted(ActionMode mode) {
+        // Workaround so that there aren't two action bars upon text selection
+        getSupportActionBar().hide();
+
+        super.onSupportActionModeStarted(mode);
+    }
+
+    @Override
+    public void onSupportActionModeFinished(ActionMode mode) {
+        // Workaround so that there aren't two action bars upon text selection
+        getSupportActionBar().show();
+
+        super.onSupportActionModeFinished(mode);
+    }
+
 }
