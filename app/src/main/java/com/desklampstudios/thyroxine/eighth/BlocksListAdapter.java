@@ -48,7 +48,7 @@ class BlocksListAdapter extends CursorAdapter {
         final ViewHolder holder = (ViewHolder) view.getTag();
 
         ContentValues values = Utils.cursorRowToContentValues(cursor);
-        Log.d(TAG, "Values: " + values);
+        // Log.d(TAG, "Values: " + values);
 
         EighthBlock block = EighthContract.Blocks.fromContentValues(values);
 
@@ -71,17 +71,19 @@ class BlocksListAdapter extends CursorAdapter {
         //String blockStr = mContext.getResources().getString(R.string.block_title, block.type);
         holder.mBlockView.setText(block.type);
 
-        CharSequence nameStr = values.getAsString(EighthContract.Actvs.KEY_NAME);
+        CharSequence name = values.getAsString(EighthContract.Actvs.KEY_NAME);
         if (actvId == 999) {
-            nameStr = Html.fromHtml(resources.getString(R.string.actv_not_selected));
-        } else if (nameStr == null) {
-            nameStr = resources.getString(R.string.actv_id_placeholder, actvId);
+            name = Html.fromHtml(resources.getString(R.string.actv_not_selected));
+        } else if (name == null) {
+            name = resources.getString(R.string.actv_id_placeholder, actvId);
         }
-        holder.mActivityNameView.setText(nameStr);
+        holder.mActivityNameView.setText(name);
 
         String roomsStr = values.getAsString(EighthContract.ActvInstances.KEY_ROOMS_STR);
         if (roomsStr == null) {
-            roomsStr = "(Rooms go here)";
+            roomsStr = mContext.getString(R.string.error);
+        } else if (roomsStr.isEmpty()) {
+            roomsStr = mContext.getString(R.string.actvInstance_rooms_placeholder);
         }
         holder.mActivityRoomsView.setText(roomsStr);
 
@@ -89,7 +91,6 @@ class BlocksListAdapter extends CursorAdapter {
 
         // Display statuses
         String statusText = getBlockStatuses(resources, allFlags, block.locked);
-        Log.d(TAG, "statusText=" + statusText);
         holder.mStatusView.setText(Html.fromHtml(statusText));
     }
 
@@ -119,8 +120,6 @@ class BlocksListAdapter extends CursorAdapter {
             statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
                     Utils.colorToHtmlHex(textColor)));
         }
-
-        statuses.add("[Status]");
 
         return Utils.join(statuses, ", ");
     }

@@ -3,6 +3,7 @@
     <string name="app_name">Thyroxine</string>
 
     <string name="action_settings">Paramètres</string>
+    <string name="error">Erreur</string>
 
     <!-- Navigation drawer strings -->
     <string name="navigation_drawer_open">Ouvrir le tiroir de navigation</string>
@@ -58,6 +59,8 @@
     <string name="block_title_date">%1$s bloc %2$s (%3$s)</string>
 
     <string name="actv_id_placeholder">[Activité %1$d]</string>
+    <string name="actv_description_placeholder">(Aucune description)</string>
+    <string name="actvInstance_rooms_placeholder">(Aucune salle)</string>
     <string name="actv_toast_text">
         NOM: %1$s
         \nSALLES: %2$s

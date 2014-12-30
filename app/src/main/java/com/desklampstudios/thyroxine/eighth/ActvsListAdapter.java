@@ -65,14 +65,22 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
 
         String name = actv.name;
         if (actv.actvId == mSelectedActvId) {
-            name = "*" + name;
+            name = "* " + name;
         }
+        holder.mNameView.setText(name);
+
+        String roomsStr = actvInstance.roomsStr;
+        if (roomsStr.isEmpty()) {
+            roomsStr = mContext.getString(R.string.actvInstance_rooms_placeholder);
+        }
+        holder.mRoomView.setText(roomsStr);
+
         String description = String.format("%s %s",
                 actvInstance.comment, actv.description
         ).trim();
-
-        holder.mNameView.setText(name);
-        holder.mRoomView.setText(actvInstance.roomsStr);
+        if (description.isEmpty()) {
+            description = mContext.getString(R.string.actv_description_placeholder);
+        }
         holder.mDescriptionView.setText(description);
 
 
