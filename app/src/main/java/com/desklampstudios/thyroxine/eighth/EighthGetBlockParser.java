@@ -15,11 +15,12 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+
+import static com.desklampstudios.thyroxine.eighth.EighthListBlocksParser.EighthBlockAndActv;
 
 class EighthGetBlockParser extends AbstractXMLParser {
     private static final String TAG = EighthGetBlockParser.class.getSimpleName();
-
-    private int curBlockId = -1;
 
     public EighthGetBlockParser(Context context) throws XmlPullParserException {
         super(context);
@@ -27,7 +28,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
 
     // after this, call nextActivity until it returns null
     @NonNull
-    public Pair<EighthBlock, Integer> beginGetBlock(InputStream in)
+    public EighthBlockAndActv beginGetBlock(InputStream in)
             throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
             stopParse();
@@ -46,14 +47,13 @@ class EighthGetBlockParser extends AbstractXMLParser {
         // getBlock API begins with currently selected block, then all activities
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "block");
-        Pair<EighthBlock, Integer> pair = EighthListBlocksParser.readBlock(mParser);
-        curBlockId = pair.first.blockId;
+        EighthBlockAndActv blockAndActv = EighthListBlocksParser.readBlock(mParser);
 
         // advance to activities
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "activities");
 
-        return pair;
+        return blockAndActv;
     }
 
     // Use with beginGetBlock
@@ -70,9 +70,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
             }
             switch (mParser.getName()) {
                 case "activity":
-                    Pair<EighthActv, EighthActvInstance> pair = readActivity(mParser);
-                    pair.second.blockId = curBlockId;
-                    return pair;
+                    return readActivity(mParser);
                 default:
                     skip(mParser);
                     break;
@@ -90,6 +88,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
         parser.require(XmlPullParser.START_TAG, ns, "activity");
 
         int actvId = -1;
+        int blockId = -1;
         String actvName = "";
         String description = "";
         String comment = "";
@@ -103,12 +102,14 @@ class EighthGetBlockParser extends AbstractXMLParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
-            String name = parser.getName();
 
-            // fields
-            switch (name) {
+            switch (parser.getName()) {
+                // fields
                 case "aid":
                     actvId = readInt(parser, "aid");
+                    break;
+                case "bid":
+                    blockId = readInt(parser, "bid");
                     break;
                 case "name":
                     actvName = Utils.cleanHtml(readText(parser, "name"));
@@ -119,8 +120,8 @@ class EighthGetBlockParser extends AbstractXMLParser {
                 case "comment":
                     comment = Utils.cleanHtml(readText(parser, "comment"));
                     break;
-                case "block_rooms_comma":
-                    roomsStr = Utils.cleanHtml(readText(parser, "block_rooms_comma"));
+                case "block_rooms":
+                    roomsStr = readBlockRooms(parser);
                     break;
                 case "member_count":
                     memberCount = readInt(parser, "member_count");
@@ -167,9 +168,57 @@ class EighthGetBlockParser extends AbstractXMLParser {
         EighthActv actv = new EighthActv(actvId, actvName, description,
                 flags & EighthActv.FLAG_ALL);
 
-        EighthActvInstance actvInstance = new EighthActvInstance(actvId, -1, comment,
+        EighthActvInstance actvInstance = new EighthActvInstance(actvId, blockId, comment,
                 flags & EighthActvInstance.FLAG_ALL, roomsStr, memberCount, capacity);
 
         return new Pair<>(actv, actvInstance);
+    }
+
+    // TODO: maybe actually get rooms at some point??
+    private static String readBlockRooms(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "block_rooms");
+
+        ArrayList<String> rooms = new ArrayList<>();
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            switch (parser.getName()) {
+                case "room":
+                    rooms.add(readRoom(parser));
+                    break;
+                default:
+                    skip(parser);
+                    break;
+            }
+        }
+
+        parser.require(XmlPullParser.END_TAG, ns, "block_rooms");
+
+        return Utils.join(rooms, ", ");
+    }
+    private static String readRoom(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "room");
+
+        String name = "";
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            switch (parser.getName()) {
+                case "name":
+                    name = Utils.cleanHtml(readText(parser, "name"));
+                    break;
+                default:
+                    skip(parser);
+                    break;
+            }
+        }
+
+        return name;
     }
 }

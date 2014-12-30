@@ -315,7 +315,10 @@ public class EighthProvider extends ContentProvider {
             }
 
             case ACTVINSTANCES: {
-                return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS);
+                return builder.table(Tables.ACTVINSTANCES_JOIN_ACTVS_BLOCKS)
+                        .mapToTable(ActvInstances._ID, Tables.ACTVINSTANCES)
+                        .mapToTable(ActvInstances.KEY_ACTV_ID, Tables.ACTVINSTANCES)
+                        .mapToTable(ActvInstances.KEY_BLOCK_ID, Tables.ACTVINSTANCES);
             }
             case ACTVINSTANCES_BLOCK_ACTV_ID: {
                 final int blockId = ActvInstances.getBlockId(uri);

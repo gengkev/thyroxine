@@ -11,11 +11,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
-import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,14 +63,14 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
 
         InputStream stream = null;
         EighthGetBlockParser parser = null;
-        Pair<EighthBlock, Integer> blockPair;
+        EighthListBlocksParser.EighthBlockAndActv blockPair;
 
         try {
             stream = IodineApiHelper.getBlock(blockId, authToken);
 
             parser = new EighthGetBlockParser(mActivity);
             blockPair = parser.beginGetBlock(stream);
-            Log.d(TAG, "Block: " + blockPair.first);
+            Log.d(TAG, "Block: " + blockPair.block);
 
             ArrayList<Pair<EighthActv, EighthActvInstance>> pairList = new ArrayList<>();
             Pair<EighthActv, EighthActvInstance> pair = parser.nextActivity();
@@ -109,37 +107,6 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
             }
         }
     }
-
-    /*
-    @Override
-    protected void onProgressUpdate(Object... args) {
-        final ContentResolver resolver = mActivity.getContentResolver();
-
-        final EighthActv actv = (EighthActv) args[0];
-        final EighthActvInstance actvInstance = (EighthActvInstance) args[1];
-
-        updateEighthActv(actv, resolver);
-        updateEighthActvInstance(actvInstance, resolver);
-    }
-
-    // TODO: do in bulk, and not on the UI thread!
-    private void updateEighthActv(@NonNull EighthActv actv, @NonNull ContentResolver resolver) {
-        final ContentValues newValues = EighthContract.Actvs.toContentValues(actv);
-
-        // actually, let's just insert it. derp
-        Uri uri = resolver.insert(EighthContract.Actvs.CONTENT_URI, newValues);
-        //Log.v(TAG, "Inserted EighthActv with uri: " + uri);
-    }
-
-    private void updateEighthActvInstance(@NonNull EighthActvInstance actvInstance,
-                                          @NonNull ContentResolver resolver) {
-        final ContentValues newValues = EighthContract.ActvInstances.toContentValues(actvInstance);
-
-        // actually, let's just insert it. derp
-        Uri uri = resolver.insert(EighthContract.ActvInstances.CONTENT_URI, newValues);
-        //Log.v(TAG, "Inserted EighthActvInstance with uri: " + uri);
-    }
-    */
 
     @Override
     protected void onPostExecute(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {

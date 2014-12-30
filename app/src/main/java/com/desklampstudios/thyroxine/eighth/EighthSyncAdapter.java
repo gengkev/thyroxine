@@ -2,7 +2,6 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
@@ -20,7 +19,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
 
@@ -35,9 +33,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+
+import static com.desklampstudios.thyroxine.eighth.EighthListBlocksParser.EighthBlockAndActv;
 
 public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = EighthSyncAdapter.class.getSimpleName();
@@ -58,6 +56,23 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             EighthContract.Schedule._ID,
             EighthContract.Schedule.KEY_BLOCK_ID,
             EighthContract.Schedule.KEY_ACTV_ID
+    };
+    private static final String[] ACTVS_PROJECTION = new String[] {
+            EighthContract.Actvs._ID,
+            EighthContract.Actvs.KEY_ACTV_ID,
+            EighthContract.Actvs.KEY_NAME,
+            EighthContract.Actvs.KEY_FLAGS,
+            EighthContract.Actvs.KEY_DESCRIPTION
+    };
+    private static final String[] ACTVINSTANCES_PROJECTION = new String[] {
+            EighthContract.ActvInstances._ID,
+            EighthContract.ActvInstances.KEY_ACTV_ID,
+            EighthContract.ActvInstances.KEY_BLOCK_ID,
+            EighthContract.ActvInstances.KEY_COMMENT,
+            EighthContract.ActvInstances.KEY_ROOMS_STR,
+            EighthContract.ActvInstances.KEY_FLAGS,
+            EighthContract.ActvInstances.KEY_MEMBER_COUNT,
+            EighthContract.ActvInstances.KEY_CAPACITY
     };
 
     private static final Utils.MergeInterface<EighthBlock, Integer> BLOCKS_MERGE_INTERFACE =
@@ -105,6 +120,46 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             };
 
+    private static final Utils.MergeInterface<EighthActv, Integer> ACTVS_MERGE_INTERFACE =
+            new Utils.MergeInterface<EighthActv, Integer>() {
+                @Override
+                public ContentValues toContentValues(EighthActv item) {
+                    return EighthContract.Actvs.toContentValues(item);
+                }
+                @Override
+                public EighthActv fromContentValues(ContentValues values) {
+                    return EighthContract.Actvs.fromContentValues(values);
+                }
+                @Override
+                public Integer getId(EighthActv item) {
+                    return item.actvId;
+                }
+                @Override
+                public Uri buildContentUri(Integer id) {
+                    return EighthContract.Actvs.buildActvUri(id);
+                }
+            };
+
+    private static final Utils.MergeInterface<EighthActvInstance, Pair<Integer, Integer>> ACTVINSTANCES_MERGE_INTERFACE =
+            new Utils.MergeInterface<EighthActvInstance, Pair<Integer, Integer>>() {
+                @Override
+                public ContentValues toContentValues(EighthActvInstance item) {
+                    return EighthContract.ActvInstances.toContentValues(item);
+                }
+                @Override
+                public EighthActvInstance fromContentValues(ContentValues values) {
+                    return EighthContract.ActvInstances.fromContentValues(values);
+                }
+                @Override
+                public Pair<Integer, Integer> getId(EighthActvInstance item) {
+                    return new Pair<>(item.blockId, item.actvId);
+                }
+                @Override
+                public Uri buildContentUri(Pair<Integer, Integer> id) {
+                    return EighthContract.ActvInstances.buildActvInstanceUri(id.first, id.second);
+                }
+            };
+
     public EighthSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
     }
@@ -133,7 +188,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         // Part II. Get schedule (list of blocks)
-        List<Pair<EighthBlock, Integer>> schedule;
+        List<EighthBlockAndActv> schedule;
         try {
             schedule = fetchSchedule(authToken);
         } catch (IodineAuthException.NotLoggedInException e) {
@@ -168,15 +223,22 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
 
         // Part III. Update blocks in database
         ArrayList<EighthBlock> blockList = new ArrayList<>(schedule.size());
-        ArrayList<Pair<Integer, Integer>> selectedActvList = new ArrayList<>(schedule.size());
-        for (Pair<EighthBlock, Integer> pair : schedule) {
-            blockList.add(pair.first);
-            selectedActvList.add(new Pair<>(pair.first.blockId, pair.second));
+        ArrayList<Pair<Integer, Integer>> scheduleList = new ArrayList<>(schedule.size());
+        ArrayList<EighthActv> actvList = new ArrayList<>(schedule.size());
+        ArrayList<EighthActvInstance> actvInstanceList = new ArrayList<>(schedule.size());
+
+        for (EighthBlockAndActv blockAndActv : schedule) {
+            blockList.add(blockAndActv.block);
+            scheduleList.add(new Pair<>(blockAndActv.block.blockId, blockAndActv.actv.actvId));
+            actvList.add(blockAndActv.actv);
+            actvInstanceList.add(blockAndActv.actvInstance);
         }
 
         try {
             updateEighthBlockData(blockList, provider, syncResult);
-            updateSelectedActvData(selectedActvList, provider, syncResult);
+            updateSelectedActvData(scheduleList, provider, syncResult);
+            updateActvData(actvList, provider, syncResult);
+            updateActvInstanceData(actvInstanceList, provider, syncResult);
         } catch (RemoteException | SQLiteException | OperationApplicationException e) {
             Log.e(TAG, "Updating database failed", e);
             syncResult.databaseError = true;
@@ -186,13 +248,13 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
 
-    private List<Pair<EighthBlock, Integer>> fetchSchedule(String authToken)
+    private List<EighthBlockAndActv> fetchSchedule(String authToken)
             throws IodineAuthException, IOException, XmlPullParserException {
 
         InputStream stream = null;
         EighthListBlocksParser parser = null;
-        List<Pair<EighthBlock, Integer>> pairList = new ArrayList<>();
-        Pair<EighthBlock, Integer> pair;
+        List<EighthBlockAndActv> blockAndActvList = new ArrayList<>();
+        EighthBlockAndActv blockAndActv;
 
         try {
             stream = IodineApiHelper.getBlockList(authToken);
@@ -200,10 +262,10 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             parser = new EighthListBlocksParser(getContext());
             parser.beginListBlocks(stream);
 
-            pair = parser.nextBlock();
-            while (pair != null) {
-                pairList.add(pair);
-                pair = parser.nextBlock();
+            blockAndActv = parser.nextBlock();
+            while (blockAndActv != null) {
+                blockAndActvList.add(blockAndActv);
+                blockAndActv = parser.nextBlock();
             }
         } finally {
             if (parser != null)
@@ -216,9 +278,10 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             }
         }
 
-        return pairList;
+        return blockAndActvList;
     }
 
+    // TODO: get rid of all this, it's ridiculous
     /**
      * This method was highly inspired by the one in BasicSyncAdapter.
      */
@@ -265,7 +328,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 "Schedule",
                 pairList,
                 queryCursor,
-                EighthContract.Blocks.CONTENT_URI,
+                EighthContract.Schedule.CONTENT_URI,
                 SCHEDULE_MERGE_INTERFACE,
                 syncResult.stats);
 
@@ -276,6 +339,66 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
         final ContentResolver resolver = getContext().getContentResolver();
         resolver.notifyChange(
                 EighthContract.Schedule.CONTENT_URI,
+                null, false); // IMPORTANT: Do not sync to network
+        resolver.notifyChange(
+                EighthContract.Blocks.CONTENT_URI,
+                null, false); // IMPORTANT: Do not sync to network
+    }
+
+    private void updateActvData(@NonNull List<EighthActv> actvList,
+                                @NonNull ContentProviderClient provider,
+                                @NonNull final SyncResult syncResult)
+            throws RemoteException, OperationApplicationException, SQLiteException {
+
+        Cursor queryCursor = provider.query(EighthContract.Actvs.CONTENT_URI,
+                ACTVS_PROJECTION, null, null, null);
+        assert queryCursor != null;
+
+        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+                "Actvs",
+                actvList,
+                queryCursor,
+                EighthContract.Actvs.CONTENT_URI,
+                ACTVS_MERGE_INTERFACE,
+                syncResult.stats);
+
+        ContentProviderResult[] results = provider.applyBatch(batch);
+        Log.d(TAG, results.length + " operations performed.");
+        // Log.d(TAG, "results: " + Arrays.toString(results));
+
+        final ContentResolver resolver = getContext().getContentResolver();
+        resolver.notifyChange(
+                EighthContract.Actvs.CONTENT_URI,
+                null, false); // IMPORTANT: Do not sync to network
+        resolver.notifyChange(
+                EighthContract.Blocks.CONTENT_URI,
+                null, false); // IMPORTANT: Do not sync to network
+    }
+
+    private void updateActvInstanceData(@NonNull List<EighthActvInstance> actvInstanceList,
+                                        @NonNull ContentProviderClient provider,
+                                        @NonNull final SyncResult syncResult)
+            throws RemoteException, OperationApplicationException, SQLiteException {
+
+        Cursor queryCursor = provider.query(EighthContract.ActvInstances.CONTENT_URI,
+                ACTVINSTANCES_PROJECTION, null, null, null);
+        assert queryCursor != null;
+
+        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+                "ActvInstances",
+                actvInstanceList,
+                queryCursor,
+                EighthContract.ActvInstances.CONTENT_URI,
+                ACTVINSTANCES_MERGE_INTERFACE,
+                syncResult.stats);
+
+        ContentProviderResult[] results = provider.applyBatch(batch);
+        Log.d(TAG, results.length + " operations performed.");
+        // Log.d(TAG, "results: " + Arrays.toString(results));
+
+        final ContentResolver resolver = getContext().getContentResolver();
+        resolver.notifyChange(
+                EighthContract.ActvInstances.CONTENT_URI,
                 null, false); // IMPORTANT: Do not sync to network
         resolver.notifyChange(
                 EighthContract.Blocks.CONTENT_URI,

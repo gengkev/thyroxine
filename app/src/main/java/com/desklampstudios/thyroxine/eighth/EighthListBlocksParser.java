@@ -49,7 +49,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
 
     // Use with beginListBlocks
     @Nullable
-    public Pair<EighthBlock, Integer> nextBlock() throws XmlPullParserException, IOException {
+    public EighthBlockAndActv nextBlock() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             return null;
         }
@@ -64,6 +64,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
                     return readBlock(mParser);
                 default:
                     skip(mParser);
+                    break;
             }
         }
 
@@ -73,7 +74,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
     }
 
     @NonNull
-    static Pair<EighthBlock, Integer> readBlock(@NonNull XmlPullParser parser)
+    static EighthBlockAndActv readBlock(@NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "block");
 
@@ -122,7 +123,8 @@ class EighthListBlocksParser extends AbstractXMLParser {
         }
 
         EighthBlock block = new EighthBlock(blockId, date, type, locked);
-        return new Pair<>(block, actvPair.second.actvId);
+
+        return new EighthBlockAndActv(block, actvPair.first, actvPair.second);
     }
 
     @NonNull
@@ -163,5 +165,19 @@ class EighthListBlocksParser extends AbstractXMLParser {
         }
 
         return dateStr;
+    }
+
+    public static class EighthBlockAndActv {
+        public EighthBlock block;
+        public EighthActv actv;
+        public EighthActvInstance actvInstance;
+
+        public EighthBlockAndActv(EighthBlock block,
+                                  EighthActv actv,
+                                  EighthActvInstance actvInstance) {
+            this.block = block;
+            this.actv = actv;
+            this.actvInstance = actvInstance;
+        }
     }
 }
