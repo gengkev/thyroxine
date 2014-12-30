@@ -11,7 +11,6 @@ import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -29,7 +28,6 @@ import com.desklampstudios.thyroxine.external.SimpleSectionedListAdapter;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -101,13 +99,16 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int sPos, long l) {
+                int pos = mSectionedAdapter.sectionedPositionToPosition(sPos);
                 Cursor cursor = mAdapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(pos)) {
                     int blockId = cursor.getInt(cursor.getColumnIndex(
                             EighthContract.Blocks.KEY_BLOCK_ID));
                     onBlockClick(blockId);
+                } else {
+                    Log.w(TAG, "cursor invalid: " + cursor);
                 }
             }
         });
