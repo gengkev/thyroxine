@@ -11,7 +11,7 @@ https://developer.android.com/training/implementing-navigation/nav-drawer.html
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.desklampstudios.thyroxine.MainActivity">
+    tools:context=".MainActivity">
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
@@ -31,6 +31,7 @@ https://developer.android.com/training/implementing-navigation/nav-drawer.html
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/background" />
+
         </LinearLayout>
 
         <!-- Drawer -->

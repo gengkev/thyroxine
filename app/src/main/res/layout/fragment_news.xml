@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.desklampstudios.thyroxine.news.NewsFragment">
+    tools:context=".news.NewsFragment">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_container"
@@ -12,7 +12,9 @@
         <ListView android:id="@+id/news_listview"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical"
+            android:background="@color/background_white"
+            tools:listitem="@layout/news_list_textview" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

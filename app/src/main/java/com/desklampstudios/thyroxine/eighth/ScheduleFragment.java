@@ -80,7 +80,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
         mSectionedAdapter = new SimpleSectionedListAdapter(
                 getActivity(),
-                R.layout.schedule_header_textview,
+                R.layout.schedule_header,
                 R.id.schedule_header_textview,
                 R.id.schedule_header_divider,
                 mAdapter);

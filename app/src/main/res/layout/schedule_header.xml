@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:background="#FFFFFF">
 
     <RelativeLayout android:id="@+id/schedule_header_divider"
         android:layout_width="match_parent"
@@ -25,6 +27,7 @@
         android:singleLine="true"
         android:textColor="#8A000000"
         android:textSize="14sp"
-        android:fontFamily="sans-serif" />
+        android:fontFamily="sans-serif"
+        tools:text="Monday, January 5, 2014"/>
 
 </LinearLayout>

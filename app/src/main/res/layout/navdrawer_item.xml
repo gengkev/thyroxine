@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="48dp"
     android:background="@drawable/navdrawer_item_background"
-    android:clickable="true">
+    android:clickable="true"
+    tools:background="#FFFFFF">
 
     <TextView android:id="@+id/navdrawer_item_text"
         android:layout_width="match_parent"
@@ -16,6 +18,7 @@
         android:paddingEnd="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="20dp"
-        android:textColor="@drawable/navdrawer_item_textcolor" />
+        android:textColor="@drawable/navdrawer_item_textcolor"
+        tools:text="Home" />
 
 </RelativeLayout>

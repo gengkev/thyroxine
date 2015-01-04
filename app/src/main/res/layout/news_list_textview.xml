@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingEnd="@dimen/activity_horizontal_margin"
     android:paddingTop="16dp"
     android:paddingBottom="20dp"
     android:minHeight="88dip"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    tools:background="@color/background_white">
 
     <LinearLayout android:id="@+id/linear_layout1"
         android:layout_width="match_parent"
@@ -18,10 +20,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="16sp"
-            android:lineSpacingExtra="2dp"
             android:textColor="?android:textColorPrimary"
             android:lines="1"
-            android:ellipsize="end" />
+            android:ellipsize="end"
+            tools:text="Iodine news entry title about something" />
 
         <TextView android:id="@+id/news_entry_published"
             android:paddingStart="8dp"
@@ -29,7 +31,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
-            android:textColor="?android:textColorSecondary" />
+            android:textColor="?android:textColorSecondary"
+            android:lines="1"
+            tools:text="Jan 1 2015" />
 
         </LinearLayout>
 
@@ -40,6 +44,7 @@
         android:textSize="14sp"
         android:textColor="?android:textColorSecondary"
         android:lines="2"
-        android:ellipsize="end" />
+        android:ellipsize="end"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod" />
 
 </RelativeLayout>

@@ -6,7 +6,7 @@
 
     <item name="background" type="color">@color/background_material_light</item>
     <item name="background_dark" type="color">@color/background_material_dark</item>
-    <item name="background_white" type="color">#FFFFFF</item>
+    <item name="background_white" type="color">#F8F8F8</item>
 
     <item name="navdrawer_item_activated" type="color">#EFEFEF</item>
     <item name="navdrawer_item_pressed" type="color">#DFDFDF</item>

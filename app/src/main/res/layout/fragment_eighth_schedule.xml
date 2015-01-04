@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.desklampstudios.thyroxine.eighth.ScheduleFragment">
+    tools:context=".eighth.ScheduleFragment">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_container"
@@ -12,7 +12,10 @@
         <ListView android:id="@+id/blocks_list"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical"
+            android:background="@color/background_white"
+            tools:listitem="@layout/block_list_textview"
+            tools:listheader="@layout/schedule_header" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
