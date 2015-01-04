@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
@@ -90,8 +91,38 @@ class BlocksListAdapter extends CursorAdapter {
         long allFlags = actvFlags | actvInstanceFlags;
 
         // Display statuses
+        /*
         String statusText = getBlockStatuses(resources, allFlags, block.locked);
         holder.mStatusView.setText(Html.fromHtml(statusText));
+        */
+
+        //final ImageView imageView = (ImageView) view.findViewById(R.id.eighth_activity_status_img);
+        if ((allFlags & EighthActvInstance.FLAG_CANCELLED) != 0) {
+            //imageView.setImageResource(R.drawable.ic_highlight_remove_white_18dp);
+            //imageView.setVisibility(View.VISIBLE);
+            holder.mActivityView.setBackgroundResource(R.drawable.block_background_cancelled);
+            holder.mStatusView.setText("Cancelled");
+        }
+        else if ((allFlags & EighthActv.FLAG_STICKY) != 0) {
+            //imageView.setImageResource(R.drawable.ic_lock_outline_white_18dp);
+            //imageView.setVisibility(View.VISIBLE);
+            holder.mActivityView.setBackgroundResource(R.drawable.block_background);
+            holder.mStatusView.setText("Sticky");
+        }
+        else if (actvId == EighthActv.NOT_SELECTED_AID) {
+            //imageView.setVisibility(View.GONE);
+            holder.mActivityView.setBackgroundResource(R.drawable.block_background_grey);
+            holder.mStatusView.setText("");
+        }
+        else if (block.type.charAt(0) % 2 == 0) {
+            //imageView.setVisibility(View.GONE);
+            holder.mActivityView.setBackgroundResource(R.drawable.block_background_2);
+            holder.mStatusView.setText("");
+        } else {
+            //imageView.setVisibility(View.GONE);
+            holder.mActivityView.setBackgroundResource(R.drawable.block_background);
+            holder.mStatusView.setText("");
+        }
     }
 
     @NonNull
@@ -101,12 +132,6 @@ class BlocksListAdapter extends CursorAdapter {
         // locked
         if (locked) {
             statuses.add(resources.getString(R.string.block_status_locked));
-        }
-        // restricted
-        if ((flags & EighthActv.FLAG_RESTRICTED) != 0) {
-            int textColor = resources.getColor(R.color.actv_textColor_restricted);
-            statuses.add(resources.getString(R.string.actv_status_restricted,
-                    Utils.colorToHtmlHex(textColor)));
         }
         // sticky
         if ((flags & EighthActv.FLAG_STICKY) != 0) {
@@ -129,6 +154,7 @@ class BlocksListAdapter extends CursorAdapter {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         @NonNull public final View mView;
         @NonNull public final TextView mBlockView;
+        @NonNull public final View mActivityView;
         @NonNull public final TextView mActivityNameView;
         @NonNull public final TextView mStatusView;
         @NonNull public final TextView mActivityRoomsView;
@@ -137,6 +163,7 @@ class BlocksListAdapter extends CursorAdapter {
             super(v);
             mView = v;
             mBlockView = (TextView) v.findViewById(R.id.eighth_block);
+            mActivityView = v.findViewById(R.id.eighth_activity);
             mActivityNameView = (TextView) v.findViewById(R.id.eighth_activity_name);
             mStatusView = (TextView) v.findViewById(R.id.eighth_activity_status);
             mActivityRoomsView = (TextView) v.findViewById(R.id.eighth_activity_rooms);
