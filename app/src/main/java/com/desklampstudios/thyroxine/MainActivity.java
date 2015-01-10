@@ -3,6 +3,7 @@ package com.desklampstudios.thyroxine;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
@@ -76,6 +78,23 @@ public class MainActivity extends ActionBarActivity {
 
         // select an item in drawer
         selectItem(mDrawerSelectedPosition, false);
+
+        // set drawer padding
+        // TODO: this is a hack
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            int topPadding = getStatusBarHeight();
+            RelativeLayout leftDrawer = (RelativeLayout) findViewById(R.id.left_drawer);
+            leftDrawer.setPaddingRelative(0, topPadding, 0, 0);
+        }
+    }
+
+    public int getStatusBarHeight() {
+        int result = 25;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
     /** Swaps fragments in the main content view */
