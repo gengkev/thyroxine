@@ -47,6 +47,7 @@ public class NewsDetailActivity extends ActionBarActivity {
 
         TextView title = (TextView) findViewById(R.id.news_entry_title);
         TextView published = (TextView) findViewById(R.id.news_entry_published);
+        TextView likes = (TextView) findViewById(R.id.news_entry_likes);
         //TextView content = (TextView) findViewById(R.id.news_entry_content);
         WebView webView = (WebView) findViewById(R.id.news_entry_webview);
 
@@ -70,6 +71,9 @@ public class NewsDetailActivity extends ActionBarActivity {
 
         title.setText(mNewsEntry.title);
         published.setText(Utils.DateFormats.FULL_DATETIME.format(this, mNewsEntry.published));
+        likes.setText(mNewsEntry.numLikes + " people liked this" +
+                (mNewsEntry.liked ? ", including you" : ""));
+
         //content.setText(Html.fromHtml(mNewsEntry.content));
         webView.loadData(mNewsEntry.content, "text/html;charset=utf-8", null);
         webView.setBackgroundColor(getResources().getColor(R.color.background));

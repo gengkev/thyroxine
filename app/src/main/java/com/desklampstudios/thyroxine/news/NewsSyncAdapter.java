@@ -22,6 +22,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
+import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
@@ -35,6 +36,7 @@ import java.util.List;
 
 public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = NewsSyncAdapter.class.getSimpleName();
+    private static final String KEY_AUTHTOKEN_RETRY = "authTokenRetry";
 
     // Sync intervals
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
@@ -90,7 +92,25 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         // Part I. Get news list
         List<NewsEntry> newsList;
         try {
-            newsList = fetchNews();
+            newsList = fetchNews(authToken);
+        } catch (IodineAuthException.NotLoggedInException e) {
+            Log.d(TAG, "Not logged in, invalidating auth token", e);
+            am.invalidateAuthToken(account.type, authToken);
+
+            // Automatically retry sync, but only once
+            if (!extras.getBoolean(KEY_AUTHTOKEN_RETRY, false)) {
+                extras.putBoolean(KEY_AUTHTOKEN_RETRY, true);
+                Log.d(TAG, "Retrying sync once, recursively. extras: " + extras);
+                onPerformSync(account, extras, authority, provider, syncResult);
+            } else {
+                Log.d(TAG, "Retry token found; will not retry sync again.");
+                syncResult.stats.numAuthExceptions++;
+            }
+            return;
+        } catch (IodineAuthException e) {
+            Log.e(TAG, "Iodine auth error", e);
+            syncResult.stats.numAuthExceptions++;
+            return;
         } catch (IOException e) {
             Log.e(TAG, "Connection error: " + e.toString());
             syncResult.stats.numIoExceptions++;
@@ -101,7 +121,6 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
         Log.v(TAG, "Got news list (" + newsList.size() + ") entries");
-
 
         // Part II. Update entries in database
         try {
@@ -116,16 +135,17 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @NonNull
-    private List<NewsEntry> fetchNews() throws IOException, XmlPullParserException {
+    private List<NewsEntry> fetchNews(String authToken)
+            throws IodineAuthException, IOException, XmlPullParserException {
 
         InputStream stream = null;
-        NewsFeedParser parser = null;
+        NewsListParser parser = null;
         List<NewsEntry> entries = new ArrayList<>();
         NewsEntry entry;
 
         try {
-            stream = IodineApiHelper.getPublicNewsFeed();
-            parser = new NewsFeedParser(getContext());
+            stream = IodineApiHelper.getNewsList(authToken);
+            parser = new NewsListParser(getContext());
             parser.beginFeed(stream);
 
             entry = parser.nextEntry();

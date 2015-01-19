@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 public class Utils {
     private static final String TAG = Utils.class.getSimpleName();
@@ -38,21 +39,33 @@ public class Utils {
     /**
      * Some date formats that are useful for parsing.
      * The locale MUST be explicitly set!
-     * Also, warning that DateFormat objects aren't synchronized. This probably won't be a
-     * problem in the near future.
+     * Warning: these are mutable and not threadsafe. Do not mutate them :-|
      */
     public static class FixedDateFormats {
         public static final DateFormat NEWS_FEED =
                 new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
+        public static final DateFormat NEWS_LIST =
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
         public static final DateFormat ISO =
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
         public static final DateFormat BASIC =
                 new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+        /**
+         * Time zone of the Iodine servers, probably.
+         */
+        public static final TimeZone IODINE_TIME_ZONE = TimeZone.getTimeZone("America/New_York");
+
+        // Set time zones for date formats without time zones
+        static {
+            NEWS_LIST.setTimeZone(IODINE_TIME_ZONE);
+        }
     }
 
     /**
      * Some date formats that are to be shown to the user.
-     * The default locale is OK.
+     * The default locale is preferred, for localization.
+     * All timezones here are relative to the user so they should be OK.
      */
     public static enum DateFormats {
         FULL_DATETIME, // Monday, January 1, 1970 12:00 AM
