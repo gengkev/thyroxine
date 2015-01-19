@@ -87,16 +87,8 @@ class EighthGetBlockParser extends AbstractXMLParser {
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "activity");
 
-        int actvId = -1;
-        int blockId = -1;
-        String actvName = "";
-        String description = "";
-        String comment = "";
-        long flags = 0;
-
-        String roomsStr = "";
-        int memberCount = 0;
-        int capacity = -1;
+        EighthActv.Builder actvBuilder = new EighthActv.Builder();
+        EighthActvInstance.Builder actvInstanceBuilder = new EighthActvInstance.Builder();
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -105,53 +97,56 @@ class EighthGetBlockParser extends AbstractXMLParser {
 
             switch (parser.getName()) {
                 // fields
-                case "aid":
-                    actvId = readInt(parser, "aid");
+                case "aid": {
+                    int actvId = readInt(parser, "aid");
+                    actvBuilder.actvId(actvId);
+                    actvInstanceBuilder.actvId(actvId);
                     break;
+                }
                 case "bid":
-                    blockId = readInt(parser, "bid");
+                    actvInstanceBuilder.blockId(readInt(parser, "bid"));
                     break;
                 case "name":
-                    actvName = Utils.cleanHtml(readText(parser, "name"));
+                    actvBuilder.name(Utils.cleanHtml(readText(parser, "name")));
                     break;
                 case "description":
-                    description = Utils.cleanHtml(readText(parser, "description"));
+                    actvBuilder.description(Utils.cleanHtml(readText(parser, "description")));
                     break;
                 case "comment":
-                    comment = Utils.cleanHtml(readText(parser, "comment"));
+                    actvInstanceBuilder.comment(Utils.cleanHtml(readText(parser, "comment")));
                     break;
                 case "block_rooms":
-                    roomsStr = readBlockRooms(parser);
+                    actvInstanceBuilder.roomsStr(readBlockRooms(parser));
                     break;
                 case "member_count":
-                    memberCount = readInt(parser, "member_count");
+                    actvInstanceBuilder.memberCount(readInt(parser, "member_count"));
                     break;
                 case "capacity":
-                    capacity = readInt(parser, "capacity");
+                    actvInstanceBuilder.capacity(readInt(parser, "capacity"));
                     break;
 
                 // EighthActv flags
                 case "restricted":
                     if (readInt(parser, "restricted") != 0)
-                        flags |= EighthActv.FLAG_RESTRICTED;
+                        actvBuilder.setFlag(EighthActv.FLAG_RESTRICTED);
                     break;
                 case "sticky":
                     if (readInt(parser, "sticky") != 0)
-                        flags |= EighthActv.FLAG_STICKY;
+                        actvBuilder.setFlag(EighthActv.FLAG_STICKY);
                     break;
                 case "special":
                     if (readInt(parser, "special") != 0)
-                        flags |= EighthActv.FLAG_SPECIAL;
+                        actvBuilder.setFlag(EighthActv.FLAG_SPECIAL);
                     break;
 
                 // EighthActvInstance flags
                 case "attendancetaken":
                     if (readInt(parser, "attendancetaken") != 0)
-                        flags |= EighthActvInstance.FLAG_ATTENDANCETAKEN;
+                        actvInstanceBuilder.setFlag(EighthActvInstance.FLAG_ATTENDANCETAKEN);
                     break;
                 case "cancelled":
                     if (readInt(parser, "cancelled") != 0)
-                        flags |= EighthActvInstance.FLAG_CANCELLED;
+                        actvInstanceBuilder.setFlag(EighthActvInstance.FLAG_CANCELLED);
                     break;
 
                 // else
@@ -163,15 +158,9 @@ class EighthGetBlockParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "activity");
 
-        // TODO: re-add errors if fields not found, consider nullable fields again... :\
-
-        EighthActv actv = new EighthActv(actvId, actvName, description,
-                flags & EighthActv.FLAG_ALL);
-
-        EighthActvInstance actvInstance = new EighthActvInstance(actvId, blockId, comment,
-                flags & EighthActvInstance.FLAG_ALL, roomsStr, memberCount, capacity);
-
-        return new Pair<>(actv, actvInstance);
+        return new Pair<>(
+                actvBuilder.build(),
+                actvInstanceBuilder.build());
     }
 
     // TODO: maybe actually get rooms at some point??

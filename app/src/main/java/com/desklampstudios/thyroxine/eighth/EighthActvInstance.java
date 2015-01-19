@@ -13,20 +13,18 @@ class EighthActvInstance {
     public final int blockId;
     @NonNull public final String comment;
     public final long flags;
-
     @NonNull public final String roomsStr;
     public final int memberCount;
     public final int capacity;
 
-    public EighthActvInstance(int actvId, int blockId, @NonNull String comment, long flags,
-                              @NonNull String roomsStr, int memberCount, int capacity) {
-        this.actvId = actvId;
-        this.blockId = blockId;
-        this.comment = comment;
-        this.flags = flags;
-        this.roomsStr = roomsStr;
-        this.memberCount = memberCount;
-        this.capacity = capacity;
+    public EighthActvInstance(Builder builder) {
+        this.actvId = builder.actvId;
+        this.blockId = builder.blockId;
+        this.comment = builder.comment;
+        this.flags = builder.flags;
+        this.roomsStr = builder.roomsStr;
+        this.memberCount = builder.memberCount;
+        this.capacity = builder.capacity;
     }
 
     @NonNull
@@ -49,5 +47,59 @@ class EighthActvInstance {
     @Override
     public int hashCode() {
         throw new UnsupportedOperationException();
+    }
+
+    public static class Builder {
+        private int actvId = -1;
+        private int blockId = -1;
+        @NonNull private String comment = "";
+        private long flags = 0;
+        @NonNull private String roomsStr = "";
+        private int memberCount = 0;
+        private int capacity = -1;
+
+        public Builder() {
+        }
+
+        public Builder actvId(int actvId) {
+            this.actvId = actvId;
+            return this;
+        }
+        public Builder blockId(int blockId) {
+            this.blockId = blockId;
+            return this;
+        }
+        public Builder comment(@NonNull String comment) {
+            this.comment = comment;
+            return this;
+        }
+        public Builder flags(long flags) {
+            this.flags = flags;
+            return this;
+        }
+        public Builder setFlag(long flag) {
+            this.flags |= flag;
+            return this;
+        }
+        public Builder roomsStr(@NonNull String roomsStr) {
+            this.roomsStr = roomsStr;
+            return this;
+        }
+        public Builder memberCount(int memberCount) {
+            this.memberCount = memberCount;
+            return this;
+        }
+        public Builder capacity(int capacity) {
+            this.capacity = capacity;
+            return this;
+        }
+
+        public EighthActvInstance build() {
+            EighthActvInstance actvInstance = new EighthActvInstance(this);
+            if ((actvInstance.flags & ~FLAG_ALL) != 0) {
+                throw new IllegalStateException("Flags invalid: " + actvInstance.flags);
+            }
+            return actvInstance;
+        }
     }
 }

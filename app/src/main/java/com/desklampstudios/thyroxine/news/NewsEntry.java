@@ -11,13 +11,12 @@ class NewsEntry {
     @NonNull public final String contentRaw;
     @NonNull public final String contentSnippet;
 
-    public NewsEntry(@NonNull String link, @NonNull String title, long published,
-                     @NonNull String contentRaw, @NonNull String contentSnippet) {
-        this.link = link;
-        this.title = title;
-        this.published = published;
-        this.contentRaw = contentRaw;
-        this.contentSnippet = contentSnippet;
+    public NewsEntry(Builder builder) {
+        this.link = builder.link;
+        this.title = builder.title;
+        this.published = builder.published;
+        this.contentRaw = builder.contentRaw;
+        this.contentSnippet = builder.contentSnippet;
     }
 
     @Override
@@ -37,5 +36,41 @@ class NewsEntry {
     @Override
     public int hashCode() {
         throw new UnsupportedOperationException();
+    }
+
+    public static class Builder {
+        @NonNull private String link;
+        @NonNull private String title;
+        private long published;
+        @NonNull private String contentRaw;
+        @NonNull private String contentSnippet;
+
+        public Builder() {}
+
+        public Builder link(@NonNull String link) {
+            this.link = link;
+            return this;
+        }
+        public Builder title(@NonNull String title) {
+            this.title = title;
+            return this;
+        }
+        public Builder published(long published) {
+            this.published = published;
+            return this;
+        }
+        public Builder contentRaw(@NonNull String contentRaw) {
+            this.contentRaw = contentRaw;
+            return this;
+        }
+        public Builder contentSnippet(@NonNull String contentSnippet) {
+            this.contentSnippet = contentSnippet;
+            return this;
+        }
+
+        public NewsEntry build() {
+            NewsEntry entry = new NewsEntry(this);
+            return entry;
+        }
     }
 }

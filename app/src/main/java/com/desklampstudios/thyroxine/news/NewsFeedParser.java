@@ -69,10 +69,7 @@ class NewsFeedParser extends AbstractXMLParser {
     private static NewsEntry readEntry(@NonNull XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "item");
 
-        String title = "";
-        long published = 0;
-        String link = "";
-        String content = "";
+        NewsEntry.Builder newsBuilder = new NewsEntry.Builder();
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -80,17 +77,21 @@ class NewsFeedParser extends AbstractXMLParser {
             }
             switch (parser.getName()) {
                 case "title":
-                    title = Utils.cleanHtml(readText(parser, "title"));
+                    newsBuilder.title(Utils.cleanHtml(readText(parser, "title")));
                     break;
                 case "pubDate":
-                    published = readPublished(parser);
+                    newsBuilder.published(readPublished(parser));
                     break;
                 case "link":
-                    link = Utils.cleanHtml(readText(parser, "link"));
+                    newsBuilder.link(Utils.cleanHtml(readText(parser, "link")));
                     break;
-                case "description":
-                    content = readText(parser, "description");
+                case "description": {
+                    String content = readText(parser, "description");
+                    String snippet = Utils.getSnippet(content, 300);
+                    newsBuilder.contentRaw(content);
+                    newsBuilder.contentSnippet(snippet);
                     break;
+                }
                 default:
                     skip(parser);
                     break;
@@ -99,11 +100,7 @@ class NewsFeedParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "item");
 
-        // TODO: re-add errors if fields not found, consider nullable fields again... :\
-
-        String snippet = Utils.getSnippet(content, 300);
-
-        return new NewsEntry(link, title, published, content, snippet);
+        return newsBuilder.build();
     }
 
     // Process published tags in the feed.

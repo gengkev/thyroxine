@@ -53,12 +53,12 @@ class EighthContract {
 
         @NonNull
         public static EighthBlock fromContentValues(@NonNull ContentValues values) {
-            return new EighthBlock(
-                    values.getAsInteger(KEY_BLOCK_ID),
-                    values.getAsString(KEY_DATE),
-                    values.getAsString(KEY_TYPE),
-                    values.getAsBoolean(KEY_LOCKED)
-            );
+            return new EighthBlock.Builder()
+                    .blockId(values.getAsInteger(KEY_BLOCK_ID))
+                    .date(values.getAsString(KEY_DATE))
+                    .type(values.getAsString(KEY_TYPE))
+                    .locked(values.getAsBoolean(KEY_LOCKED))
+                    .build();
         }
         @NonNull
         public static ContentValues toContentValues(@NonNull EighthBlock block) {
@@ -107,12 +107,12 @@ class EighthContract {
 
         @NonNull
         public static EighthActv fromContentValues(@NonNull ContentValues values) {
-            return new EighthActv(
-                    values.getAsInteger(KEY_ACTV_ID),
-                    values.getAsString(KEY_NAME),
-                    values.getAsString(KEY_DESCRIPTION),
-                    values.getAsLong(KEY_FLAGS)
-            );
+            return new EighthActv.Builder()
+                    .actvId(values.getAsInteger(KEY_ACTV_ID))
+                    .name(values.getAsString(KEY_NAME))
+                    .description(values.getAsString(KEY_DESCRIPTION))
+                    .flags(values.getAsLong(KEY_FLAGS))
+                    .build();
         }
         @NonNull
         public static ContentValues toContentValues(@NonNull EighthActv actv) {
@@ -158,15 +158,15 @@ class EighthContract {
 
         @NonNull
         public static EighthActvInstance fromContentValues(@NonNull ContentValues values) {
-            return new EighthActvInstance(
-                    values.getAsInteger(KEY_ACTV_ID),
-                    values.getAsInteger(KEY_BLOCK_ID),
-                    values.getAsString(KEY_COMMENT),
-                    values.getAsLong(KEY_FLAGS),
-                    values.getAsString(KEY_ROOMS_STR),
-                    values.getAsInteger(KEY_MEMBER_COUNT),
-                    values.getAsInteger(KEY_CAPACITY)
-            );
+            return new EighthActvInstance.Builder()
+                    .actvId(values.getAsInteger(KEY_ACTV_ID))
+                    .blockId(values.getAsInteger(KEY_BLOCK_ID))
+                    .comment(values.getAsString(KEY_COMMENT))
+                    .flags(values.getAsLong(KEY_FLAGS))
+                    .roomsStr(values.getAsString(KEY_ROOMS_STR))
+                    .memberCount(values.getAsInteger(KEY_MEMBER_COUNT))
+                    .capacity(values.getAsInteger(KEY_CAPACITY))
+                    .build();
         }
         @NonNull
         public static ContentValues toContentValues(@NonNull EighthActvInstance actvInstance) {

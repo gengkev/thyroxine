@@ -38,16 +38,15 @@ class NewsContract {
         }
 
         // converting to and from not-really-pojos yooooo
-        // this is so yooo i can't even :')
         @NonNull
         static NewsEntry fromContentValues(@NonNull ContentValues values) {
-            return new NewsEntry(
-                    values.getAsString(NewsEntries.KEY_LINK),
-                    values.getAsString(NewsEntries.KEY_TITLE),
-                    values.getAsLong(NewsEntries.KEY_DATE),
-                    values.getAsString(NewsEntries.KEY_CONTENT),
-                    values.getAsString(NewsEntries.KEY_SNIPPET)
-            );
+            return new NewsEntry.Builder()
+                    .link(values.getAsString(NewsEntries.KEY_LINK))
+                    .title(values.getAsString(NewsEntries.KEY_TITLE))
+                    .published(values.getAsLong(NewsEntries.KEY_DATE))
+                    .contentRaw(values.getAsString(NewsEntries.KEY_CONTENT))
+                    .contentSnippet(values.getAsString(NewsEntries.KEY_SNIPPET))
+                    .build();
         }
         @NonNull
         static ContentValues toContentValues(@NonNull NewsEntry entry) {

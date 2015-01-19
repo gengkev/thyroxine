@@ -20,11 +20,11 @@ class EighthActv {
     @NonNull public final String description;
     public final long flags;
 
-    public EighthActv(int actvId, @NonNull String name, @NonNull String description, long flags) {
-        this.actvId = actvId;
-        this.name = name;
-        this.description = description;
-        this.flags = flags;
+    private EighthActv(Builder builder) {
+        this.actvId = builder.actvId;
+        this.name = builder.name;
+        this.description = builder.description;
+        this.flags = builder.flags;
     }
 
     @NonNull
@@ -45,5 +45,43 @@ class EighthActv {
     @Override
     public int hashCode() {
         throw new UnsupportedOperationException();
+    }
+
+    public static class Builder {
+        private int actvId = -1;
+        @NonNull private String name = "";
+        @NonNull private String description = "";
+        private long flags = 0;
+
+        public Builder() {}
+
+        public Builder actvId(int actvId) {
+            this.actvId = actvId;
+            return this;
+        }
+        public Builder name(@NonNull String name) {
+            this.name = name;
+            return this;
+        }
+        public Builder description(@NonNull String description) {
+            this.description = description;
+            return this;
+        }
+        public Builder flags(long flags) {
+            this.flags = flags;
+            return this;
+        }
+        public Builder setFlag(long flag) {
+            this.flags |= flag;
+            return this;
+        }
+
+        public EighthActv build() {
+            EighthActv actv = new EighthActv(this);
+            if ((actv.flags & ~FLAG_ALL) != 0) {
+                throw new IllegalStateException("Flags invalid: " + actv.flags);
+            }
+            return actv;
+        }
     }
 }

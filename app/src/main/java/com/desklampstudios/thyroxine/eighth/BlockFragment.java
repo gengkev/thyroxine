@@ -90,8 +90,16 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             }
         });
         mAdapter.add(new Pair<>(
-                new EighthActv(999, "Test activity", "Test description", 0),
-                new EighthActvInstance(999, 1337, "Test comment", 0, "All the rooms", 0, 0)
+                new EighthActv.Builder()
+                        .actvId(999)
+                        .name("Test activity")
+                        .description("Test description")
+                        .build(),
+                new EighthActvInstance.Builder()
+                        .actvId(999)
+                        .comment("Test comment")
+                        .roomsStr("All the rooms")
+                        .build()
         ));
     }
 
