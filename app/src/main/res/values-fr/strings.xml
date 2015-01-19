@@ -84,11 +84,6 @@
     <string name="signup_failure">L\'inscription à «%1$s» a echoué à cause des raisons ci-dessous :</string>
 
     <!-- SyncAdapter related strings -->
-    <string name="stub_authenticator_name">Thyroxine (Sync)</string>
-    <string name="stub_account_cannot_create">
-        Ce genre de compte ne peut pas être créé.
-    </string>
-
     <string name="iodine_authenticator_name">Thyroxine (Iode)</string>
     <string name="iodine_account_only_one">
         Un seul compte Iode peut exister à la fois. Pour en ajouter un autre, retirez d\'abord le

@@ -21,7 +21,6 @@ import android.util.Log;
 import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -150,16 +149,14 @@ public class Utils {
      * @param context Context used to get accounts
      */
     public static void configureSync(@NonNull Context context) {
-        // Make sure stub account exists
-        Account stubAccount = StubAuthenticator.getStubAccount(context);
-        // Configure News sync with stub account
-        NewsSyncAdapter.configureSync(stubAccount);
-
         // Find Iodine account (may not exist)
         Account iodineAccount = IodineAuthenticator.getIodineAccount(context);
         if (iodineAccount != null) {
             // Configure Eighth sync with Iodine account
             EighthSyncAdapter.configureSync(iodineAccount);
+
+            // Configure News sync with Iodine account
+            NewsSyncAdapter.configureSync(iodineAccount);
         }
     }
 

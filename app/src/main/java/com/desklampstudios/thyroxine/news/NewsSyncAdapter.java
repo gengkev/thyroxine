@@ -1,6 +1,9 @@
 package com.desklampstudios.thyroxine.news;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
@@ -19,8 +22,9 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
+import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
-import com.desklampstudios.thyroxine.sync.StubAuthenticator;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -64,6 +68,24 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               @NonNull ContentProviderClient provider, @NonNull SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
+        final AccountManager am = AccountManager.get(getContext());
+
+        // Part 0. Get auth token
+        String authToken;
+        try {
+            authToken = am.blockingGetAuthToken(account,
+                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
+        } catch (IOException e) {
+            Log.e(TAG, "Connection error: " + e.toString());
+            syncResult.stats.numIoExceptions++;
+            return;
+        } catch (OperationCanceledException | AuthenticatorException e) {
+            Log.e(TAG, "Authentication error: " + e.toString());
+            syncResult.stats.numAuthExceptions++;
+            return;
+        }
+        Log.v(TAG, "Got auth token: " + authToken);
+
 
         // Part I. Get news list
         List<NewsEntry> newsList;
@@ -161,8 +183,8 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(StubAuthenticator.getStubAccount(context),
-                NewsContract.CONTENT_AUTHORITY, bundle);
+        ContentResolver.requestSync(IodineAuthenticator.getIodineAccount(context),
+                context.getString(R.string.eighth_content_authority), bundle);
     }
 
 

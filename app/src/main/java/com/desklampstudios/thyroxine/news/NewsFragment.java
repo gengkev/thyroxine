@@ -20,10 +20,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
-import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.sync.StubAuthenticator;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -115,8 +115,11 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         super.onActivityCreated(savedInstanceState);
         // setHasOptionsMenu(true);
 
-        // start loader
-        getLoaderManager().initLoader(NEWS_LOADER, null, this);
+        // check if user is logged in
+        if (checkLoginState()) {
+            // start loader
+            getLoaderManager().initLoader(NEWS_LOADER, null, this);
+        }
     }
 
     /*
@@ -166,7 +169,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onStatusChanged(int which) {
         final Activity activity = getActivity();
-        final Account account = StubAuthenticator.getStubAccount(activity);
+        final Account account = IodineAuthenticator.getIodineAccount(activity);
 
         final boolean syncActive = ContentResolver.isSyncActive(
                 account, NewsContract.CONTENT_AUTHORITY);
@@ -195,6 +198,16 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         Intent intent = new Intent(getActivity(), NewsDetailActivity.class);
         intent.putExtra(EXTRA_NEWS_ID, newsId);
         startActivity(intent);
+    }
+
+    private boolean checkLoginState() {
+        Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        if (account == null) { // not logged in
+            Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
+            IodineAuthenticator.attemptAddAccount(getActivity());
+            return false;
+        }
+        return true;
     }
 
     private void retrieveNews() {
