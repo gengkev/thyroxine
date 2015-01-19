@@ -13,13 +13,20 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.IodineAuthException;
@@ -53,6 +60,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Nullable private SignupActvTask mSignupActvTask;
 
     private ActvsListAdapter mAdapter;
+    private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public BlockFragment() {
@@ -70,6 +78,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (getArguments() != null) {
             blockId = getArguments().getInt(ARG_BLOCK_ID);
         }
@@ -79,17 +88,17 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mAdapter.setOnItemClickListener(new ActvsListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int pos) {
-                Pair<EighthActv, EighthActvInstance> pair = mAdapter.get(pos);
+                Pair<EighthActv, EighthActvInstance> pair = mAdapter.getItem(pos);
                 onActvClick(pair);
             }
             @Override
             public boolean onItemLongClick(View view, int pos) {
-                Pair<EighthActv, EighthActvInstance> pair = mAdapter.get(pos);
+                Pair<EighthActv, EighthActvInstance> pair = mAdapter.getItem(pos);
                 changeSelectedActv(pair);
                 return true;
             }
         });
-        mAdapter.add(new Pair<>(
+        mAdapter.addItem(new Pair<>(
                 new EighthActv(999, "Test activity", "Test description", 0),
                 new EighthActvInstance(999, 1337, "Test comment", 0, "All the rooms", 0, 0)
         ));
@@ -103,18 +112,18 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
         // RecyclerView!
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setHasFixedSize(true); // changes in content don't change layout size
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setHasFixedSize(true); // changes in content don't change layout size
 
         // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(layoutManager);
 
         // dividers between items
         //RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
         //        getActivity(), DividerItemDecoration.VERTICAL_LIST);
-        //recyclerView.addItemDecoration(itemDecoration);
+        //mRecyclerView.addItemDecoration(itemDecoration);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
@@ -125,7 +134,77 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             }
         });
 
+
+
+        final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar.setBackgroundColor(0);
+        toolbar.setTitleTextColor(0);
+
+        final int toolbarBgColor = getResources().getColor(R.color.background_material_dark);
+        final int toolbarTextColor = getResources().getColor(R.color.abc_primary_text_material_dark);
+
+        final float actionBarSize = getResources().getDimension(R.dimen.action_bar_size);
+        final float headerSize = getResources().getDimension(R.dimen.action_bar_size_eighth_block);
+
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                //int scrollY = getScrollY();
+                //toolbar.setTranslationY(Math.max(-scrollY, blahblah));
+
+                //Log.d(TAG, "getBottom=" + toolbar.getBottom() + ", getHeight=" + toolbar.getHeight());
+                //Log.d(TAG, "scrollY=" + scrollY);
+
+                View firstChild = mRecyclerView.getChildAt(0);
+                if (firstChild == null) return;
+
+                if (mRecyclerView.getChildPosition(firstChild) == 0) { // it's the header!
+                    float ratio = clamp(-firstChild.getTop() / (headerSize - actionBarSize), 0.0f, 1.0f); // actual
+                    float ratio2 = clamp(2.0f * ratio - 1.0f, 0.0f, 1.0f); // alpha ratio to use
+                    int alpha = ((int) (ratio2 * 255) << 24);
+                    // Log.d(TAG, "ratio=" + ratio + ", ratio2=" + ratio2 + ", color=" + Integer.toHexString(alpha));
+
+                    toolbar.setTitleTextColor(alpha | (0xFFFFFF & toolbarTextColor));
+                    toolbar.setBackgroundColor(alpha | (0xFFFFFF & toolbarBgColor));
+
+                    /*
+                    // show toolbar
+                    toolbar.animate()
+                            .translationY(0)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .start();
+                    */
+                }
+                else {
+                    toolbar.setTitleTextColor(toolbarTextColor);
+                    toolbar.setBackgroundColor(toolbarBgColor);
+
+                    /*
+                    if (5 < dy) {
+                        // scroll down; hide toolbar
+                        toolbar.animate()
+                                .translationY(-toolbar.getBottom())
+                                .setInterpolator(new AccelerateInterpolator())
+                                .start();
+                    } else if (dy < -10) {
+                        // scroll up; show toolbar
+                        toolbar.animate()
+                                .translationY(0)
+                                .setInterpolator(new DecelerateInterpolator())
+                                .start();
+                    }
+                    */
+                }
+            }
+        });
+
         return view;
+    }
+
+    public float clamp(float val, float min, float max) {
+        return Math.min(Math.max(val, min), max);
     }
 
     @Override
@@ -146,6 +225,12 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                 }
             });
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.eighth_block, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     // Called when an item in the adapter is clicked
@@ -195,8 +280,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                 mFetchBlockTask = null;
                 mSwipeRefreshLayout.setRefreshing(false); // syncing done
 
-                mAdapter.clear();
-                mAdapter.addAll(pairList);
+                mAdapter.replaceAllItems(pairList);
             }
 
             @Override
@@ -294,14 +378,24 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private void displayBlock(@NonNull EighthBlock block) {
-        String dateStr = Utils.DateFormats.MED_DAYMONTH.formatBasicDate(getActivity(), block.date);
-        String weekday = Utils.DateFormats.WEEKDAY.formatBasicDate(getActivity(), block.date);
-        String displayStr = getResources().getString(R.string.block_title_date,
-                weekday, block.type, dateStr);
+        //String dateStr = Utils.DateFormats.FULL_DATE_NO_WEEKDAY.formatBasicDate(getActivity(), block.date);
+        String weekday = Utils.DateFormats.FULL_WEEKDAY.formatBasicDate(getActivity(), block.date);
+        String displayStr = String.format("%s %s Block",
+                weekday, block.type);
 
-        if (getActivity() != null) {
-            getActivity().setTitle(displayStr);
-        }
+/*
+        TextView blockTitleView = (TextView) getActivity().findViewById(R.id.eighth_block_title);
+        TextView blockDateView = (TextView) getActivity().findViewById(R.id.eighth_block_date);
+
+        blockTitleView.setText(displayStr);
+        blockDateView.setText(dateStr);
+*/
+
+        ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+        actionBar.setTitle(displayStr);
+        //actionBar.setSubtitle(dateStr);
+
+        mAdapter.setBlock(block);
     }
 
     @Nullable

@@ -1,58 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- TODO: get padding, height (88dp) right -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="96dp"
-    android:paddingStart="@dimen/activity_horizontal_margin"
-    android:paddingEnd="@dimen/activity_horizontal_margin"
-    android:paddingBottom="4dp"
-    android:gravity="center_vertical"
-    android:orientation="vertical"
-    tools:background="@color/background_white">
+    android:layout_height="72dp"
+    tools:background="@color/list_item_background">
 
-    <LinearLayout
+    <TextView android:id="@+id/eighth_activity_group"
+        android:layout_width="24dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="16dp"
+        android:gravity="center"
+        android:textSize="24sp"
+        android:lines="1"
+        android:textColor="@color/colorAccent"
+        tools:text="Q" />
+
+    <LinearLayout android:id="@+id/eighth_activity_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        tools:background="@color/actvInstance_background_cancelled_1">
 
         <TextView android:id="@+id/iodine_eighth_activity_name"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:textSize="16sp"
             android:textColor="?android:textColorPrimary"
             android:lines="1"
             android:ellipsize="end"
             tools:text="Name of the 8th period activity" />
 
-        <TextView android:id="@+id/iodine_eighth_activity_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textSize="14sp"
-            android:lines="1"
-            android:ellipsize="end"
-            tools:text="Non-existent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView android:id="@+id/iodine_eighth_activity_description"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="?android:textColorSecondary"
+                android:lines="1"
+                android:ellipsize="end"
+                tools:text="This is the best activity ever — it's hella rad." />
+
+            <TextView android:id="@+id/iodine_eighth_activity_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textSize="14sp"
+                android:lines="1"
+                android:ellipsize="end"
+                tools:text="Non-existent" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-    <TextView android:id="@+id/iodine_eighth_activity_room"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="?android:textColorSecondary"
-        android:lines="1"
-        android:ellipsize="end"
-        tools:text="1 Room, 2 Room, Red Room, Blue Room" />
-
-    <TextView android:id="@+id/iodine_eighth_activity_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="?android:textColorSecondary"
-        android:lines="1"
-        android:ellipsize="end"
-        tools:text="This is the best activity ever — it's hella rad." />
 
 </LinearLayout>

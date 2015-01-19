@@ -6,7 +6,7 @@
 
     <item name="background" type="color">@color/background_material_light</item>
     <item name="background_dark" type="color">@color/background_material_dark</item>
-    <item name="background_white" type="color">#F8F8F8</item>
+    <item name="background_white" type="color">#FAFAFA</item>
 
     <item name="navdrawer_item_activated" type="color">#EFEFEF</item>
     <item name="navdrawer_item_pressed" type="color">#DFDFDF</item>
@@ -14,15 +14,15 @@
     <item name="navdrawer_item_textColor_activated" type="color">@color/primary</item>
 
     <item name="list_item_background" type="color">#FAFAFA</item>
-    <item name="actv_background_default_1" type="color">#F8F8F8</item>
+    <item name="actv_background_default_1" type="color">#FAFAFA</item>
     <item name="actv_background_default_2" type="color">#FAFAFA</item>
     <item name="actv_background_restricted_1" type="color">#FFCCAA</item>
     <item name="actv_background_restricted_2" type="color">#FDC5A0</item>
-    <item name="actvInstance_background_cancelled_1" type="color">#CF4040</item>
-    <item name="actvInstance_background_cancelled_2" type="color">#CA4040</item>
-    <item name="actvInstance_textColor_full" type="color">@android:color/holo_blue_dark</item>
+    <item name="actvInstance_background_cancelled_1" type="color">#D32F2F</item> <!-- Red 700 -->
+    <item name="actvInstance_background_cancelled_2" type="color">#D32F2F</item> <!-- Red 700 -->
+    <item name="actvInstance_textColor_full" type="color">#3D5AFE</item> <!-- Indigo A400 -->
     <item name="actvInstance_textColor_cancelled" type="color">@android:color/white</item>
-    <item name="actv_textColor_restricted" type="color">@android:color/holo_orange_dark</item>
-    <item name="actv_textColor_sticky" type="color">@android:color/darker_gray</item>
+    <item name="actv_textColor_restricted" type="color">#FF3D00</item> <!-- Deep Orange A400 -->
+    <item name="actv_textColor_sticky" type="color">#FF3D00</item>
 
 </resources>
