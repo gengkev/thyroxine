@@ -36,8 +36,8 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
 
-    private static final Utils.MergeInterface<NewsEntry, String> MERGE_INTERFACE =
-            new Utils.MergeInterface<NewsEntry, String>() {
+    private static final Utils.MergeInterface<NewsEntry, Integer> MERGE_INTERFACE =
+            new Utils.MergeInterface<NewsEntry, Integer>() {
                 @Override
                 public ContentValues toContentValues(NewsEntry item) {
                     return NewsContract.NewsEntries.toContentValues(item);
@@ -47,11 +47,11 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                     return NewsContract.NewsEntries.fromContentValues(values);
                 }
                 @Override
-                public String getId(NewsEntry item) {
-                    return item.link;
+                public Integer getId(NewsEntry item) {
+                    return item.newsId;
                 }
                 @Override
-                public Uri buildContentUri(String id) {
+                public Uri buildContentUri(Integer id) {
                     return NewsContract.NewsEntries.buildEntryUri(id);
                 }
             };

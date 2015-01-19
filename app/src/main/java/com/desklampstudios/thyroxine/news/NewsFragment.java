@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 
@@ -32,17 +33,17 @@ import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 public class NewsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
         SyncStatusObserver {
     private static final String TAG = NewsFragment.class.getSimpleName();
-    public static final String EXTRA_NEWS_LINK = "com.desklampstudios.thyroxine.news.KEY_LINK";
+    public static final String EXTRA_NEWS_ID = "com.desklampstudios.thyroxine.news.KEY_NEWS_ID";
     public static final String ARG_LOGGED_IN = "loggedIn";
     private static final int NEWS_LOADER = 0;
 
     private static final String[] NEWS_PROJECTION = new String[] {
             NewsContract.NewsEntries._ID,
             NewsContract.NewsEntries.KEY_TITLE,
-            NewsContract.NewsEntries.KEY_DATE,
-            NewsContract.NewsEntries.KEY_LINK,
+            NewsContract.NewsEntries.KEY_PUBLISHED,
+            NewsContract.NewsEntries.KEY_NEWS_ID,
             //NewsContract.NewsEntries.KEY_CONTENT,
-            NewsContract.NewsEntries.KEY_SNIPPET
+            NewsContract.NewsEntries.KEY_CONTENT_SNIPPET
     };
 
     private NewsListAdapter mAdapter;
@@ -90,9 +91,9 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
                 Cursor cursor = mAdapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(pos)) {
-                    String link = cursor.getString(
-                            cursor.getColumnIndex(NewsContract.NewsEntries.KEY_LINK));
-                    openNewsDetailActivity(link);
+                    int newsId = cursor.getInt(
+                            cursor.getColumnIndex(NewsContract.NewsEntries.KEY_NEWS_ID));
+                    openNewsDetailActivity(newsId);
                 }
             }
         });
@@ -188,11 +189,11 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     // Called when an item in the adapter is clicked
-    private void openNewsDetailActivity(String link) {
+    private void openNewsDetailActivity(int newsId) {
         // Toast.makeText(getApplicationContext(), "Entry: " + entry, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), NewsDetailActivity.class);
-        intent.putExtra(EXTRA_NEWS_LINK, link);
+        intent.putExtra(EXTRA_NEWS_ID, newsId);
         startActivity(intent);
     }
 
@@ -212,7 +213,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
                     NEWS_PROJECTION,
                     null, // selection
                     null, // selectionArgs
-                    NewsContract.NewsEntries.KEY_DATE + " DESC" // orderBy
+                    NewsContract.NewsEntries.KEY_PUBLISHED + " DESC" // orderBy
             );
         default:
             return null;

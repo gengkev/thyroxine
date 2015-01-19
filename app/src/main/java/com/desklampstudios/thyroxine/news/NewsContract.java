@@ -20,42 +20,47 @@ class NewsContract {
         public static final String CONTENT_TYPE_NEWSENTRIES = ContentResolver.CURSOR_DIR_BASE_TYPE + "/newsEntries";
         public static final String CONTENT_ITEM_TYPE_NEWSENTRIES = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/newsEntry";
 
-        static final String KEY_TITLE = "title";
-        static final String KEY_DATE = "date";
-        static final String KEY_LINK = "link";
-        static final String KEY_CONTENT = "content";
-        static final String KEY_SNIPPET = "content_snippet";
+        static final String KEY_TITLE = "news_title";
+        static final String KEY_PUBLISHED = "news_published";
+        static final String KEY_NEWS_ID = "news_id";
+        static final String KEY_CONTENT = "news_content";
+        static final String KEY_CONTENT_SNIPPET = "news_content_snippet";
+        static final String KEY_LIKED = "news_liked";
+        static final String KEY_NUM_LIKES = "news_num_likes";
 
         @NonNull
-        public static Uri buildEntryUri(String link) {
+        public static Uri buildEntryUri(int newsId) {
             return CONTENT_URI.buildUpon()
-                    .appendPath(link)
+                    .appendPath(String.valueOf(newsId))
                     .build();
         }
-        @NonNull
-        public static String getLink(@NonNull Uri uri) {
-            return uri.getPathSegments().get(1);
+        public static int getNewsId(@NonNull Uri uri) {
+            return Integer.parseInt(uri.getPathSegments().get(1));
         }
 
         // converting to and from not-really-pojos yooooo
         @NonNull
         static NewsEntry fromContentValues(@NonNull ContentValues values) {
             return new NewsEntry.Builder()
-                    .link(values.getAsString(NewsEntries.KEY_LINK))
-                    .title(values.getAsString(NewsEntries.KEY_TITLE))
-                    .published(values.getAsLong(NewsEntries.KEY_DATE))
-                    .contentRaw(values.getAsString(NewsEntries.KEY_CONTENT))
-                    .contentSnippet(values.getAsString(NewsEntries.KEY_SNIPPET))
+                    .newsId(values.getAsInteger(KEY_NEWS_ID))
+                    .title(values.getAsString(KEY_TITLE))
+                    .published(values.getAsLong(KEY_PUBLISHED))
+                    .content(values.getAsString(KEY_CONTENT))
+                    .contentSnippet(values.getAsString(KEY_CONTENT_SNIPPET))
+                    .liked(values.getAsBoolean(KEY_LIKED))
+                    .numLikes(values.getAsInteger(KEY_NUM_LIKES))
                     .build();
         }
         @NonNull
         static ContentValues toContentValues(@NonNull NewsEntry entry) {
             ContentValues values = new ContentValues();
-            values.put(NewsEntries.KEY_TITLE, entry.title);
-            values.put(NewsEntries.KEY_DATE, entry.published);
-            values.put(NewsEntries.KEY_LINK, entry.link);
-            values.put(NewsEntries.KEY_CONTENT, entry.contentRaw);
-            values.put(NewsEntries.KEY_SNIPPET, entry.contentSnippet);
+            values.put(KEY_TITLE, entry.title);
+            values.put(KEY_PUBLISHED, entry.published);
+            values.put(KEY_NEWS_ID, entry.newsId);
+            values.put(KEY_CONTENT, entry.content);
+            values.put(KEY_CONTENT_SNIPPET, entry.contentSnippet);
+            values.put(KEY_LIKED, entry.liked);
+            values.put(KEY_NUM_LIKES, entry.numLikes);
             return values;
         }
     }

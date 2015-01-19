@@ -20,6 +20,7 @@ import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 
@@ -50,11 +51,11 @@ public class NewsDetailActivity extends ActionBarActivity {
         WebView webView = (WebView) findViewById(R.id.news_entry_webview);
 
         Intent intent = getIntent();
-        String link = intent.getStringExtra(NewsFragment.EXTRA_NEWS_LINK);
+        int newsId = intent.getIntExtra(NewsFragment.EXTRA_NEWS_ID, -1);
 
         // load from db
         Cursor cursor = getContentResolver().query(
-                NewsContract.NewsEntries.buildEntryUri(link),
+                NewsContract.NewsEntries.buildEntryUri(newsId),
                 null, // projection
                 null, null, null);
 
@@ -69,8 +70,8 @@ public class NewsDetailActivity extends ActionBarActivity {
 
         title.setText(mNewsEntry.title);
         published.setText(Utils.DateFormats.FULL_DATETIME.format(this, mNewsEntry.published));
-        //content.setText(Html.fromHtml(mNewsEntry.contentRaw));
-        webView.loadData(mNewsEntry.contentRaw, "text/html;charset=utf-8", null);
+        //content.setText(Html.fromHtml(mNewsEntry.content));
+        webView.loadData(mNewsEntry.content, "text/html;charset=utf-8", null);
         webView.setBackgroundColor(getResources().getColor(R.color.background));
     }
 
@@ -96,7 +97,8 @@ public class NewsDetailActivity extends ActionBarActivity {
             return null;
 
         String shareSubject = mNewsEntry.title;
-        String shareMessage = mNewsEntry.title + "\n" + mNewsEntry.link;
+        String shareMessage = mNewsEntry.title + "\n" +
+                IodineApiHelper.getNewsShowUrl(mNewsEntry.newsId);
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
@@ -121,7 +123,8 @@ public class NewsDetailActivity extends ActionBarActivity {
                 return true;
             case R.id.news_entry_browser:
                 // open in browser
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mNewsEntry.link));
+                String link = IodineApiHelper.getNewsShowUrl(mNewsEntry.newsId);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                 startActivity(browserIntent);
                 return true;
         }
