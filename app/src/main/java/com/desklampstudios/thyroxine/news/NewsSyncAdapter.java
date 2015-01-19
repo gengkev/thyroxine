@@ -184,7 +184,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(IodineAuthenticator.getIodineAccount(context),
-                context.getString(R.string.eighth_content_authority), bundle);
+                context.getString(R.string.news_content_authority), bundle);
     }
 
 
