@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.SyncRequest;
 import android.content.SyncStats;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Build;
@@ -180,10 +179,39 @@ public class Utils {
         }
     }
 
+    /**
+     * Read the entire contents of a cursor row and store them in a ContentValues.
+     * This version performs number conversions immediately using the cursor, rather than storing
+     *     the values as strings in the ContentValues and using that to convert them, thus
+     *     indirectly fixing http://stackoverflow.com/q/13095277/689161
+     *
+     * @param cursor the cursor to read from.
+     * @return the {@link ContentValues} to put the row into.
+     */
     @NonNull
-    public static ContentValues cursorRowToContentValues(Cursor cursor) {
+    public static ContentValues cursorRowToContentValues(@NonNull Cursor cursor) {
         ContentValues values = new ContentValues();
-        DatabaseUtils.cursorRowToContentValues(cursor, values);
+        String[] columns = cursor.getColumnNames();
+        int length = columns.length;
+        for (int i = 0; i < length; i++) {
+            switch (cursor.getType(i)) {
+                case Cursor.FIELD_TYPE_NULL:
+                    values.putNull(columns[i]);
+                    break;
+                case Cursor.FIELD_TYPE_INTEGER:
+                    values.put(columns[i], cursor.getLong(i));
+                    break;
+                case Cursor.FIELD_TYPE_FLOAT:
+                    values.put(columns[i], cursor.getDouble(i));
+                    break;
+                case Cursor.FIELD_TYPE_STRING:
+                    values.put(columns[i], cursor.getString(i));
+                    break;
+                case Cursor.FIELD_TYPE_BLOB:
+                    values.put(columns[i], cursor.getBlob(i));
+                    break;
+            }
+        }
         return values;
     }
 
