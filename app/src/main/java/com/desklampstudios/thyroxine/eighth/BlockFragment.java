@@ -139,12 +139,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(BLOCK_LOADER, null, this);
 
         // check if user is logged in
-        if (checkLoginState()) {
-            // start block loader
-            getLoaderManager().initLoader(BLOCK_LOADER, null, this);
-
+        if (checkLoginState() != null) {
             // load actvs from server
             // http://stackoverflow.com/a/26910973/689161
             mSwipeRefreshLayout.post(new Runnable() {
@@ -169,14 +167,13 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
     }
 
-    private boolean checkLoginState() {
+    private Account checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
             IodineAuthenticator.attemptAddAccount(getActivity());
-            return false;
         }
-        return true;
+        return account;
     }
 
     // Starts FetchBlockTask
@@ -187,7 +184,8 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
 
         // make sure user is logged in
-        if (!checkLoginState()) {
+        Account account = checkLoginState();
+        if (account == null) {
             mSwipeRefreshLayout.setRefreshing(false);
             return;
         }
@@ -196,7 +194,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mSwipeRefreshLayout.setRefreshing(true);
 
         // Load stuff using AsyncTask
-        Account account = IodineAuthenticator.getIodineAccount(getActivity());
         mFetchBlockTask = new FetchBlockTask(getActivity(), account, new FetchBlockTask.ActvsResultListener() {
             @Override
             public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {

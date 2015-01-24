@@ -114,12 +114,8 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // setHasOptionsMenu(true);
-
-        // check if user is logged in
-        if (checkLoginState()) {
-            // start loader
-            getLoaderManager().initLoader(NEWS_LOADER, null, this);
-        }
+        checkLoginState();
+        getLoaderManager().initLoader(NEWS_LOADER, null, this);
     }
 
     /*
@@ -200,19 +196,21 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         startActivity(intent);
     }
 
-    private boolean checkLoginState() {
+    private Account checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
             IodineAuthenticator.attemptAddAccount(getActivity());
-            return false;
         }
-        return true;
+        return account;
     }
 
     private void retrieveNews() {
-        // Request immediate sync
-        NewsSyncAdapter.syncImmediately(getActivity());
+        Account account = checkLoginState();
+        if (account != null) {
+            // Request immediate sync
+            NewsSyncAdapter.syncImmediately(account, true);
+        }
     }
 
     @Nullable

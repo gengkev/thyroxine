@@ -6,7 +6,9 @@ import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
 import android.accounts.NetworkErrorException;
+import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -17,10 +19,12 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.desklampstudios.thyroxine.BuildConfig;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
+import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -204,14 +208,38 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
      * Attempts to add an Iodine account.
      * @param activity The activity used to open the login activity and as a context.
      */
-    public static void attemptAddAccount(@Nullable final Activity activity) {
+    public static void attemptAddAccount(@NonNull final Activity activity) {
         final AccountManager am = AccountManager.get(activity);
         final AccountManagerCallback<Bundle> callback = new AccountManagerCallback<Bundle>() {
             @Override
             public void run(AccountManagerFuture<Bundle> future) {
-                if (activity != null) {
-                    Utils.configureSync(activity);
+                Bundle result;
+                try {
+                    result = future.getResult();
+                } catch (OperationCanceledException | IOException | AuthenticatorException e) {
+                    Log.e(TAG, "Error trying to add account", e);
+                    Toast.makeText(activity, "Error trying to add account", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                Account newAccount = new Account(
+                        result.getString(AccountManager.KEY_ACCOUNT_NAME),
+                        result.getString(AccountManager.KEY_ACCOUNT_TYPE));
+
+                // Check that this new account is correct
+                if (BuildConfig.DEBUG) {
+                    Account iodineAccount = IodineAuthenticator.getIodineAccount(activity);
+                    if (iodineAccount == null || !iodineAccount.equals(newAccount))
+                        throw new AssertionError();
+                }
+
+                // Configure sync with Iodine account
+                EighthSyncAdapter.configureSync(newAccount);
+                NewsSyncAdapter.configureSync(newAccount);
+
+                // Request initial sync
+                EighthSyncAdapter.syncImmediately(newAccount, false);
+                NewsSyncAdapter.syncImmediately(newAccount, false);
             }
         };
         am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,

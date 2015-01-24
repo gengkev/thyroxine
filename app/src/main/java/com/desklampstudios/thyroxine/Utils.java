@@ -164,10 +164,8 @@ public class Utils {
         // Find Iodine account (may not exist)
         Account iodineAccount = IodineAuthenticator.getIodineAccount(context);
         if (iodineAccount != null) {
-            // Configure Eighth sync with Iodine account
+            // Configure sync with Iodine account
             EighthSyncAdapter.configureSync(iodineAccount);
-
-            // Configure News sync with Iodine account
             NewsSyncAdapter.configureSync(iodineAccount);
         }
     }

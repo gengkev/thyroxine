@@ -120,8 +120,6 @@ class NewsListParser extends AbstractXMLParser {
             Log.e(TAG, "Invalid date string: " + publishedStr + ", " + e.toString());
             throw new XmlPullParserException("Invalid date string: " + publishedStr, parser, e);
         }
-        Log.i(TAG, Arrays.toString(TimeZone.getAvailableIDs()));
-        Log.i(TAG, TimeZone.getDefault() + "");
         return published;
     }
 }

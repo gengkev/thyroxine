@@ -407,30 +407,30 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     /**
-     * Helper method to have the sync adapter sync immediately
-     * @param context The context used to access the account service
+     * Helper method to have the sync adapter sync immediately.
+     * @param account The account to sync immediately
+     * @param manual Whether the sync was manually initiated
      */
-    public static void syncImmediately(@NonNull Context context) {
+    public static void syncImmediately(@NonNull Account account, boolean manual) {
         Log.d(TAG, "Immediate sync requested");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(IodineAuthenticator.getIodineAccount(context),
-                context.getString(R.string.eighth_content_authority), bundle);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, manual);
+        ContentResolver.requestSync(account, EighthContract.CONTENT_AUTHORITY, bundle);
     }
 
 
     /**
-     * Configures sync scheduling. Called from MainActivity.
-     * @param newAccount The stub account that was created.
+     * Configures sync scheduling.
+     * @param account The Iodine account to sync.
      */
-    public static void configureSync(@NonNull Account newAccount) {
+    public static void configureSync(@NonNull Account account) {
         final String authority = EighthContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
-        Utils.configurePeriodicSync(newAccount, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
+        Utils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
-        // Configure syncing automatically
-        ContentResolver.setSyncAutomatically(newAccount, authority, true);
+        // Enable automatic sync
+        ContentResolver.setSyncAutomatically(account, authority, true);
     }
 }
