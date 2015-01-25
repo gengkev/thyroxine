@@ -36,9 +36,9 @@ import java.util.ArrayList;
  */
 public class BlockFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = BlockFragment.class.getSimpleName();
-    private static final int BLOCK_LOADER = 1;
     public static final String ARG_BLOCK_ID = "com.desklampstudios.thyroxine.eighth.BLOCK_ID";
 
+    private static final int BLOCK_LOADER = 1;
     private static final String[] BLOCK_LOADER_PROJECTION = new String[]{
             EighthContract.Blocks.KEY_BLOCK_ID,
             EighthContract.Blocks.KEY_DATE,
@@ -155,7 +155,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     // Called when an item in the adapter is clicked
-    public void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
+    private void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
         String text = getString(R.string.actv_toast_text,
                 pair.first.name,
                 pair.second.roomsStr,
@@ -320,7 +320,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                         BLOCK_LOADER_PROJECTION, // columns
                         null, // selection
                         null, // selectionArgs
-                        null
+                        null // orderBy
                 );
             }
             default: {
@@ -341,8 +341,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             mAdapter.setSelectedActvId(curActvId);
 
             Log.d(TAG, "Got block: " + block + ", curActvId: " + curActvId);
-        } else {
+        }
+        else {
             Log.e(TAG, "Cursor error");
+            Toast.makeText(getActivity(), R.string.error_database, Toast.LENGTH_LONG).show();
         }
     }
 

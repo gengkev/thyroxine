@@ -34,7 +34,6 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
         SyncStatusObserver {
     private static final String TAG = NewsFragment.class.getSimpleName();
     public static final String EXTRA_NEWS_ID = "com.desklampstudios.thyroxine.news.KEY_NEWS_ID";
-    public static final String ARG_LOGGED_IN = "loggedIn";
     private static final int NEWS_LOADER = 0;
 
     private static final String[] NEWS_PROJECTION = new String[] {
@@ -217,17 +216,17 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
-        case NEWS_LOADER:
-            return new CursorLoader(
-                    getActivity(),
-                    NewsContract.NewsEntries.CONTENT_URI,
-                    NEWS_PROJECTION,
-                    null, // selection
-                    null, // selectionArgs
-                    NewsContract.NewsEntries.KEY_PUBLISHED + " DESC" // orderBy
-            );
-        default:
-            return null;
+            case NEWS_LOADER:
+                return new CursorLoader(
+                        getActivity(),
+                        NewsContract.NewsEntries.CONTENT_URI,
+                        NEWS_PROJECTION,
+                        null, // selection
+                        null, // selectionArgs
+                        NewsContract.NewsEntries.DEFAULT_SORT // orderBy
+                );
+            default:
+                return null;
         }
     }
 

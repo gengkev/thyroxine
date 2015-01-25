@@ -218,7 +218,7 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
                     result = future.getResult();
                 } catch (OperationCanceledException | IOException | AuthenticatorException e) {
                     Log.e(TAG, "Error trying to add account", e);
-                    Toast.makeText(activity, "Error trying to add account", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, R.string.error_adding_account, Toast.LENGTH_SHORT).show();
                     return;
                 }
 

@@ -1,7 +1,10 @@
 package com.desklampstudios.thyroxine.news;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,11 +27,19 @@ import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 
-public class NewsDetailActivity extends ActionBarActivity {
+public class NewsDetailActivity extends ActionBarActivity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
+
     private static final String TAG = NewsDetailActivity.class.getSimpleName();
 
-    private NewsEntry mNewsEntry;
+    private int mNewsId = -1;
+    @Nullable private NewsEntry mNewsEntry = null;
     private ShareActionProvider mShareActionProvider;
+
+    private TextView mTitleView;
+    private TextView mPublishedView;
+    private TextView mLikesView;
+    private WebView mWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,41 +53,23 @@ public class NewsDetailActivity extends ActionBarActivity {
         // enable Up button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // no title
+        // no title in action bar
         setTitle("");
 
-        TextView title = (TextView) findViewById(R.id.news_entry_title);
-        TextView published = (TextView) findViewById(R.id.news_entry_published);
-        TextView likes = (TextView) findViewById(R.id.news_entry_likes);
-        //TextView content = (TextView) findViewById(R.id.news_entry_content);
-        WebView webView = (WebView) findViewById(R.id.news_entry_webview);
-
+        // read intent
         Intent intent = getIntent();
-        int newsId = intent.getIntExtra(NewsFragment.EXTRA_NEWS_ID, -1);
+        mNewsId = intent.getIntExtra(NewsFragment.EXTRA_NEWS_ID, -1);
 
-        // load from db
-        Cursor cursor = getContentResolver().query(
-                NewsContract.NewsEntries.buildEntryUri(newsId),
-                null, // projection
-                null, null, null);
+        // reference views
+        mTitleView = (TextView) findViewById(R.id.news_entry_title);
+        mPublishedView = (TextView) findViewById(R.id.news_entry_published);
+        mLikesView = (TextView) findViewById(R.id.news_entry_likes);
+        mWebView = (WebView) findViewById(R.id.news_entry_webview);
 
-        if (cursor == null || !cursor.moveToNext()) {
-            Toast.makeText(this, "Error loading from database", Toast.LENGTH_LONG).show();
-            return;
-        }
-        ContentValues values = Utils.cursorRowToContentValues(cursor);
-        mNewsEntry = NewsContract.NewsEntries.fromContentValues(values);
+        mWebView.setBackgroundColor(getResources().getColor(R.color.background));
 
-        Log.d(TAG, "Entry: " + mNewsEntry);
-
-        title.setText(mNewsEntry.title);
-        published.setText(Utils.DateFormats.FULL_DATETIME.format(this, mNewsEntry.published));
-        likes.setText(mNewsEntry.numLikes + " people liked this" +
-                (mNewsEntry.liked ? ", including you" : ""));
-
-        //content.setText(Html.fromHtml(mNewsEntry.content));
-        webView.loadData(mNewsEntry.content, "text/html;charset=utf-8", null);
-        webView.setBackgroundColor(getResources().getColor(R.color.background));
+        // initialize loader
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -89,8 +82,6 @@ public class NewsDetailActivity extends ActionBarActivity {
 
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-
-        setShareIntent(createShareIntent());
 
         return true;
     }
@@ -125,12 +116,15 @@ public class NewsDetailActivity extends ActionBarActivity {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
-            case R.id.news_entry_browser:
-                // open in browser
-                String link = IodineApiHelper.getNewsShowUrl(mNewsEntry.newsId);
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-                startActivity(browserIntent);
-                return true;
+            case R.id.news_entry_browser: {
+                if (mNewsEntry != null) {
+                    // open in browser
+                    String link = IodineApiHelper.getNewsShowUrl(mNewsEntry.newsId);
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                    startActivity(browserIntent);
+                    return true;
+                }
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -151,4 +145,49 @@ public class NewsDetailActivity extends ActionBarActivity {
         super.onSupportActionModeFinished(mode);
     }
 
+    @Nullable
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+        return new CursorLoader(
+                this,
+                NewsContract.NewsEntries.buildEntryUri(mNewsId),
+                null, // projection
+                null, // selection
+                null, // selectionArgs
+                null // orderBy
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, @Nullable Cursor cursor) {
+        if (cursor != null && cursor.moveToFirst()) {
+            ContentValues values = Utils.cursorRowToContentValues(cursor);
+            mNewsEntry = NewsContract.NewsEntries.fromContentValues(values);
+
+            Log.d(TAG, "Entry: " + mNewsEntry);
+
+            String published = Utils.DateFormats.FULL_DATETIME.format(this, mNewsEntry.published);
+            String liked = getResources().getQuantityString(R.plurals.news_entry_liked,
+                    mNewsEntry.numLikes, mNewsEntry.numLikes);
+
+            // Update WebView
+            mWebView.loadData(mNewsEntry.content, "text/html;charset=utf-8", null);
+
+            // Update UI fields
+            mTitleView.setText(mNewsEntry.title);
+            mPublishedView.setText(published);
+            mLikesView.setText(liked);
+
+            // create share intent
+            setShareIntent(createShareIntent());
+        }
+        else {
+            Log.e(TAG, "Cursor error");
+            Toast.makeText(this, R.string.error_database, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+    }
 }

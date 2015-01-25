@@ -23,9 +23,8 @@ import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
-import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.sync.SyncUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -42,8 +41,8 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
 
-    private static final Utils.MergeInterface<NewsEntry, Integer> MERGE_INTERFACE =
-            new Utils.MergeInterface<NewsEntry, Integer>() {
+    private static final SyncUtils.MergeInterface<NewsEntry, Integer> MERGE_INTERFACE =
+            new SyncUtils.MergeInterface<NewsEntry, Integer>() {
                 @Override
                 public ContentValues toContentValues(NewsEntry item) {
                     return NewsContract.NewsEntries.toContentValues(item);
@@ -177,7 +176,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                 null, null, null, null);
         assert queryCursor != null;
 
-        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+        ArrayList<ContentProviderOperation> batch = SyncUtils.createMergeBatch(
                 NewsEntry.class.getSimpleName(),
                 newsList,
                 queryCursor,
@@ -217,7 +216,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
-        Utils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
+        SyncUtils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         // Enable automatic sync
         ContentResolver.setSyncAutomatically(account, authority, true);

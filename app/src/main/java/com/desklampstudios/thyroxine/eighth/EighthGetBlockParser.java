@@ -128,25 +128,25 @@ class EighthGetBlockParser extends AbstractXMLParser {
                 // EighthActv flags
                 case "restricted":
                     if (readInt(parser, "restricted") != 0)
-                        actvBuilder.setFlag(EighthActv.FLAG_RESTRICTED);
+                        actvBuilder.withFlag(EighthActv.FLAG_RESTRICTED);
                     break;
                 case "sticky":
                     if (readInt(parser, "sticky") != 0)
-                        actvBuilder.setFlag(EighthActv.FLAG_STICKY);
+                        actvBuilder.withFlag(EighthActv.FLAG_STICKY);
                     break;
                 case "special":
                     if (readInt(parser, "special") != 0)
-                        actvBuilder.setFlag(EighthActv.FLAG_SPECIAL);
+                        actvBuilder.withFlag(EighthActv.FLAG_SPECIAL);
                     break;
 
                 // EighthActvInstance flags
                 case "attendancetaken":
                     if (readInt(parser, "attendancetaken") != 0)
-                        actvInstanceBuilder.setFlag(EighthActvInstance.FLAG_ATTENDANCETAKEN);
+                        actvInstanceBuilder.withFlag(EighthActvInstance.FLAG_ATTENDANCETAKEN);
                     break;
                 case "cancelled":
                     if (readInt(parser, "cancelled") != 0)
-                        actvInstanceBuilder.setFlag(EighthActvInstance.FLAG_CANCELLED);
+                        actvInstanceBuilder.withFlag(EighthActvInstance.FLAG_CANCELLED);
                     break;
 
                 // else

@@ -4,8 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.desklampstudios.thyroxine.Utils;
 
-import java.util.Date;
-
 class NewsEntry implements Comparable<NewsEntry> {
     public final int newsId;
     @NonNull public final String title;

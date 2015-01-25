@@ -109,7 +109,7 @@ class NewsFeedParser extends AbstractXMLParser {
     // Process published tags in the feed.
     private static long readPublished(XmlPullParser parser) throws IOException, XmlPullParserException {
         String publishedStr = readText(parser, "pubDate");
-        long published = 0;
+        long published;
         try {
             Date date = Utils.FixedDateFormats.NEWS_FEED.parse(publishedStr);
             published = date.getTime();

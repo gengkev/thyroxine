@@ -84,7 +84,7 @@ class EighthActvInstance {
             this.flags = flags;
             return this;
         }
-        public Builder setFlag(long flag) {
+        public Builder withFlag(long flag) {
             this.flags |= flag;
             return this;
         }
