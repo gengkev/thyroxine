@@ -80,13 +80,16 @@ class NewsFeedParser extends AbstractXMLParser {
             }
             switch (parser.getName()) {
                 case "title":
-                    newsBuilder.title(Utils.cleanHtml(readText(parser, "title")));
+                    newsBuilder.title(
+                            Utils.cleanHtml(readText(parser, "title")));
                     break;
                 case "pubDate":
-                    newsBuilder.published(readPublished(parser));
+                    newsBuilder.published(
+                            readPublished(parser));
                     break;
                 case "link":
-                    newsBuilder.newsId(readNewsIdFromLink(parser));
+                    newsBuilder.newsId(
+                            readNewsIdFromLink(parser));
                     break;
                 case "description": {
                     String content = readText(parser, "description");
@@ -114,7 +117,6 @@ class NewsFeedParser extends AbstractXMLParser {
             Date date = Utils.FixedDateFormats.NEWS_FEED.parse(publishedStr);
             published = date.getTime();
         } catch (ParseException e) {
-            Log.e(TAG, "Invalid date string: " + publishedStr + ", " + e.toString());
             throw new XmlPullParserException("Invalid date string: " + publishedStr, parser, e);
         }
         return published;

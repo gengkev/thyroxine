@@ -104,49 +104,68 @@ class EighthGetBlockParser extends AbstractXMLParser {
                     break;
                 }
                 case "bid":
-                    actvInstanceBuilder.blockId(readInt(parser, "bid"));
+                    actvInstanceBuilder.blockId(
+                            readInt(parser, "bid"));
                     break;
                 case "name":
-                    actvBuilder.name(Utils.cleanHtml(readText(parser, "name")));
+                    actvBuilder.name(
+                            Utils.cleanHtml(readText(parser, "name")));
                     break;
                 case "description":
-                    actvBuilder.description(Utils.cleanHtml(readText(parser, "description")));
+                    actvBuilder.description(
+                            Utils.cleanHtml(readText(parser, "description")));
                     break;
                 case "comment":
-                    actvInstanceBuilder.comment(Utils.cleanHtml(readText(parser, "comment")));
+                    actvInstanceBuilder.comment(
+                            Utils.cleanHtml(readText(parser, "comment")));
                     break;
                 case "block_rooms":
-                    actvInstanceBuilder.roomsStr(readBlockRooms(parser));
+                    actvInstanceBuilder.roomsStr(
+                            readBlockRooms(parser));
                     break;
                 case "member_count":
-                    actvInstanceBuilder.memberCount(readInt(parser, "member_count"));
+                    actvInstanceBuilder.memberCount(
+                            readInt(parser, "member_count"));
                     break;
                 case "capacity":
-                    actvInstanceBuilder.capacity(readInt(parser, "capacity"));
+                    actvInstanceBuilder.capacity(
+                            readInt(parser, "capacity"));
                     break;
 
                 // EighthActv flags
                 case "restricted":
-                    if (readInt(parser, "restricted") != 0)
-                        actvBuilder.withFlag(EighthActv.FLAG_RESTRICTED);
+                    actvBuilder.withFlag(EighthActv.FLAG_RESTRICTED,
+                            readBoolean(parser, "restricted"));
+                    break;
+                case "presign":
+                    actvBuilder.withFlag(EighthActv.FLAG_PRESIGN,
+                            readBoolean(parser, "presign"));
+                    break;
+                case "oneaday":
+                    actvBuilder.withFlag(EighthActv.FLAG_ONEADAY,
+                            readBoolean(parser, "oneaday"));
+                    break;
+                case "bothblocks":
+                    actvBuilder.withFlag(EighthActv.FLAG_BOTHBLOCKS,
+                            readBoolean(parser, "bothblocks"));
                     break;
                 case "sticky":
-                    if (readInt(parser, "sticky") != 0)
-                        actvBuilder.withFlag(EighthActv.FLAG_STICKY);
+                    actvBuilder.withFlag(EighthActv.FLAG_STICKY,
+                            readBoolean(parser, "sticky"));
                     break;
                 case "special":
-                    if (readInt(parser, "special") != 0)
-                        actvBuilder.withFlag(EighthActv.FLAG_SPECIAL);
+                    actvBuilder.withFlag(EighthActv.FLAG_SPECIAL,
+                            readBoolean(parser, "special"));
                     break;
 
                 // EighthActvInstance flags
                 case "attendancetaken":
-                    if (readInt(parser, "attendancetaken") != 0)
-                        actvInstanceBuilder.withFlag(EighthActvInstance.FLAG_ATTENDANCETAKEN);
+                    actvInstanceBuilder.withFlag(EighthActvInstance.FLAG_ATTENDANCETAKEN,
+                            readBoolean(parser, "attendancetaken"));
                     break;
                 case "cancelled":
-                    if (readInt(parser, "cancelled") != 0)
-                        actvInstanceBuilder.withFlag(EighthActvInstance.FLAG_CANCELLED);
+                    actvInstanceBuilder.withFlag(EighthActvInstance.FLAG_CANCELLED,
+                            readBoolean(parser, "cancelled"));
                     break;
 
                 // else

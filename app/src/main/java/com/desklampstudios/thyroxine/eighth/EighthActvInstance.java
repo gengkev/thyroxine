@@ -88,6 +88,14 @@ class EighthActvInstance {
             this.flags |= flag;
             return this;
         }
+        public Builder withFlag(long flag, boolean set) {
+            if (set) {
+                this.flags |= flag;
+            } else {
+                this.flags &= ~flag;
+            }
+            return this;
+        }
         public Builder roomsStr(@NonNull String roomsStr) {
             this.roomsStr = roomsStr;
             return this;
