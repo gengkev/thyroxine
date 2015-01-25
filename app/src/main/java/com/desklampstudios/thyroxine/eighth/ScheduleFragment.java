@@ -128,12 +128,8 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        // check if user is logged in
-        if (checkLoginState()) {
-            // start loader
-            getLoaderManager().initLoader(BLOCKS_LOADER, null, this);
-        }
+        checkLoginState();
+        getLoaderManager().initLoader(BLOCKS_LOADER, null, this);
     }
 
     @Override
@@ -195,25 +191,22 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         startActivity(intent);
     }
 
-    private boolean checkLoginState() {
+    private Account checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
             IodineAuthenticator.attemptAddAccount(getActivity());
-            return false;
         }
-        return true;
+        return account;
     }
 
     // Fetches schedule
     private void retrieveSchedule() {
-        // make sure user is logged in
-        if (!checkLoginState()) {
-            return;
+        Account account = checkLoginState();
+        if (account != null) {
+            // Request immediate sync
+            EighthSyncAdapter.syncImmediately(account, true);
         }
-
-        // Request immediate sync
-        EighthSyncAdapter.syncImmediately(getActivity());
     }
 
     @NonNull

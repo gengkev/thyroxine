@@ -1,6 +1,9 @@
 package com.desklampstudios.thyroxine.news;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
@@ -19,8 +22,9 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
-import com.desklampstudios.thyroxine.Utils;
-import com.desklampstudios.thyroxine.sync.StubAuthenticator;
+import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.sync.SyncUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -31,13 +35,14 @@ import java.util.List;
 
 public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = NewsSyncAdapter.class.getSimpleName();
+    private static final String KEY_AUTHTOKEN_RETRY = "authTokenRetry";
 
     // Sync intervals
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
 
-    private static final Utils.MergeInterface<NewsEntry, String> MERGE_INTERFACE =
-            new Utils.MergeInterface<NewsEntry, String>() {
+    private static final SyncUtils.MergeInterface<NewsEntry, Integer> MERGE_INTERFACE =
+            new SyncUtils.MergeInterface<NewsEntry, Integer>() {
                 @Override
                 public ContentValues toContentValues(NewsEntry item) {
                     return NewsContract.NewsEntries.toContentValues(item);
@@ -47,11 +52,11 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                     return NewsContract.NewsEntries.fromContentValues(values);
                 }
                 @Override
-                public String getId(NewsEntry item) {
-                    return item.link;
+                public Integer getId(NewsEntry item) {
+                    return item.newsId;
                 }
                 @Override
-                public Uri buildContentUri(String id) {
+                public Uri buildContentUri(Integer id) {
                     return NewsContract.NewsEntries.buildEntryUri(id);
                 }
             };
@@ -64,11 +69,47 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               @NonNull ContentProviderClient provider, @NonNull SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
+        final AccountManager am = AccountManager.get(getContext());
+
+        // Part 0. Get auth token
+        String authToken;
+        try {
+            authToken = am.blockingGetAuthToken(account,
+                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
+        } catch (IOException e) {
+            Log.e(TAG, "Connection error: " + e.toString());
+            syncResult.stats.numIoExceptions++;
+            return;
+        } catch (OperationCanceledException | AuthenticatorException e) {
+            Log.e(TAG, "Authentication error: " + e.toString());
+            syncResult.stats.numAuthExceptions++;
+            return;
+        }
+        Log.v(TAG, "Got auth token: " + authToken);
+
 
         // Part I. Get news list
         List<NewsEntry> newsList;
         try {
-            newsList = fetchNews();
+            newsList = fetchNews(authToken);
+        } catch (IodineAuthException.NotLoggedInException e) {
+            Log.d(TAG, "Not logged in, invalidating auth token", e);
+            am.invalidateAuthToken(account.type, authToken);
+
+            // Automatically retry sync, but only once
+            if (!extras.getBoolean(KEY_AUTHTOKEN_RETRY, false)) {
+                extras.putBoolean(KEY_AUTHTOKEN_RETRY, true);
+                Log.d(TAG, "Retrying sync once, recursively. extras: " + extras);
+                onPerformSync(account, extras, authority, provider, syncResult);
+            } else {
+                Log.d(TAG, "Retry token found; will not retry sync again.");
+                syncResult.stats.numAuthExceptions++;
+            }
+            return;
+        } catch (IodineAuthException e) {
+            Log.e(TAG, "Iodine auth error", e);
+            syncResult.stats.numAuthExceptions++;
+            return;
         } catch (IOException e) {
             Log.e(TAG, "Connection error: " + e.toString());
             syncResult.stats.numIoExceptions++;
@@ -79,7 +120,6 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
         Log.v(TAG, "Got news list (" + newsList.size() + ") entries");
-
 
         // Part II. Update entries in database
         try {
@@ -94,16 +134,17 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @NonNull
-    private List<NewsEntry> fetchNews() throws IOException, XmlPullParserException {
+    private List<NewsEntry> fetchNews(String authToken)
+            throws IodineAuthException, IOException, XmlPullParserException {
 
         InputStream stream = null;
-        NewsFeedParser parser = null;
+        NewsListParser parser = null;
         List<NewsEntry> entries = new ArrayList<>();
         NewsEntry entry;
 
         try {
-            stream = IodineApiHelper.getPublicNewsFeed();
-            parser = new NewsFeedParser(getContext());
+            stream = IodineApiHelper.getNewsList(authToken);
+            parser = new NewsListParser(getContext());
             parser.beginFeed(stream);
 
             entry = parser.nextEntry();
@@ -135,7 +176,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                 null, null, null, null);
         assert queryCursor != null;
 
-        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+        ArrayList<ContentProviderOperation> batch = SyncUtils.createMergeBatch(
                 NewsEntry.class.getSimpleName(),
                 newsList,
                 queryCursor,
@@ -154,29 +195,30 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     /**
-     * Helper method to have the sync adapter sync immediately
-     * @param context The context used to access the account service
+     * Helper method to have the sync adapter sync immediately.
+     * @param account The account to sync immediately
+     * @param manual Whether the sync was manually initiated
      */
-    public static void syncImmediately(Context context) {
+    public static void syncImmediately(Account account, boolean manual) {
+        Log.d(TAG, "Immediate sync requested");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(StubAuthenticator.getStubAccount(context),
-                NewsContract.CONTENT_AUTHORITY, bundle);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, manual);
+        ContentResolver.requestSync(account, NewsContract.CONTENT_AUTHORITY, bundle);
     }
 
 
     /**
-     * Configures sync scheduling. Called from MainActivity.
-     * @param newAccount The stub account that was created.
+     * Configures sync scheduling.
+     * @param account The Iodine account to configure sync with
      */
-    public static void configureSync(Account newAccount) {
+    public static void configureSync(Account account) {
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
-        Utils.configurePeriodicSync(newAccount, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
+        SyncUtils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
-        // Configure syncing automatically
-        ContentResolver.setSyncAutomatically(newAccount, authority, true);
+        // Enable automatic sync
+        ContentResolver.setSyncAutomatically(account, authority, true);
     }
 }

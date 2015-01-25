@@ -79,11 +79,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "block");
 
-        int blockId = -1;
-        String date = "";
-        String type = "";
-        boolean locked = false;
-
+        EighthBlock.Builder blockBuilder = new EighthBlock.Builder();
         Pair<EighthActv, EighthActvInstance> actvPair = null;
 
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -93,22 +89,22 @@ class EighthListBlocksParser extends AbstractXMLParser {
             String name = parser.getName();
             switch (name) {
                 case "bid":
-                    blockId = readInt(parser, "bid");
+                    blockBuilder.blockId(readInt(parser, "bid"));
                     break;
                 case "date":
-                    date = readBasicDate(parser);
+                    blockBuilder.date(readBasicDate(parser));
                     break;
                 case "type":
-                    type = readText(parser, "type");
+                    blockBuilder.type(readText(parser, "type"));
                     break;
                 case "block":
-                    type = readText(parser, "block");
+                    blockBuilder.type(readText(parser, "block"));
                     break;
                 case "activity":
                     actvPair = EighthGetBlockParser.readActivity(parser);
                     break;
                 case "locked":
-                    locked = readInt(parser, "locked") != 0;
+                    blockBuilder.locked(readInt(parser, "locked") != 0);
                     break;
                 default:
                     skip(parser);
@@ -118,14 +114,14 @@ class EighthListBlocksParser extends AbstractXMLParser {
 
         parser.require(XmlPullParser.END_TAG, ns, "block");
 
-        // TODO: re-add errors if fields not found, consider nullable fields again... :\
         if (actvPair == null) {
             throw new XmlPullParserException("Actv not found", parser, null);
         }
 
-        EighthBlock block = new EighthBlock(blockId, date, type, locked);
-
-        return new EighthBlockAndActv(block, actvPair.first, actvPair.second);
+        return new EighthBlockAndActv(
+                blockBuilder.build(),
+                actvPair.first,
+                actvPair.second);
     }
 
     @NonNull

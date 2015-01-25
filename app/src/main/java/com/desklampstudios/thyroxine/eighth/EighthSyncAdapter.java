@@ -24,9 +24,8 @@ import android.util.Pair;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
-import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.sync.SyncUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -75,8 +74,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             EighthContract.ActvInstances.KEY_CAPACITY
     };
 
-    private static final Utils.MergeInterface<EighthBlock, Integer> BLOCKS_MERGE_INTERFACE =
-            new Utils.MergeInterface<EighthBlock, Integer>() {
+    private static final SyncUtils.MergeInterface<EighthBlock, Integer> BLOCKS_MERGE_INTERFACE =
+            new SyncUtils.MergeInterface<EighthBlock, Integer>() {
                 @Override
                 public ContentValues toContentValues(EighthBlock item) {
                     return EighthContract.Blocks.toContentValues(item);
@@ -95,8 +94,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             };
 
-    private static final Utils.MergeInterface<Pair<Integer, Integer>, Integer> SCHEDULE_MERGE_INTERFACE =
-            new Utils.MergeInterface<Pair<Integer, Integer>, Integer>() {
+    private static final SyncUtils.MergeInterface<Pair<Integer, Integer>, Integer> SCHEDULE_MERGE_INTERFACE =
+            new SyncUtils.MergeInterface<Pair<Integer, Integer>, Integer>() {
                 @Override
                 public ContentValues toContentValues(Pair<Integer, Integer> item) {
                     ContentValues values = new ContentValues();
@@ -120,8 +119,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             };
 
-    private static final Utils.MergeInterface<EighthActv, Integer> ACTVS_MERGE_INTERFACE =
-            new Utils.MergeInterface<EighthActv, Integer>() {
+    private static final SyncUtils.MergeInterface<EighthActv, Integer> ACTVS_MERGE_INTERFACE =
+            new SyncUtils.MergeInterface<EighthActv, Integer>() {
                 @Override
                 public ContentValues toContentValues(EighthActv item) {
                     return EighthContract.Actvs.toContentValues(item);
@@ -140,8 +139,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             };
 
-    private static final Utils.MergeInterface<EighthActvInstance, Pair<Integer, Integer>> ACTVINSTANCES_MERGE_INTERFACE =
-            new Utils.MergeInterface<EighthActvInstance, Pair<Integer, Integer>>() {
+    private static final SyncUtils.MergeInterface<EighthActvInstance, Pair<Integer, Integer>> ACTVINSTANCES_MERGE_INTERFACE =
+            new SyncUtils.MergeInterface<EighthActvInstance, Pair<Integer, Integer>>() {
                 @Override
                 public ContentValues toContentValues(EighthActvInstance item) {
                     return EighthContract.ActvInstances.toContentValues(item);
@@ -236,8 +235,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
 
         try {
             updateEighthBlockData(blockList, provider, syncResult);
-            updateSelectedActvData(scheduleList, provider, syncResult);
             updateActvData(actvList, provider, syncResult);
+            updateSelectedActvData(scheduleList, provider, syncResult);
             updateActvInstanceData(actvInstanceList, provider, syncResult);
         } catch (RemoteException | SQLiteException | OperationApplicationException e) {
             Log.e(TAG, "Updating database failed", e);
@@ -295,7 +294,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 BLOCK_PROJECTION, null, null, null);
         assert queryCursor != null;
 
-        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+        ArrayList<ContentProviderOperation> batch = SyncUtils.createMergeBatch(
                 EighthBlock.class.getSimpleName(),
                 blockList,
                 queryCursor,
@@ -325,7 +324,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 SCHEDULE_PROJECTION, null, null, null);
         assert queryCursor != null;
 
-        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+        ArrayList<ContentProviderOperation> batch = SyncUtils.createMergeBatch(
                 "Schedule",
                 pairList,
                 queryCursor,
@@ -355,7 +354,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 ACTVS_PROJECTION, null, null, null);
         assert queryCursor != null;
 
-        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+        ArrayList<ContentProviderOperation> batch = SyncUtils.createMergeBatch(
                 "Actvs",
                 actvList,
                 queryCursor,
@@ -385,7 +384,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 ACTVINSTANCES_PROJECTION, null, null, null);
         assert queryCursor != null;
 
-        ArrayList<ContentProviderOperation> batch = Utils.createMergeBatch(
+        ArrayList<ContentProviderOperation> batch = SyncUtils.createMergeBatch(
                 "ActvInstances",
                 actvInstanceList,
                 queryCursor,
@@ -407,30 +406,30 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     /**
-     * Helper method to have the sync adapter sync immediately
-     * @param context The context used to access the account service
+     * Helper method to have the sync adapter sync immediately.
+     * @param account The account to sync immediately
+     * @param manual Whether the sync was manually initiated
      */
-    public static void syncImmediately(@NonNull Context context) {
+    public static void syncImmediately(@NonNull Account account, boolean manual) {
         Log.d(TAG, "Immediate sync requested");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(IodineAuthenticator.getIodineAccount(context),
-                context.getString(R.string.eighth_content_authority), bundle);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, manual);
+        ContentResolver.requestSync(account, EighthContract.CONTENT_AUTHORITY, bundle);
     }
 
 
     /**
-     * Configures sync scheduling. Called from MainActivity.
-     * @param newAccount The stub account that was created.
+     * Configures sync scheduling.
+     * @param account The Iodine account to sync.
      */
-    public static void configureSync(@NonNull Account newAccount) {
+    public static void configureSync(@NonNull Account account) {
         final String authority = EighthContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
-        Utils.configurePeriodicSync(newAccount, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
+        SyncUtils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
-        // Configure syncing automatically
-        ContentResolver.setSyncAutomatically(newAccount, authority, true);
+        // Enable automatic sync
+        ContentResolver.setSyncAutomatically(account, authority, true);
     }
 }

@@ -67,17 +67,6 @@
             android:syncable="true"
             android:label="@string/eighth_provider_name" />
 
-        <!-- Authenticator service for stub login -->
-        <service android:name=".sync.StubAuthenticatorService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/stub_authenticator" />
-        </service>
-
         <!-- Authenticator service for Iodine login -->
         <service android:name=".sync.IodineAuthenticatorService"
             android:exported="false">

@@ -6,7 +6,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
-import com.desklampstudios.thyroxine.IodineApiHelper;
+import com.desklampstudios.thyroxine.AuthErrorParser;
+import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -16,17 +17,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-class NewsFeedParser extends AbstractXMLParser {
-    private static final String TAG = NewsFeedParser.class.getSimpleName();
+class NewsListParser extends AbstractXMLParser {
+    private static final String TAG = NewsListParser.class.getSimpleName();
 
-    public NewsFeedParser(Context context) throws XmlPullParserException {
+    public NewsListParser(Context context) throws XmlPullParserException {
         super(context);
     }
 
-    public void beginFeed(InputStream in) throws XmlPullParserException, IOException {
+    public void beginFeed(InputStream in)
+            throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
             stopParse();
         }
@@ -35,9 +35,10 @@ class NewsFeedParser extends AbstractXMLParser {
         mParser.setInput(mInputStream, null);
 
         mParser.nextTag();
-        mParser.require(XmlPullParser.START_TAG, ns, "rss");
-        mParser.nextTag();
-        mParser.require(XmlPullParser.START_TAG, ns, "channel");
+        if (mParser.getName().equals("auth")) { // Auth error
+            throw AuthErrorParser.readAuth(mParser, mContext);
+        }
+        mParser.require(XmlPullParser.START_TAG, ns, "news");
 
         parsingBegun = true;
     }
@@ -53,7 +54,7 @@ class NewsFeedParser extends AbstractXMLParser {
                 continue;
             }
             switch (mParser.getName()) {
-                case "item":
+                case "post":
                     return readEntry(mParser);
                 default:
                     skip(mParser);
@@ -70,7 +71,7 @@ class NewsFeedParser extends AbstractXMLParser {
     // those are handed off to their respective "read" methods. Other tags are ignored.
     @NonNull
     private static NewsEntry readEntry(@NonNull XmlPullParser parser) throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, ns, "item");
+        parser.require(XmlPullParser.START_TAG, ns, "post");
 
         NewsEntry.Builder newsBuilder = new NewsEntry.Builder();
 
@@ -79,57 +80,51 @@ class NewsFeedParser extends AbstractXMLParser {
                 continue;
             }
             switch (parser.getName()) {
+                case "posted":
+                    newsBuilder.published(readPublished(parser));
+                    break;
+                case "id":
+                    newsBuilder.newsId(readInt(parser, "id"));
+                    break;
                 case "title":
                     newsBuilder.title(Utils.cleanHtml(readText(parser, "title")));
                     break;
-                case "pubDate":
-                    newsBuilder.published(readPublished(parser));
-                    break;
-                case "link":
-                    newsBuilder.newsId(readNewsIdFromLink(parser));
-                    break;
-                case "description": {
-                    String content = readText(parser, "description");
+                case "text": {
+                    String content = readText(parser, "text");
                     String snippet = Utils.getSnippet(content, 300);
                     newsBuilder.content(content);
                     newsBuilder.contentSnippet(snippet);
                     break;
                 }
+                case "liked":
+                    newsBuilder.liked(readInt(parser, "liked") != 0);
+                    break;
+                case "likecount":
+                    newsBuilder.numLikes(readInt(parser, "likecount"));
+                    break;
                 default:
                     skip(parser);
                     break;
             }
         }
 
-        parser.require(XmlPullParser.END_TAG, ns, "item");
+        parser.require(XmlPullParser.END_TAG, ns, "post");
 
         return newsBuilder.build();
     }
 
     // Process published tags in the feed.
     private static long readPublished(XmlPullParser parser) throws IOException, XmlPullParserException {
-        String publishedStr = readText(parser, "pubDate");
+        String publishedStr = readText(parser, "posted");
         long published;
         try {
-            Date date = Utils.FixedDateFormats.NEWS_FEED.parse(publishedStr);
+            Date date = Utils.FixedDateFormats.NEWS_LIST.parse(publishedStr);
             published = date.getTime();
         } catch (ParseException e) {
             Log.e(TAG, "Invalid date string: " + publishedStr + ", " + e.toString());
             throw new XmlPullParserException("Invalid date string: " + publishedStr, parser, e);
         }
         return published;
-    }
-
-    private static int readNewsIdFromLink(XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        String link = Utils.cleanHtml(readText(parser, "link"));
-
-        Matcher m = Pattern.compile(IodineApiHelper.NEWS_SHOW_URL + "([0-9]+)").matcher(link);
-        if (!m.matches()) {
-            throw new XmlPullParserException("Invalid link: " + link, parser, null);
-        }
-        String idStr = m.group(1);
-        return Integer.parseInt(idStr);
     }
 }
 

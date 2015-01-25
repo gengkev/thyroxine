@@ -43,9 +43,9 @@ import java.util.ArrayList;
  */
 public class BlockFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = BlockFragment.class.getSimpleName();
-    private static final int BLOCK_LOADER = 1;
     public static final String ARG_BLOCK_ID = "com.desklampstudios.thyroxine.eighth.BLOCK_ID";
 
+    private static final int BLOCK_LOADER = 1;
     private static final String[] BLOCK_LOADER_PROJECTION = new String[]{
             EighthContract.Blocks.KEY_BLOCK_ID,
             EighthContract.Blocks.KEY_DATE,
@@ -98,9 +98,18 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                 return true;
             }
         });
+
         mAdapter.addItem(new Pair<>(
-                new EighthActv(999, "Test activity", "Test description", 0),
-                new EighthActvInstance(999, 1337, "Test comment", 0, "All the rooms", 0, 0)
+                new EighthActv.Builder()
+                        .actvId(999)
+                        .name("Test activity")
+                        .description("Test description")
+                        .build(),
+                new EighthActvInstance.Builder()
+                        .actvId(999)
+                        .comment("Test comment")
+                        .roomsStr("All the rooms")
+                        .build()
         ));
     }
 
@@ -210,12 +219,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(BLOCK_LOADER, null, this);
 
         // check if user is logged in
-        if (checkLoginState()) {
-            // start block loader
-            getLoaderManager().initLoader(BLOCK_LOADER, null, this);
-
+        if (checkLoginState() != null) {
             // load actvs from server
             // http://stackoverflow.com/a/26910973/689161
             mSwipeRefreshLayout.post(new Runnable() {
@@ -234,7 +241,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     // Called when an item in the adapter is clicked
-    public void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
+    private void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
         String text = getString(R.string.actv_toast_text,
                 pair.first.name,
                 pair.second.roomsStr,
@@ -246,14 +253,13 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
     }
 
-    private boolean checkLoginState() {
+    private Account checkLoginState() {
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
             IodineAuthenticator.attemptAddAccount(getActivity());
-            return false;
         }
-        return true;
+        return account;
     }
 
     // Starts FetchBlockTask
@@ -264,7 +270,8 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
 
         // make sure user is logged in
-        if (!checkLoginState()) {
+        Account account = checkLoginState();
+        if (account == null) {
             mSwipeRefreshLayout.setRefreshing(false);
             return;
         }
@@ -273,7 +280,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mSwipeRefreshLayout.setRefreshing(true);
 
         // Load stuff using AsyncTask
-        Account account = IodineAuthenticator.getIodineAccount(getActivity());
         mFetchBlockTask = new FetchBlockTask(getActivity(), account, new FetchBlockTask.ActvsResultListener() {
             @Override
             public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
@@ -409,7 +415,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                         BLOCK_LOADER_PROJECTION, // columns
                         null, // selection
                         null, // selectionArgs
-                        null
+                        null // orderBy
                 );
             }
             default: {
@@ -430,8 +436,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             mAdapter.setSelectedActvId(curActvId);
 
             Log.d(TAG, "Got block: " + block + ", curActvId: " + curActvId);
-        } else {
+        }
+        else {
             Log.e(TAG, "Cursor error");
+            Toast.makeText(getActivity(), R.string.error_database, Toast.LENGTH_LONG).show();
         }
     }
 

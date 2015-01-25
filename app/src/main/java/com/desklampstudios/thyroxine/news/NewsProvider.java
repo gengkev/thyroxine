@@ -21,7 +21,7 @@ import static com.desklampstudios.thyroxine.news.NewsDatabase.Tables;
 
 public class NewsProvider extends ContentProvider {
     private static final int NEWSENTRIES = 100;
-    private static final int NEWSENTRIES_LINK = 102;
+    private static final int NEWSENTRIES_NEWS_ID = 102;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private NewsDatabase mDbHelper;
@@ -32,7 +32,7 @@ public class NewsProvider extends ContentProvider {
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
         matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES, NEWSENTRIES);
-        matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES + "/*", NEWSENTRIES_LINK);
+        matcher.addURI(authority, NewsContract.PATH_NEWSENTRIES + "/#", NEWSENTRIES_NEWS_ID);
 
         return matcher;
     }
@@ -47,7 +47,7 @@ public class NewsProvider extends ContentProvider {
     @Override
     public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case NEWSENTRIES_LINK:
+            case NEWSENTRIES_NEWS_ID:
                 return NewsEntries.CONTENT_ITEM_TYPE_NEWSENTRIES;
             case NEWSENTRIES:
                 return NewsEntries.CONTENT_TYPE_NEWSENTRIES;
@@ -83,7 +83,7 @@ public class NewsProvider extends ContentProvider {
         switch (match) {
             case NEWSENTRIES: {
                 db.insertOrThrow(Tables.TABLE_NEWSENTRIES, null, values);
-                returnUri = NewsEntries.buildEntryUri(values.getAsString(NewsEntries.KEY_LINK));
+                returnUri = NewsEntries.buildEntryUri(values.getAsInteger(NewsEntries.KEY_NEWS_ID));
                 break;
             }
             default: {
@@ -163,10 +163,10 @@ public class NewsProvider extends ContentProvider {
             case NEWSENTRIES: {
                 return builder.table(Tables.TABLE_NEWSENTRIES);
             }
-            case NEWSENTRIES_LINK: {
-                final String link = NewsEntries.getLink(uri);
+            case NEWSENTRIES_NEWS_ID: {
+                final int newsId = NewsEntries.getNewsId(uri);
                 return builder.table(Tables.TABLE_NEWSENTRIES)
-                        .where(NewsEntries.KEY_LINK + "=?", link);
+                        .where(NewsEntries.KEY_NEWS_ID + "=?", String.valueOf(newsId));
             }
 
             default: {

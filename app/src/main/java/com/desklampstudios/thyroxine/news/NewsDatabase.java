@@ -11,7 +11,7 @@ import static com.desklampstudios.thyroxine.news.NewsContract.NewsEntries;
 class NewsDatabase extends SQLiteOpenHelper {
     private static final String TAG = NewsDatabase.class.getSimpleName();
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     private static final String DATABASE_NAME = "thyroxine.db.news";
 
     // NewsEntry table
@@ -28,19 +28,22 @@ class NewsDatabase extends SQLiteOpenHelper {
         final String SQL_CREATE_NEWSENTRIES_TABLE =
                 "CREATE TABLE " + Tables.TABLE_NEWSENTRIES + " (" +
                         NewsEntries._ID + " INTEGER PRIMARY KEY, " +
+                        NewsEntries.KEY_NEWS_ID + " INTEGER NOT NULL, " +
                         NewsEntries.KEY_TITLE + " TEXT, " +
-                        NewsEntries.KEY_DATE + " INTEGER NOT NULL, " +
-                        NewsEntries.KEY_LINK + " TEXT, " +
+                        NewsEntries.KEY_PUBLISHED + " INTEGER NOT NULL, " +
                         NewsEntries.KEY_CONTENT + " TEXT, " +
-                        NewsEntries.KEY_SNIPPET + " TEXT" +
+                        NewsEntries.KEY_CONTENT_SNIPPET + " TEXT, " +
+                        NewsEntries.KEY_LIKED + " INTEGER, " +
+                        NewsEntries.KEY_NUM_LIKES + " INTEGER" +
                         ");";
 
-        Log.d(TAG, "Creating tables: "+ SQL_CREATE_NEWSENTRIES_TABLE);
+        Log.d(TAG, "Creating newsEntries table: "+ SQL_CREATE_NEWSENTRIES_TABLE);
         db.execSQL(SQL_CREATE_NEWSENTRIES_TABLE);
     }
 
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d(TAG, "Upgrading from "+ oldVersion + " to " + newVersion);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.TABLE_NEWSENTRIES);
         this.onCreate(db);
     }

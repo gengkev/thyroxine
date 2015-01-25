@@ -54,19 +54,15 @@ class BlocksListAdapter extends CursorAdapter {
         EighthBlock block = EighthContract.Blocks.fromContentValues(values);
 
         int actvId = -1;
-        try {
-            actvId = values.getAsInteger(EighthContract.Schedule.KEY_ACTV_ID);
-        } catch (NullPointerException e) { // it'll just be -1
-            Log.w(TAG, "NullPointerException getting activity ID: " + e);
-        }
-
         long actvFlags = 0;
         long actvInstanceFlags = 0;
         try {
+            actvId = values.getAsInteger(EighthContract.Schedule.KEY_ACTV_ID);
             actvFlags = values.getAsLong(EighthContract.Actvs.KEY_FLAGS);
             actvInstanceFlags = values.getAsLong(EighthContract.ActvInstances.KEY_FLAGS);
-        } catch (NullPointerException e) { // they'll just be 0
-            Log.w(TAG, "NullPointerException getting actvFlags or actvInstanceFlags: " + e);
+        }
+        catch (NullPointerException e) { // they'll just be default values
+            Log.w(TAG, "NullPointerException getting actvId, actvFlags, or actvInstanceFlags: " + e);
         }
 
         //String blockStr = mContext.getResources().getString(R.string.block_title, block.type);

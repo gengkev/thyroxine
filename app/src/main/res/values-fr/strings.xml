@@ -3,7 +3,14 @@
     <string name="app_name">Thyroxine</string>
 
     <string name="action_settings">Paramètres</string>
+    <string name="open_in_browser">Ouvrir dans le navigateur</string>
+    <string name="share">Partager</string>
+
+    <!-- Miscellaneous error strings -->
     <string name="error">Erreur</string>
+    <string name="error_database">Erreur de base de données</string>
+    <string name="unexpected_error">Erreur inattendue : %1$s</string>
+    <string name="attempt_login_try_again">On est en train de vous connecter. Veuillez réessayer.</string>
 
     <!-- Navigation drawer strings -->
     <string name="navigation_drawer_open">Ouvrir le tiroir de navigation</string>
@@ -36,22 +43,26 @@
     <string name="error_field_required">Champ obligatoire</string>
     <string name="error_tjhsst_edu_suffix">Le suffixe @tjhsst.edu n\'est pas nécessaire</string>
 
+    <string name="error_adding_account">Erreur lors de l\'ajout de compte : %1$s</string>
     <string name="error_not_logged_in">Pas connecté(e)</string>
-    <string name="iodine_auth_error">Erreur d\'authentification Iode :\n%1$s</string>
-    <string name="unexpected_error">Erreur inattendue :\n%1$s</string>
+    <string name="iodine_auth_error">Erreur d\'authentification Iode : %1$s</string>
 
     <!-- News strings -->
+    <string name="news_provider_name">Nouvelles</string>
     <string name="title_fragment_news">Nouvelles</string>
     <string name="refresh">Rafraîchir</string>
-    <string name="news_provider_name">Thyroxine: Nouvelles</string>
 
     <string name="title_activity_entry_detail">Détails de l\'article</string>
     <string name="news_entry_published">Publié</string>
     <string name="news_entry_title">Titre</string>
-    <string name="open_in_browser">Ouvrir dans le navigateur</string>
-    <string name="share">Partager</string>
+
+    <plurals name="news_entry_liked">
+        <item quantity="one">%1$d personne aime ceci</item>
+        <item quantity="other">%1$d personnes aiment ceci</item>
+    </plurals>
 
     <!-- Eighth strings -->
+    <string name="eighth_provider_name">Huitième</string>
     <string name="title_fragment_eighth">Huitième</string>
     <string name="title_activity_block">Bloc</string>
 
@@ -76,24 +87,16 @@
     <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Limitée</font>]]></string>
     <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Oblig.</font>]]></string>
 
-    <string name="attempt_login_try_again">On est en train de vous connecter. Veuillez réessayer.</string>
-
     <string name="signup_changing">En train de vous inscrire à «%1$s»</string>
     <string name="signup_changing_wait">Veuillez patienter jusqu\'à ce que l\'inscription actuelle se termine.</string>
     <string name="signup_success">Vous vous êtes bien inscrit(e) à «%1$s».</string>
-    <string name="signup_failure">L\'inscription à «%1$s» a echoué à cause des raisons ci-dessous :</string>
+    <string name="signup_failure">Votre inscription à «%1$s» a echoué à cause des raisons ci-dessous :</string>
 
     <!-- SyncAdapter related strings -->
-    <string name="stub_authenticator_name">Thyroxine (Sync)</string>
-    <string name="stub_account_cannot_create">
-        Ce genre de compte ne peut pas être créé.
-    </string>
-
     <string name="iodine_authenticator_name">Thyroxine (Iode)</string>
     <string name="iodine_account_only_one">
         Un seul compte Iode peut exister à la fois. Pour en ajouter un autre, retirez d\'abord le
         compte actuel. Ça se fait dans les paramètres de l\'appareil sous la section Comptes.
     </string>
     <string name="iodine_cookie_auth_token_label">Compte TJHSST Iode</string>
-    <string name="eighth_provider_name">Thyroxine : Huitième</string>
 </resources>

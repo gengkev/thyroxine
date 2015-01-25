@@ -20,9 +20,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.sync.StubAuthenticator;
+import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,17 +33,16 @@ import com.desklampstudios.thyroxine.sync.StubAuthenticator;
 public class NewsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
         SyncStatusObserver {
     private static final String TAG = NewsFragment.class.getSimpleName();
-    public static final String EXTRA_NEWS_LINK = "com.desklampstudios.thyroxine.news.KEY_LINK";
-    public static final String ARG_LOGGED_IN = "loggedIn";
+    public static final String EXTRA_NEWS_ID = "com.desklampstudios.thyroxine.news.KEY_NEWS_ID";
     private static final int NEWS_LOADER = 0;
 
     private static final String[] NEWS_PROJECTION = new String[] {
             NewsContract.NewsEntries._ID,
             NewsContract.NewsEntries.KEY_TITLE,
-            NewsContract.NewsEntries.KEY_DATE,
-            NewsContract.NewsEntries.KEY_LINK,
+            NewsContract.NewsEntries.KEY_PUBLISHED,
+            NewsContract.NewsEntries.KEY_NEWS_ID,
             //NewsContract.NewsEntries.KEY_CONTENT,
-            NewsContract.NewsEntries.KEY_SNIPPET
+            NewsContract.NewsEntries.KEY_CONTENT_SNIPPET
     };
 
     private NewsListAdapter mAdapter;
@@ -90,9 +90,9 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
                 Cursor cursor = mAdapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(pos)) {
-                    String link = cursor.getString(
-                            cursor.getColumnIndex(NewsContract.NewsEntries.KEY_LINK));
-                    openNewsDetailActivity(link);
+                    int newsId = cursor.getInt(
+                            cursor.getColumnIndex(NewsContract.NewsEntries.KEY_NEWS_ID));
+                    openNewsDetailActivity(newsId);
                 }
             }
         });
@@ -113,8 +113,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // setHasOptionsMenu(true);
-
-        // start loader
+        checkLoginState();
         getLoaderManager().initLoader(NEWS_LOADER, null, this);
     }
 
@@ -165,7 +164,7 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onStatusChanged(int which) {
         final Activity activity = getActivity();
-        final Account account = StubAuthenticator.getStubAccount(activity);
+        final Account account = IodineAuthenticator.getIodineAccount(activity);
 
         final boolean syncActive = ContentResolver.isSyncActive(
                 account, NewsContract.CONTENT_AUTHORITY);
@@ -188,34 +187,46 @@ public class NewsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     // Called when an item in the adapter is clicked
-    private void openNewsDetailActivity(String link) {
+    private void openNewsDetailActivity(int newsId) {
         // Toast.makeText(getApplicationContext(), "Entry: " + entry, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), NewsDetailActivity.class);
-        intent.putExtra(EXTRA_NEWS_LINK, link);
+        intent.putExtra(EXTRA_NEWS_ID, newsId);
         startActivity(intent);
     }
 
+    private Account checkLoginState() {
+        Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        if (account == null) { // not logged in
+            Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
+            IodineAuthenticator.attemptAddAccount(getActivity());
+        }
+        return account;
+    }
+
     private void retrieveNews() {
-        // Request immediate sync
-        NewsSyncAdapter.syncImmediately(getActivity());
+        Account account = checkLoginState();
+        if (account != null) {
+            // Request immediate sync
+            NewsSyncAdapter.syncImmediately(account, true);
+        }
     }
 
     @Nullable
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
-        case NEWS_LOADER:
-            return new CursorLoader(
-                    getActivity(),
-                    NewsContract.NewsEntries.CONTENT_URI,
-                    NEWS_PROJECTION,
-                    null, // selection
-                    null, // selectionArgs
-                    NewsContract.NewsEntries.KEY_DATE + " DESC" // orderBy
-            );
-        default:
-            return null;
+            case NEWS_LOADER:
+                return new CursorLoader(
+                        getActivity(),
+                        NewsContract.NewsEntries.CONTENT_URI,
+                        NEWS_PROJECTION,
+                        null, // selection
+                        null, // selectionArgs
+                        NewsContract.NewsEntries.DEFAULT_SORT // orderBy
+                );
+            default:
+                return null;
         }
     }
 

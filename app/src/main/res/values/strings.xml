@@ -3,7 +3,14 @@
     <string name="app_name">Thyroxine</string>
 
     <string name="action_settings">Settings</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="share">Share</string>
+
+    <!-- Miscellaneous error strings -->
     <string name="error">Error</string>
+    <string name="error_database">Database error</string>
+    <string name="unexpected_error">Unexpected error: %1$s</string>
+    <string name="attempt_login_try_again">We\'re trying to log you in. Please try again.</string>
 
     <!-- Navigation drawer strings -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -36,23 +43,26 @@
     <string name="error_field_required">This field is required</string>
     <string name="error_tjhsst_edu_suffix">The @tjhsst.edu suffix is not necessary</string>
 
+    <string name="error_adding_account">Error while adding account: %1$s</string>
     <string name="error_not_logged_in">Not logged in</string>
-    <string name="iodine_auth_error">Iodine authentication error:\n%1$s</string>
-    <string name="unexpected_error">Unexpected error:\n%1$s</string>
+    <string name="iodine_auth_error">Iodine authentication error: %1$s</string>
 
     <!-- News strings -->
+    <string name="news_provider_name">News</string>
     <string name="title_fragment_news">News</string>
     <string name="refresh">Refresh</string>
-
-    <string name="news_provider_name">Thyroxine: News</string>
 
     <string name="title_activity_entry_detail">Post details</string>
     <string name="news_entry_title">Title</string>
     <string name="news_entry_published">Published</string>
-    <string name="open_in_browser">Open in browser</string>
-    <string name="share">Share</string>
+
+    <plurals name="news_entry_liked">
+        <item quantity="one">%1$d person like this</item>
+        <item quantity="other">%1$d people like this</item>
+    </plurals>
 
     <!-- Eighth strings -->
+    <string name="eighth_provider_name">Eighth</string>
     <string name="title_fragment_eighth">Eighth</string>
     <string name="title_activity_block">Block</string>
 
@@ -77,21 +87,12 @@
     <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Restricted</font>]]></string>
     <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Sticky</font>]]></string>
 
-    <string name="attempt_login_try_again">We\'re trying to log you in. Please try again.</string>
-
     <string name="signup_changing">Signing up for "%1$s"</string>
     <string name="signup_changing_wait">Please wait for the current signup to complete.</string>
     <string name="signup_success">You were successfully signed up for "%1$s".</string>
-    <string name="signup_failure">Signup for "%1$s" failed because of the following reasons:</string>
-
-    <string name="eighth_provider_name">Thyroxine: Eighth</string>
+    <string name="signup_failure">Your signup for "%1$s" failed because of the following reasons:</string>
 
     <!-- SyncAdapter related strings -->
-    <string name="stub_authenticator_name">Thyroxine (Sync)</string>
-    <string name="stub_account_cannot_create">
-        This type of account cannot be created.
-    </string>
-
     <string name="iodine_authenticator_name">Thyroxine (Iodine)</string>
     <string name="iodine_account_only_one">
         Only one Iodine account can exist at a time. To add another, remove the current one first.

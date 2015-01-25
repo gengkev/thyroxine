@@ -31,7 +31,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Nullable private OnItemClickListener mListener = null;
 
     private int mSelectedActvId = -1;
-    @NonNull private EighthBlock mBlock = new EighthBlock(0, "1970-01-01", "(Loading)", false);
+    @NonNull private EighthBlock mBlock = new EighthBlock.Builder().date("1970-01-01").build();
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public ActvsListAdapter(@NonNull Context context) {
@@ -92,9 +92,8 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemHolder.mDescriptionView.setText(formatDescription(actv, actvInstance));
             itemHolder.mGroupView.setText(formatGroup(actv, itemPosition));
 
-            // Flags
             long allFlags = actv.flags | actvInstance.flags;
-            boolean full = actvInstance.memberCount >= actvInstance.capacity;
+            boolean full = actvInstance.isFull();
 
             // display statuses
             String statusText = getActvStatuses(resources, allFlags, full);
