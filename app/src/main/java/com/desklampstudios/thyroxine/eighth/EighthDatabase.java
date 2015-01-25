@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.desklampstudios.thyroxine.BuildConfig;
+
 import static com.desklampstudios.thyroxine.eighth.EighthContract.ActvInstances;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Blocks;
@@ -36,6 +38,14 @@ class EighthDatabase extends SQLiteOpenHelper {
 
     public EighthDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onConfigure(@NonNull SQLiteDatabase db) {
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "Foreign key constraints enabled");
+            db.setForeignKeyConstraintsEnabled(true);
+        }
     }
 
     @Override

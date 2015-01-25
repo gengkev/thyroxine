@@ -235,8 +235,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
 
         try {
             updateEighthBlockData(blockList, provider, syncResult);
-            updateSelectedActvData(scheduleList, provider, syncResult);
             updateActvData(actvList, provider, syncResult);
+            updateSelectedActvData(scheduleList, provider, syncResult);
             updateActvInstanceData(actvInstanceList, provider, syncResult);
         } catch (RemoteException | SQLiteException | OperationApplicationException e) {
             Log.e(TAG, "Updating database failed", e);
