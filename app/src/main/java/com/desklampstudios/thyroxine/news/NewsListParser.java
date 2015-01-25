@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
+import com.desklampstudios.thyroxine.AuthErrorParser;
+import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -14,9 +16,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.TimeZone;
 
 class NewsListParser extends AbstractXMLParser {
     private static final String TAG = NewsListParser.class.getSimpleName();
@@ -25,7 +25,8 @@ class NewsListParser extends AbstractXMLParser {
         super(context);
     }
 
-    public void beginFeed(InputStream in) throws XmlPullParserException, IOException {
+    public void beginFeed(InputStream in)
+            throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
             stopParse();
         }
@@ -34,6 +35,9 @@ class NewsListParser extends AbstractXMLParser {
         mParser.setInput(mInputStream, null);
 
         mParser.nextTag();
+        if (mParser.getName().equals("auth")) { // Auth error
+            throw AuthErrorParser.readAuth(mParser, mContext);
+        }
         mParser.require(XmlPullParser.START_TAG, ns, "news");
 
         parsingBegun = true;
