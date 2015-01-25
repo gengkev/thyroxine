@@ -3,14 +3,14 @@ package com.desklampstudios.thyroxine.eighth;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-class EighthActv {
+class EighthActv implements Comparable<EighthActv> {
     public static final int NOT_SELECTED_AID = 999;
 
     public static final int FLAG_ALL = 127;
     public static final int FLAG_RESTRICTED = 1;
-    //public static final int FLAG_PRESIGN = 2;
-    //public static final int FLAG_ONEADAY = 4;
-    //public static final int FLAG_BOTHBLOCKS = 8;
+    public static final int FLAG_PRESIGN = 2;
+    public static final int FLAG_ONEADAY = 4;
+    public static final int FLAG_BOTHBLOCKS = 8;
     public static final int FLAG_STICKY = 16;
     public static final int FLAG_SPECIAL = 32;
     //public static final int FLAG_CALENDAR = 64;
@@ -25,6 +25,10 @@ class EighthActv {
         this.name = builder.name;
         this.description = builder.description;
         this.flags = builder.flags;
+    }
+
+    public boolean getFlag(long flag) {
+        return (this.flags & flag) != 0;
     }
 
     @NonNull
@@ -45,6 +49,17 @@ class EighthActv {
     @Override
     public int hashCode() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int compareTo(@NonNull EighthActv other) {
+        int cmp;
+        // list special first
+        if ((cmp = Boolean.valueOf(getFlag(EighthActv.FLAG_SPECIAL)).compareTo(
+                other.getFlag(EighthActv.FLAG_SPECIAL))) != 0) return cmp;
+        // sort by name
+        if ((cmp = name.compareTo(other.name)) != 0) return cmp;
+        return 0;
     }
 
     public static class Builder {

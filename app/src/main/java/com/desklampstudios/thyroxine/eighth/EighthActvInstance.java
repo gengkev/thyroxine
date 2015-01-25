@@ -27,6 +27,14 @@ class EighthActvInstance {
         this.capacity = builder.capacity;
     }
 
+    public boolean getFlag(long flag) {
+        return (this.flags & flag) != 0;
+    }
+
+    public boolean isFull() {
+        return capacity > 0 && memberCount >= capacity;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -58,8 +66,7 @@ class EighthActvInstance {
         private int memberCount = 0;
         private int capacity = -1;
 
-        public Builder() {
-        }
+        public Builder() {}
 
         public Builder actvId(int actvId) {
             this.actvId = actvId;

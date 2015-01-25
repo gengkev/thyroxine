@@ -37,12 +37,13 @@ class NewsDatabase extends SQLiteOpenHelper {
                         NewsEntries.KEY_NUM_LIKES + " INTEGER" +
                         ");";
 
-        Log.d(TAG, "Creating tables: "+ SQL_CREATE_NEWSENTRIES_TABLE);
+        Log.d(TAG, "Creating newsEntries table: "+ SQL_CREATE_NEWSENTRIES_TABLE);
         db.execSQL(SQL_CREATE_NEWSENTRIES_TABLE);
     }
 
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d(TAG, "Upgrading from "+ oldVersion + " to " + newVersion);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.TABLE_NEWSENTRIES);
         this.onCreate(db);
     }

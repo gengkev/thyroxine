@@ -87,7 +87,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<ActvsListAdapter.ViewHolder>
 
 
         long allFlags = actv.flags | actvInstance.flags;
-        boolean full = actvInstance.memberCount >= actvInstance.capacity;
+        boolean full = actvInstance.isFull();
 
         // display statuses
         String statusText = getActvStatuses(resources, allFlags, full);

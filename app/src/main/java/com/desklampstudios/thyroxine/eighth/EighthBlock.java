@@ -7,7 +7,7 @@ import com.desklampstudios.thyroxine.Utils;
 
 import java.text.ParseException;
 
-class EighthBlock {
+class EighthBlock implements Comparable<EighthBlock> {
     public final int blockId;
     @NonNull public final String date;
     @NonNull public final String type;
@@ -40,14 +40,23 @@ class EighthBlock {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public int compareTo(@NonNull EighthBlock other) {
+        int cmp;
+        // sort by date
+        if ((cmp = date.compareTo(other.date)) != 0) return cmp;
+        // sort by type
+        if ((cmp = type.compareTo(other.type)) != 0) return cmp;
+        return 0;
+    }
+
     public static class Builder {
         private int blockId = -1;
         @NonNull private String date = "";
         @NonNull private String type = "";
         private boolean locked = false;
 
-        public Builder() {
-        }
+        public Builder() {}
 
         public Builder blockId(int blockId) {
             this.blockId = blockId;

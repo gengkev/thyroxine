@@ -15,10 +15,13 @@ class NewsContract {
     public static final String PATH_NEWSENTRIES = "news";
 
     public static class NewsEntries implements BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_NEWSENTRIES).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_NEWSENTRIES).build();
 
-        public static final String CONTENT_TYPE_NEWSENTRIES = ContentResolver.CURSOR_DIR_BASE_TYPE + "/newsEntries";
-        public static final String CONTENT_ITEM_TYPE_NEWSENTRIES = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/newsEntry";
+        public static final String CONTENT_TYPE_NEWSENTRIES =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/newsEntries";
+        public static final String CONTENT_ITEM_TYPE_NEWSENTRIES =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/newsEntry";
 
         static final String KEY_TITLE = "news_title";
         static final String KEY_PUBLISHED = "news_published";
@@ -27,6 +30,9 @@ class NewsContract {
         static final String KEY_CONTENT_SNIPPET = "news_content_snippet";
         static final String KEY_LIKED = "news_liked";
         static final String KEY_NUM_LIKES = "news_num_likes";
+
+        /** Default "ORDER BY" clause */
+        static final String DEFAULT_SORT = KEY_PUBLISHED + " DESC";
 
         @NonNull
         public static Uri buildEntryUri(int newsId) {

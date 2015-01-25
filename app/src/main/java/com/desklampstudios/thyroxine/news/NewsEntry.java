@@ -2,9 +2,11 @@ package com.desklampstudios.thyroxine.news;
 
 import android.support.annotation.NonNull;
 
+import com.desklampstudios.thyroxine.Utils;
+
 import java.util.Date;
 
-class NewsEntry {
+class NewsEntry implements Comparable<NewsEntry> {
     public final int newsId;
     @NonNull public final String title;
     public final long published;
@@ -25,9 +27,10 @@ class NewsEntry {
 
     @Override
     public String toString() {
+        String publishedStr = Utils.FixedDateFormats.ISO.format(published);
         return String.format("NewsEntry[newsId=%d, title=%s, published=%s, content=%s, " +
                         "liked=%b, numLikes=%d]",
-                newsId, title, new Date(published), contentSnippet, liked, numLikes);
+                newsId, title, publishedStr, contentSnippet, liked, numLikes);
     }
 
     @Override
@@ -42,6 +45,16 @@ class NewsEntry {
     @Override
     public int hashCode() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int compareTo(@NonNull NewsEntry other) {
+        int cmp;
+        // sort by published more recently
+        if ((cmp = -Long.valueOf(published).compareTo(other.published)) != 0) return cmp;
+        // sort by title
+        if ((cmp = title.compareTo(other.title)) != 0) return cmp;
+        return 0;
     }
 
     public static class Builder {
