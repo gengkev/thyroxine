@@ -15,6 +15,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,19 +43,21 @@ class NewsFeedParser extends AbstractXMLParser {
         parsingBegun = true;
     }
 
-    @Nullable
-    public NewsEntry nextEntry() throws XmlPullParserException, IOException {
+    @NonNull
+    public ArrayList<NewsEntry> parseEntries() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
-            return null;
+            throw new IllegalStateException();
         }
+        ArrayList<NewsEntry> entries = new ArrayList<>();
 
         while (mParser.next() != XmlPullParser.END_TAG) {
             if (mParser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             switch (mParser.getName()) {
-                case "item":
-                    return readEntry(mParser);
+                case "post":
+                    entries.add(readEntry(mParser));
+                    break;
                 default:
                     skip(mParser);
                     break;
@@ -63,7 +66,7 @@ class NewsFeedParser extends AbstractXMLParser {
 
         // No more entries found
         stopParse();
-        return null;
+        return entries;
     }
 
     // Parses the contents of an entry. If it encounters a title, published, link, or content tag,

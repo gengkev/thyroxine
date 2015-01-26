@@ -2,7 +2,6 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Pair;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
@@ -56,13 +55,13 @@ class EighthGetBlockParser extends AbstractXMLParser {
         return blockAndActv;
     }
 
-    // Use with beginGetBlock
-    @Nullable
-    public Pair<EighthActv, EighthActvInstance> nextActivity()
+    @NonNull
+    public ArrayList<Pair<EighthActv, EighthActvInstance>> parseActivities()
             throws XmlPullParserException, IOException {
         if (!parsingBegun) {
-            return null;
+            throw new IllegalStateException();
         }
+        ArrayList<Pair<EighthActv, EighthActvInstance>> activities = new ArrayList<>();
 
         while (mParser.next() != XmlPullParser.END_TAG) {
             if (mParser.getEventType() != XmlPullParser.START_TAG) {
@@ -70,7 +69,8 @@ class EighthGetBlockParser extends AbstractXMLParser {
             }
             switch (mParser.getName()) {
                 case "activity":
-                    return readActivity(mParser);
+                    activities.add(readActivity(mParser));
+                    break;
                 default:
                     skip(mParser);
                     break;
@@ -79,7 +79,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
 
         // No more entries found
         stopParse();
-        return null;
+        return activities;
     }
 
     @NonNull

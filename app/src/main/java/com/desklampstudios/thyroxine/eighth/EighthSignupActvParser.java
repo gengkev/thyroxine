@@ -1,7 +1,6 @@
 package com.desklampstudios.thyroxine.eighth;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
 import com.desklampstudios.thyroxine.AuthErrorParser;
@@ -41,10 +40,9 @@ class EighthSignupActvParser extends AbstractXMLParser {
         mParser.require(XmlPullParser.START_TAG, ns, "signup");
     }
 
-    @Nullable
-    public Integer nextResult() throws XmlPullParserException, IOException {
+    public void checkResult() throws XmlPullParserException, IOException, EighthSignupException {
         if (!parsingBegun) {
-            return null;
+            throw new IllegalStateException();
         }
 
         while (mParser.next() != XmlPullParser.END_TAG) {
@@ -52,16 +50,21 @@ class EighthSignupActvParser extends AbstractXMLParser {
                 continue;
             }
             switch (mParser.getName()) {
-                case "result":
-                    return readInt(mParser, "result");
+                case "result": {
+                    int result = readInt(mParser, "result");
+                    if (result == 0) {
+                        return;
+                    } else {
+                        throw EighthSignupException.create(result, mContext);
+                    }
+                }
                 default:
                     skip(mParser);
                     break;
             }
         }
 
-        // No more entries found
-        stopParse();
-        return null;
+        // No result found
+        throw new IllegalStateException();
     }
 }

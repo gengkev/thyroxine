@@ -2,8 +2,6 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.util.Pair;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
@@ -17,6 +15,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.ArrayList;
 
 class EighthListBlocksParser extends AbstractXMLParser {
     private static final String TAG = EighthListBlocksParser.class.getSimpleName();
@@ -42,17 +41,16 @@ class EighthListBlocksParser extends AbstractXMLParser {
         }
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
 
-
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "blocks");
     }
 
-    // Use with beginListBlocks
-    @Nullable
-    public EighthBlockAndActv nextBlock() throws XmlPullParserException, IOException {
+    @NonNull
+    public ArrayList<EighthBlockAndActv> parseBlocks() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
-            return null;
+            throw new IllegalStateException();
         }
+        ArrayList<EighthBlockAndActv> blocks = new ArrayList<>();
 
         while (mParser.next() != XmlPullParser.END_TAG) {
             if (mParser.getEventType() != XmlPullParser.START_TAG) {
@@ -61,16 +59,17 @@ class EighthListBlocksParser extends AbstractXMLParser {
             String name = mParser.getName();
             switch (name) {
                 case "block":
-                    return readBlock(mParser);
+                    blocks.add(readBlock(mParser));
+                    break;
                 default:
                     skip(mParser);
                     break;
             }
         }
 
-        // No more entries found
+        // no more entries found
         stopParse();
-        return null;
+        return blocks;
     }
 
     @NonNull

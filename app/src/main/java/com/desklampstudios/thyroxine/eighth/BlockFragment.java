@@ -3,12 +3,10 @@ package com.desklampstudios.thyroxine.eighth;
 import android.accounts.Account;
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,12 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -196,7 +193,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         // Load stuff using AsyncTask
         mFetchBlockTask = new FetchBlockTask(getActivity(), account, new FetchBlockTask.ActvsResultListener() {
             @Override
-            public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
+            public void onActvsResult(List<Pair<EighthActv, EighthActvInstance>> pairList) {
                 mFetchBlockTask = null;
                 mSwipeRefreshLayout.setRefreshing(false); // syncing done
 
@@ -208,7 +205,8 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             public void onError(Exception exception) {
                 mFetchBlockTask = null;
                 mSwipeRefreshLayout.setRefreshing(false); // syncing done
-                handleAsyncTaskError(exception);
+                String message = getString(R.string.unexpected_error, String.valueOf(exception));
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
         });
         mFetchBlockTask.execute(blockId);
@@ -227,75 +225,26 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         mSignupActvTask = new SignupActvTask(getActivity(), account, new SignupActvTask.SignupResultListener() {
             @Override
-            public void onSignupResult(int result) {
+            public void onSignupResult() {
                 mSignupActvTask = null;
-                if (result == 0) { // success
-                    String message = getActivity().getString(R.string.signup_success, pair.first.name);
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    updateDatabase(blockId, pair.first, pair.second);
-                } else { // error
-                    String message = getActivity().getString(R.string.signup_failure, pair.first.name);
-                    String errors = getSignupErrorString(result);
-                    Toast.makeText(getActivity(), message + errors, Toast.LENGTH_LONG).show();
-                }
+                String message = getActivity().getString(R.string.signup_success, pair.first.name);
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onError(Exception exception) {
+            public void onError(@NonNull Exception exception) {
                 mSignupActvTask = null;
-                handleAsyncTaskError(exception);
+                if (exception instanceof EighthSignupException) {
+                    String message = getActivity().getString(R.string.signup_failure, pair.first.name)
+                            + "\n" + exception.getMessage();
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                } else {
+                    String message = getString(R.string.unexpected_error, String.valueOf(exception));
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                }
             }
         });
-        mSignupActvTask.execute(blockId, pair.first.actvId);
-    }
-
-    private void handleAsyncTaskError(Exception exception) {
-        if (exception instanceof IodineAuthException.NotLoggedInException) {
-            Toast.makeText(getActivity(), R.string.attempt_login_try_again, Toast.LENGTH_LONG).show();
-        } else {
-            String message = getString(
-                    R.string.unexpected_error, String.valueOf(exception));
-            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @NonNull
-    private String getSignupErrorString(int result) {
-        final String[] arr = getResources().getStringArray(R.array.eighth_signup_error);
-
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < arr.length; i++) {
-            if ((result & (1 << i)) != 0) {
-                out.append("\n").append(arr[i]);
-            }
-        }
-        return out.toString();
-    }
-
-    // TODO: make less hacky
-    private void updateDatabase(int blockId, @NonNull EighthActv actv, @NonNull EighthActvInstance actvInstance) {
-        // push to db, or something
-        final ContentResolver resolver = getActivity().getContentResolver();
-
-        // Update schedule
-        ContentValues scheduleValues = new ContentValues();
-        scheduleValues.put(EighthContract.Schedule.KEY_BLOCK_ID, blockId);
-        scheduleValues.put(EighthContract.Schedule.KEY_ACTV_ID, actv.actvId);
-        Uri scheduleUri = resolver.insert(EighthContract.Schedule.CONTENT_URI, scheduleValues);
-        Log.d(TAG, "updated schedule: inserted with uri " + scheduleUri);
-
-        // Update EighthActv
-        ContentValues actvValues = EighthContract.Actvs.toContentValues(actv);
-        Uri actvUri = resolver.insert(EighthContract.Actvs.CONTENT_URI, actvValues);
-        Log.d(TAG, "updated actv: inserted with uri " + actvUri);
-
-        // Update EighthActvInstance
-        ContentValues actvInstanceValues = EighthContract.ActvInstances.toContentValues(actvInstance);
-        Uri actvInstanceUri = resolver.insert(EighthContract.ActvInstances.CONTENT_URI, actvInstanceValues);
-        Log.d(TAG, "updated actvInstance: inserted with uri " + actvInstanceUri);
-
-        // notify changes
-        resolver.notifyChange(EighthContract.Blocks.CONTENT_URI, null, false);
+        mSignupActvTask.execute(blockId, pair.first, pair.second);
     }
 
     private void displayBlock(@NonNull EighthBlock block) {
