@@ -2,22 +2,21 @@ package com.desklampstudios.thyroxine;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 public class IodineAuthException extends Exception {
     public IodineAuthException(String msg) {
         super(msg);
     }
 
-    @Nullable
-    public static IodineAuthException create(@Nullable Integer errCode, @NonNull String msg,
+    @NonNull
+    public static IodineAuthException create(int errCode, @NonNull String msg,
                                              @NonNull Context context) {
-        String[] arr = context.getResources().getStringArray(R.array.iodine_auth_error);
+        final String[] arr = context.getResources().getStringArray(R.array.iodine_auth_error);
 
         if (msg.trim().equals("You are not logged in.")) {
             return new NotLoggedInException(msg);
         }
-        if (errCode != null) {
+        else if (errCode > -1) {
             switch (errCode) {
                 case 1: // bad_password
                     return new InvalidPasswordException(arr[errCode]);

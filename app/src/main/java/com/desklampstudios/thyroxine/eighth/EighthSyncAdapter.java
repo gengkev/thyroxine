@@ -24,6 +24,7 @@ import android.util.Pair;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.sync.SyncUtils;
 
@@ -38,7 +39,6 @@ import static com.desklampstudios.thyroxine.eighth.EighthListBlocksParser.Eighth
 
 public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = EighthSyncAdapter.class.getSimpleName();
-    private static final String KEY_AUTHTOKEN_RETRY = "authTokenRetry";
 
     // Sync intervals
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
@@ -169,56 +169,60 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "onPerformSync for account " + account);
         final AccountManager am = AccountManager.get(getContext());
 
-        // Part I. Get auth token
-        String authToken;
-        try {
-            authToken = am.blockingGetAuthToken(account,
-                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
-        } catch (IOException e) {
-            Log.e(TAG, "Connection error: " + e.toString());
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (OperationCanceledException | AuthenticatorException e) {
-            Log.e(TAG, "Authentication error: " + e.toString());
-            syncResult.stats.numAuthExceptions++;
-            return;
-        }
-        Log.v(TAG, "Got auth token: " + authToken);
-
-
-        // Part II. Get schedule (list of blocks)
         List<EighthBlockAndActv> schedule;
-        try {
-            schedule = fetchSchedule(authToken);
-        } catch (IodineAuthException.NotLoggedInException e) {
-            Log.d(TAG, "Not logged in, invalidating auth token", e);
-            am.invalidateAuthToken(account.type, authToken);
-
-            // Automatically retry sync, but only once
-            if (!extras.getBoolean(KEY_AUTHTOKEN_RETRY, false)) {
-                extras.putBoolean(KEY_AUTHTOKEN_RETRY, true);
-                Log.d(TAG, "Retrying sync once, recursively. extras: " + extras);
-                onPerformSync(account, extras, authority, provider, syncResult);
-            } else {
-                Log.d(TAG, "Retry token found; will not retry sync again.");
+        boolean authTokenRetry = false;
+        while (true) {
+            // Part I. Get auth token
+            String authToken;
+            try {
+                authToken = am.blockingGetAuthToken(account,
+                        IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error", e);
+                syncResult.stats.numIoExceptions++;
+                return;
+            } catch (OperationCanceledException | AuthenticatorException e) {
+                Log.e(TAG, "Authentication error", e);
                 syncResult.stats.numAuthExceptions++;
+                return;
             }
-            return;
-        } catch (IodineAuthException e) {
-            Log.e(TAG, "Iodine auth error", e);
-            syncResult.stats.numAuthExceptions++;
-            return;
-        } catch (IOException e) {
-            Log.e(TAG, "Connection error", e);
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "XML parsing error", e);
-            syncResult.stats.numParseExceptions++;
-            return;
-        }
-        Log.v(TAG, "Got schedule (" + schedule.size() + " blocks)");
+            Log.v(TAG, "Got auth token: " + authToken);
 
+
+            // Part II. Get schedule (list of blocks)
+            try {
+                schedule = fetchSchedule(authToken);
+            } catch (IodineAuthException.NotLoggedInException e) {
+                Log.d(TAG, "Not logged in, invalidating auth token", e);
+                am.invalidateAuthToken(account.type, authToken);
+
+                // Automatically retry sync, but only once
+                if (!authTokenRetry) {
+                    authTokenRetry = true;
+                    Log.d(TAG, "Retrying sync with new auth token.");
+                    continue;
+                } else {
+                    Log.e(TAG, "Retried to get auth token already, quitting.");
+                    syncResult.stats.numAuthExceptions++;
+                    return;
+                }
+            } catch (IodineAuthException e) {
+                Log.e(TAG, "Iodine auth error", e);
+                syncResult.stats.numAuthExceptions++;
+                return;
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error", e);
+                syncResult.stats.numIoExceptions++;
+                return;
+            } catch (XmlPullParserException e) {
+                Log.e(TAG, "XML parsing error", e);
+                syncResult.stats.numParseExceptions++;
+                return;
+            }
+            break;
+        }
+
+        Log.v(TAG, "Got schedule (" + schedule.size() + " blocks)");
 
         // Part III. Update blocks in database
         ArrayList<EighthBlock> blockList = new ArrayList<>(schedule.size());
@@ -243,6 +247,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.databaseError = true;
             return;
         }
+
         Log.v(TAG, "Updated database; done syncing");
     }
 
@@ -253,8 +258,6 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
 
         InputStream stream = null;
         EighthListBlocksParser parser = null;
-        List<EighthBlockAndActv> blockAndActvList = new ArrayList<>();
-        EighthBlockAndActv blockAndActv;
 
         try {
             stream = IodineApiHelper.getBlockList(authToken);
@@ -262,11 +265,8 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
             parser = new EighthListBlocksParser(getContext());
             parser.beginListBlocks(stream);
 
-            blockAndActv = parser.nextBlock();
-            while (blockAndActv != null) {
-                blockAndActvList.add(blockAndActv);
-                blockAndActv = parser.nextBlock();
-            }
+            return parser.parseBlocks();
+
         } finally {
             if (parser != null)
                 parser.stopParse();
@@ -277,8 +277,6 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.e(TAG, "IOException when closing stream: " + e);
             }
         }
-
-        return blockAndActvList;
     }
 
     // TODO: get rid of all this, it's ridiculous
@@ -427,7 +425,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
         final String authority = EighthContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
-        SyncUtils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
+        Utils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         // Enable automatic sync
         ContentResolver.setSyncAutomatically(account, authority, true);

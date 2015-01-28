@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.sync.SyncUtils;
 
@@ -35,7 +36,6 @@ import java.util.List;
 
 public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = NewsSyncAdapter.class.getSimpleName();
-    private static final String KEY_AUTHTOKEN_RETRY = "authTokenRetry";
 
     // Sync intervals
     private static final int SYNC_INTERVAL = 2 * 60 * 60; // 2 hours
@@ -71,57 +71,61 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "onPerformSync for account " + account);
         final AccountManager am = AccountManager.get(getContext());
 
-        // Part 0. Get auth token
-        String authToken;
-        try {
-            authToken = am.blockingGetAuthToken(account,
-                    IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
-        } catch (IOException e) {
-            Log.e(TAG, "Connection error: " + e.toString());
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (OperationCanceledException | AuthenticatorException e) {
-            Log.e(TAG, "Authentication error: " + e.toString());
-            syncResult.stats.numAuthExceptions++;
-            return;
-        }
-        Log.v(TAG, "Got auth token: " + authToken);
-
-
-        // Part I. Get news list
         List<NewsEntry> newsList;
-        try {
-            newsList = fetchNews(authToken);
-        } catch (IodineAuthException.NotLoggedInException e) {
-            Log.d(TAG, "Not logged in, invalidating auth token", e);
-            am.invalidateAuthToken(account.type, authToken);
-
-            // Automatically retry sync, but only once
-            if (!extras.getBoolean(KEY_AUTHTOKEN_RETRY, false)) {
-                extras.putBoolean(KEY_AUTHTOKEN_RETRY, true);
-                Log.d(TAG, "Retrying sync once, recursively. extras: " + extras);
-                onPerformSync(account, extras, authority, provider, syncResult);
-            } else {
-                Log.d(TAG, "Retry token found; will not retry sync again.");
+        boolean authTokenRetry = false;
+        while (true) {
+            // Part I. Get auth token
+            String authToken;
+            try {
+                authToken = am.blockingGetAuthToken(account,
+                        IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error: " + e.toString());
+                syncResult.stats.numIoExceptions++;
+                return;
+            } catch (OperationCanceledException | AuthenticatorException e) {
+                Log.e(TAG, "Authentication error: " + e.toString());
                 syncResult.stats.numAuthExceptions++;
+                return;
             }
-            return;
-        } catch (IodineAuthException e) {
-            Log.e(TAG, "Iodine auth error", e);
-            syncResult.stats.numAuthExceptions++;
-            return;
-        } catch (IOException e) {
-            Log.e(TAG, "Connection error: " + e.toString());
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "XML error: " + e.toString());
-            syncResult.stats.numParseExceptions++;
-            return;
+            Log.v(TAG, "Got auth token: " + authToken);
+
+
+            // Part II. Get news list
+            try {
+                newsList = fetchNews(authToken);
+            } catch (IodineAuthException.NotLoggedInException e) {
+                Log.d(TAG, "Not logged in, invalidating auth token", e);
+                am.invalidateAuthToken(account.type, authToken);
+
+                // Automatically retry sync, but only once
+                if (!authTokenRetry) {
+                    authTokenRetry = true;
+                    Log.d(TAG, "Retrying sync with new auth token.");
+                    continue;
+                } else {
+                    Log.e(TAG, "Retried to get auth token already, quitting.");
+                    syncResult.stats.numAuthExceptions++;
+                    return;
+                }
+            } catch (IodineAuthException e) {
+                Log.e(TAG, "Iodine auth error", e);
+                syncResult.stats.numAuthExceptions++;
+                return;
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error: " + e.toString());
+                syncResult.stats.numIoExceptions++;
+                return;
+            } catch (XmlPullParserException e) {
+                Log.e(TAG, "XML error: " + e.toString());
+                syncResult.stats.numParseExceptions++;
+                return;
+            }
+            break;
         }
         Log.v(TAG, "Got news list (" + newsList.size() + ") entries");
 
-        // Part II. Update entries in database
+        // Part III. Update entries in database
         try {
             updateNewsData(newsList, provider, syncResult);
         } catch (RemoteException | SQLiteException | OperationApplicationException e) {
@@ -139,19 +143,15 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
 
         InputStream stream = null;
         NewsListParser parser = null;
-        List<NewsEntry> entries = new ArrayList<>();
-        NewsEntry entry;
 
         try {
             stream = IodineApiHelper.getNewsList(authToken);
+
             parser = new NewsListParser(getContext());
             parser.beginFeed(stream);
 
-            entry = parser.nextEntry();
-            while (entry != null) {
-                entries.add(entry);
-                entry = parser.nextEntry();
-            }
+            return parser.parseEntries();
+
         } finally {
             if (parser != null)
                 parser.stopParse();
@@ -162,8 +162,6 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.e(TAG, "IOException when closing stream: " + e);
             }
         }
-
-        return entries;
     }
 
     private void updateNewsData(@NonNull List<NewsEntry> newsList,
@@ -216,7 +214,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
-        SyncUtils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
+        Utils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         // Enable automatic sync
         ContentResolver.setSyncAutomatically(account, authority, true);

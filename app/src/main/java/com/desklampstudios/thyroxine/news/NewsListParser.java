@@ -2,8 +2,6 @@ package com.desklampstudios.thyroxine.news;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
 import com.desklampstudios.thyroxine.AuthErrorParser;
@@ -16,6 +14,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 
 class NewsListParser extends AbstractXMLParser {
@@ -43,11 +42,12 @@ class NewsListParser extends AbstractXMLParser {
         parsingBegun = true;
     }
 
-    @Nullable
-    public NewsEntry nextEntry() throws XmlPullParserException, IOException {
+    @NonNull
+    public ArrayList<NewsEntry> parseEntries() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
-            return null;
+            throw new IllegalStateException();
         }
+        ArrayList<NewsEntry> entries = new ArrayList<>();
 
         while (mParser.next() != XmlPullParser.END_TAG) {
             if (mParser.getEventType() != XmlPullParser.START_TAG) {
@@ -55,7 +55,8 @@ class NewsListParser extends AbstractXMLParser {
             }
             switch (mParser.getName()) {
                 case "post":
-                    return readEntry(mParser);
+                    entries.add(readEntry(mParser));
+                    break;
                 default:
                     skip(mParser);
                     break;
@@ -64,7 +65,7 @@ class NewsListParser extends AbstractXMLParser {
 
         // No more entries found
         stopParse();
-        return null;
+        return entries;
     }
 
     // Parses the contents of an entry. If it encounters a title, published, link, or content tag,
@@ -81,13 +82,16 @@ class NewsListParser extends AbstractXMLParser {
             }
             switch (parser.getName()) {
                 case "posted":
-                    newsBuilder.published(readPublished(parser));
+                    newsBuilder.published(
+                            readPublished(parser));
                     break;
                 case "id":
-                    newsBuilder.newsId(readInt(parser, "id"));
+                    newsBuilder.newsId(
+                            readInt(parser, "id"));
                     break;
                 case "title":
-                    newsBuilder.title(Utils.cleanHtml(readText(parser, "title")));
+                    newsBuilder.title(
+                            Utils.cleanHtml(readText(parser, "title")));
                     break;
                 case "text": {
                     String content = readText(parser, "text");
@@ -97,10 +101,12 @@ class NewsListParser extends AbstractXMLParser {
                     break;
                 }
                 case "liked":
-                    newsBuilder.liked(readInt(parser, "liked") != 0);
+                    newsBuilder.liked(
+                            readBoolean(parser, "liked"));
                     break;
                 case "likecount":
-                    newsBuilder.numLikes(readInt(parser, "likecount"));
+                    newsBuilder.numLikes(
+                            readInt(parser, "likecount"));
                     break;
                 default:
                     skip(parser);
@@ -121,7 +127,6 @@ class NewsListParser extends AbstractXMLParser {
             Date date = Utils.FixedDateFormats.NEWS_LIST.parse(publishedStr);
             published = date.getTime();
         } catch (ParseException e) {
-            Log.e(TAG, "Invalid date string: " + publishedStr + ", " + e.toString());
             throw new XmlPullParserException("Invalid date string: " + publishedStr, parser, e);
         }
         return published;

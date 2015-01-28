@@ -1,23 +1,15 @@
 package com.desklampstudios.thyroxine.sync;
 
-import android.accounts.Account;
 import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.SyncRequest;
 import android.content.SyncStats;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.Utils;
-import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
-import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,41 +17,6 @@ import java.util.List;
 
 public class SyncUtils {
     private static final String TAG = SyncUtils.class.getSimpleName();
-
-    /**
-     * Makes sure synchronization is set up properly, retrieving the stub and Iodine accounts
-     * and configuring periodic synchronization with the SyncAdapters.
-     * @param context Context used to get accounts
-     */
-    public static void configureSync(@NonNull Context context) {
-        // Find Iodine account (may not exist)
-        Account iodineAccount = IodineAuthenticator.getIodineAccount(context);
-        if (iodineAccount != null) {
-            // Configure sync with Iodine account
-            EighthSyncAdapter.configureSync(iodineAccount);
-            NewsSyncAdapter.configureSync(iodineAccount);
-        }
-    }
-
-    /**
-     * Helper method to schedule periodic execution of a sync adapter.
-     * flexTime is only used on KitKat and newer devices.
-     */
-    public static void configurePeriodicSync(Account account, String authority,
-                                             int syncInterval, int flexTime) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // we can enable inexact timers in our periodic sync
-            SyncRequest request = new SyncRequest.Builder()
-                    .syncPeriodic(syncInterval, flexTime)
-                    .setSyncAdapter(account, authority)
-                    .setExtras(Bundle.EMPTY)
-                    .build();
-            ContentResolver.requestSync(request);
-        } else {
-            ContentResolver.addPeriodicSync(account, authority, Bundle.EMPTY, syncInterval);
-        }
-    }
 
     @NonNull
     public static <T, K> ArrayList<ContentProviderOperation> createMergeBatch(

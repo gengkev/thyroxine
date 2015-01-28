@@ -2,12 +2,11 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
@@ -20,9 +19,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.List;
 
-class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv, EighthActvInstance>>> {
+class FetchBlockTask extends AsyncTask<Integer, Void, List<Pair<EighthActv, EighthActvInstance>>> {
     private static final String TAG = FetchBlockTask.class.getSimpleName();
 
     private final Activity mActivity;
@@ -39,63 +38,77 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
 
     @Nullable
     @Override
-    protected ArrayList<Pair<EighthActv, EighthActvInstance>> doInBackground(Integer... params) {
+    protected List<Pair<EighthActv, EighthActvInstance>> doInBackground(Integer... params) {
+        final int blockId = params[0];
         final AccountManager am = AccountManager.get(mActivity);
-        AccountManagerFuture<Bundle> future = am.getAuthToken(mAccount,
-                IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, Bundle.EMPTY, mActivity, null, null);
 
-        String authToken;
-        try {
-            Bundle bundle = future.getResult();
-            authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-            Log.v(TAG, "Got bundle: " + bundle);
-        } catch (IOException e) {
-            Log.e(TAG, "Connection error: "+ e.toString());
-            mException = e;
-            return null;
-        } catch (OperationCanceledException | AuthenticatorException e) {
-            Log.e(TAG, "Authentication error: " + e.toString());
-            mException = e;
-            return null;
+        List<Pair<EighthActv, EighthActvInstance>> pairList;
+        boolean authTokenRetry = false;
+        while (true) {
+            // Part I. Get auth token
+            String authToken;
+            try {
+                authToken = am.blockingGetAuthToken(mAccount,
+                        IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error", e);
+                mException = e;
+                return null;
+            } catch (OperationCanceledException | AuthenticatorException e) {
+                Log.e(TAG, "Authentication error", e);
+                mException = e;
+                return null;
+            }
+            Log.v(TAG, "Got auth token: " + authToken);
+
+            // Part II. Get block (list of activities)
+            try {
+                pairList = fetchActivities(blockId, authToken);
+            } catch (IodineAuthException.NotLoggedInException e) {
+                Log.d(TAG, "Not logged in, invalidating auth token", e);
+                am.invalidateAuthToken(mAccount.type, authToken);
+                mException = e;
+
+                // Automatically retry, but only once
+                if (!authTokenRetry) {
+                    authTokenRetry = true;
+                    Log.d(TAG, "Retrying fetch with new auth token.");
+                    continue;
+                } else {
+                    Log.e(TAG, "Retried to get auth token already, quitting.");
+                    return null;
+                }
+            } catch (IOException | IodineAuthException e) {
+                Log.e(TAG, "Connection error", e);
+                mException = e;
+                return null;
+            } catch (XmlPullParserException e) {
+                Log.e(TAG, "XML error", e);
+                mException = e;
+                return null;
+            }
+            break;
         }
 
-        final int blockId = params[0];
+        return pairList;
+    }
+
+    @NonNull
+    private List<Pair<EighthActv, EighthActvInstance>> fetchActivities(int blockId, String authToken)
+            throws IodineAuthException, IOException, XmlPullParserException {
 
         InputStream stream = null;
         EighthGetBlockParser parser = null;
-        EighthListBlocksParser.EighthBlockAndActv blockPair;
 
         try {
             stream = IodineApiHelper.getBlock(blockId, authToken);
 
             parser = new EighthGetBlockParser(mActivity);
-            blockPair = parser.beginGetBlock(stream);
+            EighthListBlocksParser.EighthBlockAndActv blockPair = parser.beginGetBlock(stream);
             Log.d(TAG, "Block: " + blockPair.block);
 
-            ArrayList<Pair<EighthActv, EighthActvInstance>> pairList = new ArrayList<>();
-            Pair<EighthActv, EighthActvInstance> pair = parser.nextActivity();
+            return parser.parseActivities();
 
-            while (pair != null && !isCancelled()) {
-                pairList.add(pair);
-                pair = parser.nextActivity();
-            }
-
-            return pairList;
-
-        } catch (IodineAuthException.NotLoggedInException e) {
-            Log.d(TAG, "Not logged in, oh no!", e);
-            am.invalidateAuthToken(mAccount.type, authToken);
-            // TODO: try again automatically
-            mException = e;
-            return null;
-        } catch (IOException | IodineAuthException e) {
-            Log.e(TAG, "Connection error: " + e.toString());
-            mException = e;
-            return null;
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "XML error: " + e.toString());
-            mException = e;
-            return null;
         } finally {
             if (parser != null)
                 parser.stopParse();
@@ -109,8 +122,8 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
     }
 
     @Override
-    protected void onPostExecute(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList) {
-        if (mException != null) {
+    protected void onPostExecute(List<Pair<EighthActv, EighthActvInstance>> pairList) {
+        if (pairList == null) {
             mResultListener.onError(mException);
             return;
         }
@@ -120,7 +133,7 @@ class FetchBlockTask extends AsyncTask<Integer, Void, ArrayList<Pair<EighthActv,
     }
 
     public interface ActvsResultListener {
-        public void onActvsResult(ArrayList<Pair<EighthActv, EighthActvInstance>> pairList);
+        public void onActvsResult(List<Pair<EighthActv, EighthActvInstance>> pairList);
         public void onError(Exception exception);
     }
 }

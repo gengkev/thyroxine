@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,9 @@ import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.external.AccountAuthenticatorActivity;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 import static com.desklampstudios.thyroxine.IodineAuthException.InvalidPasswordException;
@@ -37,11 +41,10 @@ import static com.desklampstudios.thyroxine.IodineAuthException.InvalidUsernameE
  * A login screen that offers login via username/password.
  */
 public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
-    private final static String TAG = IodineAuthenticatorActivity.class.getSimpleName();
-    public final static String ARG_ACCOUNT_TYPE = "ACCOUNT_TYPE";
-    public final static String ARG_AUTH_TOKEN_TYPE = "AUTH_TOKEN_TYPE";
-    public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_NEW_ACCOUNT";
-    private static final String PARAM_USER_PASS = "USER_PASS";
+    private static final String TAG = IodineAuthenticatorActivity.class.getSimpleName();
+    public static final String ARG_ACCOUNT_TYPE = "ACCOUNT_TYPE";
+    public static final String ARG_AUTH_TOKEN_TYPE = "AUTH_TOKEN_TYPE";
+    public static final String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_NEW_ACCOUNT";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -132,6 +135,9 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
             return;
         }
 
+        // Clear password field
+        mPasswordView.setText("");
+
         // Check for a valid password
         if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
@@ -142,14 +148,13 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
         // Show a progress spinner, and kick off a background task to
         // perform the user login attempt.
         showProgress(true);
-        mAuthTask = new UserLoginTask(username, password);
-        mAuthTask.execute((Void) null);
-
+        mAuthTask = new UserLoginTask();
+        mAuthTask.execute(username, password);
     }
 
     private void finishLogin(@NonNull Intent intent) {
         String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-        String accountPassword = intent.getStringExtra(PARAM_USER_PASS);
+        String accountPassword = intent.getStringExtra(AccountManager.KEY_PASSWORD);
         String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
 
         final AccountManager am = AccountManager.get(IodineAuthenticatorActivity.this);
@@ -162,6 +167,9 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
             // Change account password
             am.setPassword(account, accountPassword);
         }
+
+        // get things started
+        IodineAuthenticator.onAccountCreated(account);
 
         // Update the auth token (to prevent an extra round-trip)
         am.setAuthToken(account, IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, authToken);
@@ -213,35 +221,33 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Intent> {
-        private final String mUsername;
-        private final String mPassword;
-
+    private class UserLoginTask extends AsyncTask<String, Void, Intent> {
         private Exception mException;
 
-        UserLoginTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
-        }
+        private UserLoginTask() { }
 
         @Nullable
         @Override
-        protected Intent doInBackground(Void... params) {
+        protected Intent doInBackground(String... params) {
+            final String username = params[0];
+            final String password = params[1];
+
             String authToken;
             try {
-                authToken = IodineApiHelper.attemptLogin(mUsername, mPassword, IodineAuthenticatorActivity.this);
-                Log.d(TAG, "attemptLogin succeeded, authToken: " + authToken);
-            } catch (Exception e) {
+                authToken = IodineApiHelper.attemptLogin(
+                        username, password, IodineAuthenticatorActivity.this);
+            } catch (IodineAuthException | IOException | XmlPullParserException e) {
                 mException = e;
                 Log.w(TAG, "attemptLogin threw exception: " + e);
                 return null;
             }
+            Log.d(TAG, "attemptLogin succeeded, authToken: " + authToken);
 
             final Intent res = new Intent();
-            res.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername);
+            res.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
             res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, IodineAuthenticator.ACCOUNT_TYPE);
             res.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
-            res.putExtra(PARAM_USER_PASS, mPassword);
+            res.putExtra(AccountManager.KEY_PASSWORD, password);
             return res;
         }
 
@@ -266,14 +272,13 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
                             R.string.iodine_auth_error, mException.toString());
                     Toast.makeText(IodineAuthenticatorActivity.this,
                             message, Toast.LENGTH_LONG).show();
-                    return;
                 } else {
                     String message = getResources().getString(
                             R.string.unexpected_error, mException.toString());
                     Toast.makeText(IodineAuthenticatorActivity.this,
                             message, Toast.LENGTH_LONG).show();
-                    return;
                 }
+                return;
             }
 
             // Success!

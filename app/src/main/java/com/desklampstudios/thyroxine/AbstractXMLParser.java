@@ -51,13 +51,26 @@ public abstract class AbstractXMLParser {
     protected static int readInt(@NonNull XmlPullParser parser, String tagName)
             throws XmlPullParserException, IOException {
         String str = readText(parser, tagName);
-        int integer = -1;
         try {
-            integer = Integer.parseInt(str);
+            return Integer.parseInt(str);
         } catch (NumberFormatException e) {
-            Log.e(TAG, "readInt parse exception for int: " + str + ", " + e.toString());
+            throw new XmlPullParserException("Invalid integer: " + str, parser, e);
         }
-        return integer;
+    }
+
+    protected static boolean readBoolean(@NonNull XmlPullParser parser, String tagName)
+            throws XmlPullParserException, IOException {
+        String str = readText(parser, tagName);
+        if ("true".equalsIgnoreCase(str)) {
+            return true;
+        } else if ("false".equalsIgnoreCase(str)) {
+            return false;
+        }
+        try {
+            return Integer.parseInt(str) != 0;
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException("Invalid boolean/integer: " + str, parser, e);
+        }
     }
 
     protected static void skip(@NonNull XmlPullParser parser) throws XmlPullParserException, IOException {

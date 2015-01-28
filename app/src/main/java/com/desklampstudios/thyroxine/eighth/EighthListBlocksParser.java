@@ -2,8 +2,6 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.util.Pair;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
@@ -17,8 +15,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.ArrayList;
 
-// TODO: split into a parser for listBlocks and getBlock
 class EighthListBlocksParser extends AbstractXMLParser {
     private static final String TAG = EighthListBlocksParser.class.getSimpleName();
 
@@ -43,17 +41,16 @@ class EighthListBlocksParser extends AbstractXMLParser {
         }
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
 
-
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "blocks");
     }
 
-    // Use with beginListBlocks
-    @Nullable
-    public EighthBlockAndActv nextBlock() throws XmlPullParserException, IOException {
+    @NonNull
+    public ArrayList<EighthBlockAndActv> parseBlocks() throws XmlPullParserException, IOException {
         if (!parsingBegun) {
-            return null;
+            throw new IllegalStateException();
         }
+        ArrayList<EighthBlockAndActv> blocks = new ArrayList<>();
 
         while (mParser.next() != XmlPullParser.END_TAG) {
             if (mParser.getEventType() != XmlPullParser.START_TAG) {
@@ -62,16 +59,17 @@ class EighthListBlocksParser extends AbstractXMLParser {
             String name = mParser.getName();
             switch (name) {
                 case "block":
-                    return readBlock(mParser);
+                    blocks.add(readBlock(mParser));
+                    break;
                 default:
                     skip(mParser);
                     break;
             }
         }
 
-        // No more entries found
+        // no more entries found
         stopParse();
-        return null;
+        return blocks;
     }
 
     @NonNull
@@ -89,22 +87,27 @@ class EighthListBlocksParser extends AbstractXMLParser {
             String name = parser.getName();
             switch (name) {
                 case "bid":
-                    blockBuilder.blockId(readInt(parser, "bid"));
+                    blockBuilder.blockId(
+                            readInt(parser, "bid"));
                     break;
                 case "date":
-                    blockBuilder.date(readBasicDate(parser));
+                    blockBuilder.date(
+                            readBasicDate(parser));
                     break;
                 case "type":
-                    blockBuilder.type(readText(parser, "type"));
+                    blockBuilder.type(
+                            readText(parser, "type"));
                     break;
                 case "block":
-                    blockBuilder.type(readText(parser, "block"));
+                    blockBuilder.type(
+                            readText(parser, "block"));
                     break;
                 case "activity":
                     actvPair = EighthGetBlockParser.readActivity(parser);
                     break;
                 case "locked":
-                    blockBuilder.locked(readInt(parser, "locked") != 0);
+                    blockBuilder.locked(
+                            readBoolean(parser, "locked"));
                     break;
                 default:
                     skip(parser);
@@ -121,7 +124,8 @@ class EighthListBlocksParser extends AbstractXMLParser {
         return new EighthBlockAndActv(
                 blockBuilder.build(),
                 actvPair.first,
-                actvPair.second);
+                actvPair.second
+        );
     }
 
     @NonNull
@@ -157,7 +161,6 @@ class EighthListBlocksParser extends AbstractXMLParser {
         try {
             Utils.FixedDateFormats.BASIC.parse(dateStr);
         } catch (ParseException e) {
-            Log.e(TAG, "Invalid date string: " + dateStr);
             throw new XmlPullParserException("Invalid date string: " + dateStr, parser, e);
         }
 

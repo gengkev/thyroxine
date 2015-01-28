@@ -90,6 +90,14 @@ class EighthActv implements Comparable<EighthActv> {
             this.flags |= flag;
             return this;
         }
+        public Builder withFlag(long flag, boolean set) {
+            if (set) {
+                this.flags |= flag;
+            } else {
+                this.flags &= ~flag;
+            }
+            return this;
+        }
 
         public EighthActv build() {
             EighthActv actv = new EighthActv(this);
