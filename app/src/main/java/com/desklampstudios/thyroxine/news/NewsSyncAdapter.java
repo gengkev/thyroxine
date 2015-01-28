@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.sync.SyncUtils;
 
@@ -213,7 +214,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
         // Configure syncing periodically
-        SyncUtils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
+        Utils.configurePeriodicSync(account, authority, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         // Enable automatic sync
         ContentResolver.setSyncAutomatically(account, authority, true);

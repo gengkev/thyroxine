@@ -23,7 +23,6 @@ import android.widget.TextView;
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.desklampstudios.thyroxine.sync.SyncUtils;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -51,7 +50,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         // Configure synchronization
-        SyncUtils.configureSync(this);
+        IodineAuthenticator.configureSync(this);
 
         // Navigation Drawer
         mNavTitles = getResources().getStringArray(R.array.nav_titles);

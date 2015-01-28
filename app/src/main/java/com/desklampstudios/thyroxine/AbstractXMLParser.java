@@ -11,7 +11,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.NumberFormat;
 
 public abstract class AbstractXMLParser {
     private static final String TAG = AbstractXMLParser.class.getSimpleName();

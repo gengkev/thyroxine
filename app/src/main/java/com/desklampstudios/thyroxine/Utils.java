@@ -1,8 +1,13 @@
 package com.desklampstudios.thyroxine;
 
+import android.accounts.Account;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SyncRequest;
 import android.database.Cursor;
+import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.format.DateUtils;
@@ -19,6 +24,26 @@ import java.util.TimeZone;
 
 public class Utils {
     private static final String TAG = Utils.class.getSimpleName();
+
+    /**
+     * Helper method to schedule periodic execution of a sync adapter.
+     * flexTime is only used on KitKat and newer devices.
+     */
+    public static void configurePeriodicSync(Account account, String authority,
+                                             int syncInterval, int flexTime) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // we can enable inexact timers in our periodic sync
+            SyncRequest request = new SyncRequest.Builder()
+                    .syncPeriodic(syncInterval, flexTime)
+                    .setSyncAdapter(account, authority)
+                    .setExtras(Bundle.EMPTY)
+                    .build();
+            ContentResolver.requestSync(request);
+        } else {
+            ContentResolver.addPeriodicSync(account, authority, Bundle.EMPTY, syncInterval);
+        }
+    }
 
     /**
      * Some date formats that are useful for parsing.

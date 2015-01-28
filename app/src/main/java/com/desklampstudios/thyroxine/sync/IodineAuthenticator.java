@@ -218,7 +218,8 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
                     result = future.getResult();
                 } catch (OperationCanceledException | IOException | AuthenticatorException e) {
                     Log.e(TAG, "Error trying to add account", e);
-                    Toast.makeText(activity, R.string.error_adding_account, Toast.LENGTH_SHORT).show();
+                    String message = activity.getString(R.string.error_adding_account, e.toString());
+                    Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -232,19 +233,36 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
                     if (iodineAccount == null || !iodineAccount.equals(newAccount))
                         throw new AssertionError();
                 }
-
-                // Configure sync with Iodine account
-                EighthSyncAdapter.configureSync(newAccount);
-                NewsSyncAdapter.configureSync(newAccount);
-
-                // Request initial sync
-                EighthSyncAdapter.syncImmediately(newAccount, false);
-                NewsSyncAdapter.syncImmediately(newAccount, false);
             }
         };
         am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
                 IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
                 null, null, activity, callback, null);
+    }
+
+    static void onAccountCreated(Account newAccount) {
+        // Configure sync with Iodine account
+        EighthSyncAdapter.configureSync(newAccount);
+        NewsSyncAdapter.configureSync(newAccount);
+
+        // Request initial sync
+        EighthSyncAdapter.syncImmediately(newAccount, false);
+        NewsSyncAdapter.syncImmediately(newAccount, false);
+    }
+
+    /**
+     * Makes sure synchronization is set up properly, retrieving the Iodine account
+     * and configuring periodic synchronization with the SyncAdapters.
+     * @param context Context used to get accounts
+     */
+    public static void configureSync(@NonNull Context context) {
+        // Find Iodine account (may not exist)
+        Account iodineAccount = IodineAuthenticator.getIodineAccount(context);
+        if (iodineAccount != null) {
+            // Configure sync with Iodine account
+            EighthSyncAdapter.configureSync(iodineAccount);
+            NewsSyncAdapter.configureSync(iodineAccount);
+        }
     }
 }
 
