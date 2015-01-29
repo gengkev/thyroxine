@@ -59,6 +59,9 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Nullable private Object mSyncObserverHandle; // obtained in onResume
+    private boolean mSyncActive = false;
+    private boolean mSyncPending = false;
+
     private SimpleSectionedListAdapter.Section[] mSections;
 
     public ScheduleFragment() {
@@ -140,6 +143,15 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
                 ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
         mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, this);
+
+        // initialize mSyncActive, mSyncPending
+        final Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        mSyncActive = ContentResolver.isSyncActive(
+                account, EighthContract.CONTENT_AUTHORITY);
+        mSyncPending = ContentResolver.isSyncPending(
+                account, EighthContract.CONTENT_AUTHORITY);
+
+        Log.v(TAG, "onResume: syncActive=" + mSyncActive + ", syncPending=" + mSyncPending);
     }
 
     @Override
@@ -167,7 +179,14 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         final boolean syncPending = ContentResolver.isSyncPending(
                 account, EighthContract.CONTENT_AUTHORITY);
 
-        Log.d(TAG, "onStatusChanged: syncActive=" + syncActive + ", syncPending=" + syncPending);
+        // no change
+        if (syncActive == mSyncActive && syncPending == mSyncPending) {
+            return;
+        }
+        mSyncActive = syncActive;
+        mSyncPending = syncPending;
+
+        Log.v(TAG, "onStatusChanged: syncActive=" + syncActive + ", syncPending=" + syncPending);
 
         // Run on the UI thread in order to update the UI
         activity.runOnUiThread(new Runnable() {
@@ -177,7 +196,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                     mSwipeRefreshLayout.setRefreshing(false);
                     return;
                 }
-                mSwipeRefreshLayout.setRefreshing(syncActive || syncPending);
+                mSwipeRefreshLayout.setRefreshing(syncActive);
             }
         });
     }
