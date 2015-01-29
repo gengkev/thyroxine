@@ -42,10 +42,13 @@ class EighthDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onConfigure(@NonNull SQLiteDatabase db) {
+        // TODO: re-enable when possible
+        /*
         if (BuildConfig.DEBUG) {
             Log.i(TAG, "Foreign key constraints enabled");
             db.setForeignKeyConstraintsEnabled(true);
         }
+        */
     }
 
     @Override
