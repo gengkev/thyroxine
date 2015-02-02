@@ -2,17 +2,17 @@ package com.desklampstudios.thyroxine.news;
 
 import android.accounts.Account;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.LoaderManager;
 import android.content.ContentResolver;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,8 +30,8 @@ import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
  * Use the {@link NewsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
-        SyncStatusObserver {
+public class NewsFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>, SyncStatusObserver {
     private static final String TAG = NewsFragment.class.getSimpleName();
     public static final String EXTRA_NEWS_ID = "com.desklampstudios.thyroxine.news.KEY_NEWS_ID";
     private static final int NEWS_LOADER = 0;

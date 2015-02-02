@@ -1,11 +1,11 @@
 package com.desklampstudios.thyroxine;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -81,7 +81,7 @@ public class MainActivity extends ActionBarActivity {
     /** Swaps fragments in the main content view */
     private void selectItem(int position, boolean force) {
         mDrawerSelectedPosition = position;
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment oldFragment = fragmentManager.findFragmentById(R.id.container);
 
         // Only swap fragment if necessary, or if one doesn't exist already
