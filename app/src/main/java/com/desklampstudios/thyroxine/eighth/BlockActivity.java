@@ -27,7 +27,7 @@ public class BlockActivity extends ActionBarActivity {
             fragment.setArguments(getIntent().getExtras());
 
             // add fragment
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, fragment)
                     .commit();
         }
