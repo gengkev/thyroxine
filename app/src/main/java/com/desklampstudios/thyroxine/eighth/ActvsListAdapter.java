@@ -23,7 +23,6 @@ import java.util.Locale;
 
 class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = ActvsListAdapter.class.getSimpleName();
-    private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
     @NonNull private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
@@ -64,11 +63,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .inflate(R.layout.actv_list_textview, parent, false);
             return new ViewHolder(v);
         }
-        else if (viewType == TYPE_HEADER) {
-            View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.actv_list_header, parent, false);
-            return new HeaderViewHolder(v);
-        } else {
+        else {
             Log.wtf(TAG, "Invalid view type");
             throw new IllegalArgumentException();
         }
@@ -82,7 +77,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         if (viewType == TYPE_ITEM) {
             final ViewHolder itemHolder = (ViewHolder) holder;
-            final int itemPosition = actualToItemPosition(actualPosition);
+            final int itemPosition = actualPosition;
 
             Pair<EighthActv, EighthActvInstance> pair = getItem(itemPosition);
             EighthActv actv = pair.first;
@@ -116,17 +111,6 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     return mListener != null && mListener.onItemLongClick(view, itemPosition);
                 }
             });
-        }
-        else if (viewType == TYPE_HEADER) {
-            final HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
-
-            String dateStr = Utils.DateFormats.FULL_DATE_NO_WEEKDAY.formatBasicDate(mContext, mBlock.date);
-            String weekday = Utils.DateFormats.FULL_WEEKDAY.formatBasicDate(mContext, mBlock.date);
-            String displayStr = String.format("%s %s Block",
-                    weekday, mBlock.type);
-
-            headerHolder.mTitleView.setText(displayStr);
-            headerHolder.mDateView.setText(dateStr);
         }
         else {
             Log.wtf(TAG, "Invalid view type");
@@ -230,7 +214,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void addItem(int pos, @NonNull Pair<EighthActv, EighthActvInstance> pair) {
         mDataset.add(pos, pair);
-        notifyItemInserted(itemToActualPosition(pos));
+        notifyItemInserted(pos);
     }
 
     public Pair<EighthActv, EighthActvInstance> getItem(int pos) {
@@ -242,37 +226,16 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mDataset.clear();
         mDataset.addAll(pairList);
 
-        if (pairList.size() > oldSize) {
-            notifyItemRangeChanged(
-                    itemToActualPosition(0),
-                    itemToActualPosition(oldSize));
-            notifyItemRangeInserted(
-                    itemToActualPosition(oldSize),
-                    itemToActualPosition(pairList.size()));
-        } else {
-            notifyItemRangeRemoved(
-                    itemToActualPosition(pairList.size()),
-                    itemToActualPosition(oldSize));
-            notifyItemRangeChanged(
-                    itemToActualPosition(0),
-                    itemToActualPosition(pairList.size()));
-        }
+        notifyItemRangeRemoved(0, oldSize);
+        notifyItemRangeInserted(0, pairList.size());
     }
 
-    public int actualToItemPosition(int actualPosition) {
-        return actualPosition - 1;
-    }
-    public int itemToActualPosition(int itemPosition) {
-        return itemPosition + 1;
-    }
     @Override
     public int getItemCount() {
-        return mDataset.size() + 1;
+        return mDataset.size();
     }
     @Override
     public int getItemViewType(int position) {
-        if (position == 0)
-            return TYPE_HEADER;
         return TYPE_ITEM;
     }
 
@@ -295,19 +258,6 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mStatusView = (TextView) v.findViewById(R.id.iodine_eighth_activity_status);
             mGroupView = (TextView) v.findViewById(R.id.eighth_activity_group);
             mContentView = v.findViewById(R.id.eighth_activity_content);
-        }
-    }
-
-    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
-        @NonNull public final View mView;
-        @NonNull public final TextView mTitleView;
-        @NonNull public final TextView mDateView;
-
-        public HeaderViewHolder(@NonNull View v) {
-            super(v);
-            mView = v;
-            mTitleView = (TextView) v.findViewById(R.id.eighth_block_title);
-            mDateView = (TextView) v.findViewById(R.id.eighth_block_date);
         }
     }
 

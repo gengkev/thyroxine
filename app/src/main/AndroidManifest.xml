@@ -47,10 +47,8 @@
             android:name=".news.NewsDetailActivity"
             android:label="@string/title_activity_entry_detail"
             android:parentActivityName=".MainActivity" />
-
-        <activity
-            android:name=".eighth.BlockActivity"
-            android:label="@string/title_activity_block"
+        <activity android:name=".eighth.DayActivity"
+            android:label="@string/title_activity_day"
             android:parentActivityName=".MainActivity" />
 
         <!-- News content provider -->

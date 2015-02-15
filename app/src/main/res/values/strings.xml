@@ -65,6 +65,7 @@
     <string name="eighth_provider_name">Eighth</string>
     <string name="title_fragment_eighth">Eighth</string>
     <string name="title_activity_block">Block</string>
+    <string name="title_activity_day">Day</string>
 
     <string name="block_title">%1$s Block</string>
     <string name="block_title_date">%1$s %2$s Block (%3$s)</string>
