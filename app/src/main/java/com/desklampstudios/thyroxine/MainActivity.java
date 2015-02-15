@@ -145,8 +145,8 @@ public class MainActivity extends ActionBarActivity {
         }
 
         switch (item.getItemId()) {
-            case R.id.action_login:
-                IodineAuthenticator.attemptAddAccount(this);
+            case R.id.action_logout:
+                IodineAuthenticator.attemptLogout(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);

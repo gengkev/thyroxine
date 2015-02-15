@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.desklampstudios.thyroxine.MainActivity" >
 
-    <item android:id="@+id/action_login"
-        android:title="@string/action_sign_in_short"
+    <item android:id="@+id/action_logout"
+        android:title="@string/action_sign_out_short"
         android:orderInCategory="10"
         app:showAsAction="never" />
 

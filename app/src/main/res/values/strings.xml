@@ -36,6 +36,11 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in to Thyroxine with Iodine</string>
     <string name="action_sign_in_short">Sign in</string>
+    <string name="action_sign_out_short">Sign out</string>
+    <string name="sign_out_success">
+        You have been signed out successfully. However, your data is still on the device.
+        To delete it, select \"Clear data\" in Settings > Apps > Thyroxine.
+    </string>
 
     <string name="error_incorrect_username">This username is incorrect</string>
     <string name="error_incorrect_password">This password is incorrect</string>
@@ -44,6 +49,7 @@
     <string name="error_tjhsst_edu_suffix">The @tjhsst.edu suffix is not necessary</string>
 
     <string name="error_adding_account">Error while adding account: %1$s</string>
+    <string name="error_removing_account">Error while removing account: %1$s</string>
     <string name="error_not_logged_in">Not logged in</string>
     <string name="iodine_auth_error">Iodine authentication error: %1$s</string>
 
@@ -89,10 +95,10 @@
     <string name="actv_status_restricted">Restricted</string>
     <string name="actv_status_sticky">Sticky</string>
 
-    <string name="signup_changing">Signing up for "%1$s"</string>
+    <string name="signup_changing">Signing up for \"%1$s\"</string>
     <string name="signup_changing_wait">Please wait for the current signup to complete.</string>
-    <string name="signup_success">You were successfully signed up for "%1$s".</string>
-    <string name="signup_failure">Your signup for "%1$s" failed because of the following reasons:</string>
+    <string name="signup_success">You were successfully signed up for \"%1$s\".</string>
+    <string name="signup_failure">Your signup for \"%1$s\" failed because of the following reasons:</string>
 
     <!-- SyncAdapter related strings -->
     <string name="iodine_authenticator_name">Thyroxine (Iodine)</string>
