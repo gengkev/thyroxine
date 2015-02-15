@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.BuildConfig;
 import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.MainActivity;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
@@ -204,6 +205,32 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
         return accounts[0];
     }
 
+    public static void attemptLogout(@NonNull final Activity activity) {
+        final AccountManager am = AccountManager.get(activity);
+        final AccountManagerCallback<Boolean> callback = new AccountManagerCallback<Boolean>() {
+            @Override
+            public void run(AccountManagerFuture<Boolean> future) {
+                try {
+                    Boolean result = future.getResult();
+                    if (result == null || result.equals(Boolean.FALSE)) {
+                        throw new Exception("result was " + result);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error trying to remove account", e);
+                    String message = activity.getString(R.string.error_removing_account, e.toString());
+                    Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Log.i(TAG, "Successfully removed account.");
+                Toast.makeText(activity, R.string.sign_out_success, Toast.LENGTH_LONG).show();
+            }
+        };
+
+        final Account account = IodineAuthenticator.getIodineAccount(activity);
+        am.removeAccount(account, callback, null);
+        activity.finish();
+    }
+
     /**
      * Attempts to add an Iodine account.
      * @param activity The activity used to open the login activity and as a context.
@@ -233,11 +260,16 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
                     if (iodineAccount == null || !iodineAccount.equals(newAccount))
                         throw new AssertionError();
                 }
+
+                // Start MainActivity
+                Intent intent = new Intent(activity, MainActivity.class);
+                activity.startActivity(intent);
             }
         };
         am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
                 IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
                 null, null, activity, callback, null);
+        activity.finish();
     }
 
     static void onAccountCreated(Account newAccount) {

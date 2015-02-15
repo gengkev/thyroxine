@@ -36,14 +36,21 @@
     <string name="prompt_password">Mot de passe</string>
     <string name="action_sign_in">Se connecter à Thyroxine avec Iode</string>
     <string name="action_sign_in_short">Se connecter</string>
+    <string name="action_sign_out_short">Se déconnecter</string>
+    <string name="sign_out_success">
+        Vous vous êtes bien déconnecté(e). Cependant, vos données sont encore sur l\'appareil.
+        Pour les supprimer, appuyez sur «Effacer les données» sous Paramètres > Applications >
+        Thyroxine.
+    </string>
 
     <string name="error_incorrect_username">Nom d\'utilisateur incorrect</string>
     <string name="error_incorrect_password">Mot de passe incorrect</string>
     <string name="error_invalid_username">Nom d\'utilisateur invalide</string>
     <string name="error_field_required">Champ obligatoire</string>
-    <string name="error_tjhsst_edu_suffix">Le suffixe @tjhsst.edu n\'est pas nécessaire</string>
+    <string name="error_tjhsst_edu_suffix">Le suffixe @tjhsst.edu est superflu</string>
 
     <string name="error_adding_account">Erreur lors de l\'ajout de compte : %1$s</string>
+    <string name="error_removing_account">Erreur lors de la suppression de compte : %1$s</string>
     <string name="error_not_logged_in">Pas connecté(e)</string>
     <string name="iodine_auth_error">Erreur d\'authentification Iode : %1$s</string>
 
