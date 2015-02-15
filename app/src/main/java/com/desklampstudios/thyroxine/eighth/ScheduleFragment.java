@@ -186,20 +186,18 @@ public class ScheduleFragment extends Fragment
         if (syncActive == mSyncActive && syncPending == mSyncPending) {
             return;
         }
-        mSyncActive = syncActive;
-        mSyncPending = syncPending;
-
         Log.v(TAG, "onStatusChanged: syncActive=" + syncActive + ", syncPending=" + syncPending);
 
         // Run on the UI thread in order to update the UI
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (account == null) {
+                // sync changing from on to off
+                if (mSyncActive && !syncActive && mSwipeRefreshLayout.isRefreshing()) {
                     mSwipeRefreshLayout.setRefreshing(false);
-                    return;
                 }
-                mSwipeRefreshLayout.setRefreshing(syncActive);
+                mSyncActive = syncActive;
+                mSyncPending = syncPending;
             }
         });
     }
