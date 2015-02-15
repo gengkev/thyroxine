@@ -6,8 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.desklampstudios.thyroxine.BuildConfig;
-
 import static com.desklampstudios.thyroxine.eighth.EighthContract.ActvInstances;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
 import static com.desklampstudios.thyroxine.eighth.EighthContract.Blocks;

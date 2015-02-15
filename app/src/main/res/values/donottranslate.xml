@@ -7,11 +7,11 @@
         <item>@string/title_fragment_links</item>
     </string-array>
 
+    <string name="font_color"><![CDATA[<font color="%2$s">%1$s</font>]]></string>
     <string name="tjhsst_edu_suffix" translatable="false">"@tjhsst.edu"</string>
 
     <!-- Warning: also declared in NewsProvider -->
     <string name="news_content_authority" translatable="false">com.desklampstudios.thyroxine.news</string>
-
     <!-- Warning: also declared in EighthProvider -->
     <string name="eighth_content_authority" translatable="false">com.desklampstudios.thyroxine.eighth</string>
 

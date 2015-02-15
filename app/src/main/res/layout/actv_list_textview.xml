@@ -14,7 +14,7 @@
         android:gravity="center"
         android:textSize="24sp"
         android:lines="1"
-        android:textColor="@color/colorAccent"
+        android:textColor="#0091EA"
         tools:text="Q" />
 
     <LinearLayout android:id="@+id/eighth_activity_content"

@@ -14,8 +14,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -167,7 +165,7 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
         @Override
         public CharSequence getPageTitle(int position) {
             EighthBlock block = mBlocks.get(position);
-            return block.type + " Block";
+            return getString(R.string.block_title, block.type);
         }
     }
 }

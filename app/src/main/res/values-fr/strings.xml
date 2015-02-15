@@ -67,6 +67,7 @@
     <string name="title_activity_block">Bloc</string>
     <string name="title_activity_day">Jour</string>
 
+    <string name="block">Bloc</string>
     <string name="block_title">Bloc %1$s</string>
     <string name="block_title_date">%1$s bloc %2$s (%3$s)</string>
 

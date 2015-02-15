@@ -44,14 +44,11 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setSelectedActvId(int actvId) {
         this.mSelectedActvId = actvId;
-        if (mDataset.size() > 0) { // oops, already loaded
-            notifyDataSetChanged();
-        }
+        notifyDataSetChanged();
     }
 
     public void setBlock(EighthBlock block) {
         this.mBlock = block;
-        notifyItemChanged(0);
     }
 
     // Create new views (invoked by the layout manager)
@@ -139,17 +136,28 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     private String getActvStatuses(@NonNull final Resources resources, long flags, boolean full) {
         ArrayList<String> statuses = new ArrayList<>();
+        final String fontColor = resources.getString(R.string.font_color);
 
-        // sticky
+        // sticky (always? implies restricted)
         if ((flags & EighthActv.FLAG_STICKY) != 0) {
             int textColor = resources.getColor(R.color.actv_textColor_sticky);
-            statuses.add(resources.getString(R.string.actv_status_sticky,
+            statuses.add(String.format(fontColor,
+                    resources.getString(R.string.actv_status_sticky),
                     Utils.colorToHtmlHex(textColor)));
         }
         // restricted
         else if ((flags & EighthActv.FLAG_RESTRICTED) != 0) {
             int textColor = resources.getColor(R.color.actv_textColor_restricted);
-            statuses.add(resources.getString(R.string.actv_status_restricted,
+            statuses.add(String.format(fontColor,
+                    resources.getString(R.string.actv_status_restricted),
+                    Utils.colorToHtmlHex(textColor)));
+        }
+
+        // full
+        if (full) {
+            int textColor = resources.getColor(R.color.actvInstance_textColor_full);
+            statuses.add(String.format(fontColor,
+                    resources.getString(R.string.actvInstance_status_full),
                     Utils.colorToHtmlHex(textColor)));
         }
 
@@ -157,7 +165,8 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
             int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
             statuses.clear(); // clear other statuses
-            statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
+            statuses.add(resources.getString(R.string.font_color,
+                    resources.getString(R.string.actvInstance_status_cancelled),
                     Utils.colorToHtmlHex(textColor)));
         }
 
@@ -172,13 +181,16 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return name;
     }
     private String formatDescription(EighthActv actv, EighthActvInstance actvInstance) {
-        String description = String.format("%s %s",
-                actvInstance.comment, actv.description
-        ).trim();
-        if (description.isEmpty()) {
-            description = mContext.getString(R.string.actv_description_placeholder);
+        if (!actvInstance.comment.isEmpty()) {
+            String out = String.format("(%s) %s", actvInstance.comment, actv.description);
+            return out.trim();
         }
-        return description;
+        else if (!actv.description.isEmpty()) {
+            return actv.description.trim();
+        }
+        else {
+            return mContext.getString(R.string.actv_description_placeholder);
+        }
     }
     private String formatGroup(EighthActv actv, int position) {
         String group = getGroup(actv);

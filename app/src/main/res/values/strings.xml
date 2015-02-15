@@ -67,6 +67,7 @@
     <string name="title_activity_block">Block</string>
     <string name="title_activity_day">Day</string>
 
+    <string name="block">Block</string>
     <string name="block_title">%1$s Block</string>
     <string name="block_title_date">%1$s %2$s Block (%3$s)</string>
 
@@ -83,10 +84,10 @@
 
     <string name="actv_not_selected"><![CDATA[<i>Not selected</i>]]></string>
     <string name="block_status_locked">Locked</string>
-    <string name="actvInstance_status_cancelled"><![CDATA[<font color="%1$s">Cancelled</font>]]></string>
-    <string name="actvInstance_status_full"><![CDATA[<font color="%1$s">Full</font>]]></string>
-    <string name="actv_status_restricted"><![CDATA[<font color="%1$s">Restricted</font>]]></string>
-    <string name="actv_status_sticky"><![CDATA[<font color="%1$s">Sticky</font>]]></string>
+    <string name="actvInstance_status_cancelled">Cancelled</string>
+    <string name="actvInstance_status_full">Full</string>
+    <string name="actv_status_restricted">Restricted</string>
+    <string name="actv_status_sticky">Sticky</string>
 
     <string name="signup_changing">Signing up for "%1$s"</string>
     <string name="signup_changing_wait">Please wait for the current signup to complete.</string>

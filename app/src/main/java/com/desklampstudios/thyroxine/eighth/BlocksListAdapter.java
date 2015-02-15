@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
@@ -87,37 +86,43 @@ class BlocksListAdapter extends CursorAdapter {
         long allFlags = actvFlags | actvInstanceFlags;
 
         // Display statuses
-        /*
         String statusText = getBlockStatuses(resources, allFlags, block.locked);
         holder.mStatusView.setText(Html.fromHtml(statusText));
-        */
 
-        //final ImageView imageView = (ImageView) view.findViewById(R.id.eighth_activity_status_img);
+        // Set background
+        holder.mActivityView.setBackgroundResource(getBlockBackground(allFlags, actvId));
+
+        /*
+        final ImageView imageView = (ImageView) view.findViewById(R.id.eighth_activity_status_img);
         if ((allFlags & EighthActvInstance.FLAG_CANCELLED) != 0) {
-            //imageView.setImageResource(R.drawable.ic_highlight_remove_white_18dp);
-            //imageView.setVisibility(View.VISIBLE);
-            holder.mActivityView.setBackgroundResource(R.drawable.block_background_cancelled);
-            holder.mStatusView.setText("Cancelled");
+            imageView.setImageResource(R.drawable.ic_highlight_remove_white_18dp);
+            imageView.setVisibility(View.VISIBLE);
         }
         else if ((allFlags & EighthActv.FLAG_STICKY) != 0) {
-            //imageView.setImageResource(R.drawable.ic_lock_outline_white_18dp);
-            //imageView.setVisibility(View.VISIBLE);
-            holder.mActivityView.setBackgroundResource(R.drawable.block_background);
-            holder.mStatusView.setText("Sticky");
+            imageView.setImageResource(R.drawable.ic_lock_outline_white_18dp);
+            imageView.setVisibility(View.VISIBLE);
         }
         else if (actvId == EighthActv.NOT_SELECTED_AID) {
-            //imageView.setVisibility(View.GONE);
-            holder.mActivityView.setBackgroundResource(R.drawable.block_background_grey);
-            holder.mStatusView.setText("");
+            imageView.setVisibility(View.GONE);
         }
-        else if (block.type.charAt(0) % 2 == 0) {
-            //imageView.setVisibility(View.GONE);
-            holder.mActivityView.setBackgroundResource(R.drawable.block_background_2);
-            holder.mStatusView.setText("");
-        } else {
-            //imageView.setVisibility(View.GONE);
-            holder.mActivityView.setBackgroundResource(R.drawable.block_background);
-            holder.mStatusView.setText("");
+        else {
+            imageView.setVisibility(View.GONE);
+        }
+        */
+    }
+
+    private int getBlockBackground(long flags, int actvId) {
+        if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
+            return R.drawable.block_background_cancelled;
+        }
+        else if ((flags & EighthActv.FLAG_STICKY) != 0) {
+            return R.drawable.block_background_2;
+        }
+        else if (actvId == EighthActv.NOT_SELECTED_AID) {
+            return R.drawable.block_background_grey;
+        }
+        else {
+            return R.drawable.block_background;
         }
     }
 
@@ -131,16 +136,12 @@ class BlocksListAdapter extends CursorAdapter {
         }
         // sticky
         if ((flags & EighthActv.FLAG_STICKY) != 0) {
-            int textColor = resources.getColor(R.color.actv_textColor_sticky);
-            statuses.add(resources.getString(R.string.actv_status_sticky,
-                    Utils.colorToHtmlHex(textColor)));
+            statuses.add(resources.getString(R.string.actv_status_sticky));
         }
         // cancelled
         if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
-            int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
             statuses.clear(); // clear other statuses
-            statuses.add(resources.getString(R.string.actvInstance_status_cancelled,
-                    Utils.colorToHtmlHex(textColor)));
+            statuses.add(resources.getString(R.string.actvInstance_status_cancelled));
         }
 
         return Utils.join(statuses, ", ");

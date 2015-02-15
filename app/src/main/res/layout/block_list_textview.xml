@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/eighth_block"
-            android:text="Block" />
+            android:text="@string/block" />
 
     </RelativeLayout>
 
@@ -61,6 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="8dp"
+                android:paddingEnd="0dp"
                 android:textSize="14sp"
                 android:textColor="?android:textColorSecondaryInverse"
                 android:lines="1"
