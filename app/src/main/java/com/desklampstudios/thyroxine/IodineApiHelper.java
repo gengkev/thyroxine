@@ -33,6 +33,9 @@ public class IodineApiHelper {
     private static final String BLOCK_GET_URL = IODINE_BASE_URL + "/api/eighth/get_block/%d";
     private static final String SIGNUP_ACTIVITY_URL = IODINE_BASE_URL + "/api/eighth/signup_activity";
 
+    private static final String DIRECTORY_INFO_URL = IODINE_BASE_URL + "/api/studentdirectory/info/%s";
+    private static final String USER_ICON_URL = IODINE_BASE_URL + "/pictures/%s/main";
+
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
 
@@ -118,6 +121,36 @@ public class IodineApiHelper {
         OutputStreamWriter outWriter = new OutputStreamWriter(conn.getOutputStream());
         outWriter.write(query);
         outWriter.close();
+
+        if (conn.getResponseCode() != 200) {
+            throw new IOException("Response code invalid: " + conn.getResponseCode());
+        }
+        return new BufferedInputStream(conn.getInputStream());
+    }
+
+    @NonNull
+    public static InputStream getDirectoryInfo(String uid, String cookieHeader) throws IOException {
+        Log.v(TAG, "Cookies: " + cookieHeader);
+
+        URL url = new URL(String.format(DIRECTORY_INFO_URL, uid));
+        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Cookie", cookieHeader);
+
+        if (conn.getResponseCode() != 200) {
+            throw new IOException("Response code invalid: " + conn.getResponseCode());
+        }
+        return new BufferedInputStream(conn.getInputStream());
+    }
+
+    @NonNull
+    public static InputStream getUserIcon(String uid, String cookieHeader) throws IOException {
+        Log.v(TAG, "Cookies: " + cookieHeader);
+
+        URL url = new URL(String.format(USER_ICON_URL, uid));
+        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Cookie", cookieHeader);
 
         if (conn.getResponseCode() != 200) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
