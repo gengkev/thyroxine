@@ -2,7 +2,7 @@
 <resources>
     <item name="primary" type="color">#673AB7</item> <!-- Deep Purple 500 -->
     <item name="primaryDark" type="color">#512DA8</item> <!-- Deep Purple 700 -->
-    <item name="colorAccent" type="color">#40C4FF</item> <!-- Light Blue A200 -->
+    <item name="colorAccent" type="color">#8BC34A</item> <!-- Light Green A200 -->
 
     <item name="background" type="color">@color/background_material_light</item>
     <item name="background_dark" type="color">@color/background_material_dark</item>
