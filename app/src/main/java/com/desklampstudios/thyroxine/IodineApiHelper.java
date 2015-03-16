@@ -42,7 +42,7 @@ public class IodineApiHelper {
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
-        if (conn.getResponseCode() != 200) {
+        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
         }
         return new BufferedInputStream(conn.getInputStream());
@@ -57,7 +57,7 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200) {
+        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
         }
         return new BufferedInputStream(conn.getInputStream());
@@ -77,7 +77,7 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200) {
+        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
         }
         return new BufferedInputStream(conn.getInputStream());
@@ -92,7 +92,7 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200) {
+        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
         }
         return new BufferedInputStream(conn.getInputStream());
@@ -119,7 +119,7 @@ public class IodineApiHelper {
         outWriter.write(query);
         outWriter.close();
 
-        if (conn.getResponseCode() != 200) {
+        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
         }
         return new BufferedInputStream(conn.getInputStream());
