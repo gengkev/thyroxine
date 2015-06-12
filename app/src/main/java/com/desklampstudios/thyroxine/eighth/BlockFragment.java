@@ -16,6 +16,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -50,6 +52,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Nullable private SignupActvTask mSignupActvTask;
 
     private ActvsListAdapter mAdapter;
+    private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public BlockFragment() {
@@ -67,6 +70,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (getArguments() != null) {
             blockId = getArguments().getInt(ARG_BLOCK_ID);
         }
@@ -76,17 +80,18 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mAdapter.setOnItemClickListener(new ActvsListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int pos) {
-                Pair<EighthActv, EighthActvInstance> pair = mAdapter.get(pos);
+                Pair<EighthActv, EighthActvInstance> pair = mAdapter.getItem(pos);
                 onActvClick(pair);
             }
             @Override
             public boolean onItemLongClick(View view, int pos) {
-                Pair<EighthActv, EighthActvInstance> pair = mAdapter.get(pos);
+                Pair<EighthActv, EighthActvInstance> pair = mAdapter.getItem(pos);
                 changeSelectedActv(pair);
                 return true;
             }
         });
-        mAdapter.add(new Pair<>(
+
+        mAdapter.addItem(new Pair<>(
                 new EighthActv.Builder()
                         .actvId(999)
                         .name("Test activity")
@@ -108,18 +113,18 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
         // RecyclerView!
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setHasFixedSize(true); // changes in content don't change layout size
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setHasFixedSize(true); // changes in content don't change layout size
 
         // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(layoutManager);
 
         // dividers between items
         //RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
         //        getActivity(), DividerItemDecoration.VERTICAL_LIST);
-        //recyclerView.addItemDecoration(itemDecoration);
+        //mRecyclerView.addItemDecoration(itemDecoration);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
@@ -127,6 +132,19 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             @Override
             public void onRefresh() {
                 retrieveBlock();
+            }
+        });
+
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                //int scrollY = getScrollY();
+                //toolbar.setTranslationY(Math.max(-scrollY, blahblah));
+
+                //Log.d(TAG, "getBottom=" + toolbar.getBottom() + ", getHeight=" + toolbar.getHeight());
+                //Log.d(TAG, "scrollY=" + scrollY);
             }
         });
 
@@ -151,6 +169,12 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         }
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.eighth_block, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
     // Called when an item in the adapter is clicked
     private void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
         String text = getString(R.string.actv_toast_text,
@@ -165,6 +189,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private Account checkLoginState() {
+        if (getActivity() == null) {
+            Log.w(TAG, "getActivity() is null");
+            return null;
+        }
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
@@ -197,8 +225,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                 mFetchBlockTask = null;
                 mSwipeRefreshLayout.setRefreshing(false); // syncing done
 
-                mAdapter.clear();
-                mAdapter.addAll(pairList);
+                mAdapter.replaceAllItems(pairList);
             }
 
             @Override
@@ -247,17 +274,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mSignupActvTask.execute(blockId, pair.first, pair.second);
     }
 
-    private void displayBlock(@NonNull EighthBlock block) {
-        String dateStr = Utils.DateFormats.MED_DAYMONTH.formatBasicDate(getActivity(), block.date);
-        String weekday = Utils.DateFormats.WEEKDAY.formatBasicDate(getActivity(), block.date);
-        String displayStr = getResources().getString(R.string.block_title_date,
-                weekday, block.type, dateStr);
-
-        if (getActivity() != null) {
-            getActivity().setTitle(displayStr);
-        }
-    }
-
     @Nullable
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
@@ -283,7 +299,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         if (cursor != null && cursor.moveToFirst()) {
             ContentValues blockValues = Utils.cursorRowToContentValues(cursor);
             EighthBlock block = EighthContract.Blocks.fromContentValues(blockValues);
-            displayBlock(block);
 
             int curActvId = cursor.getInt(
                     cursor.getColumnIndex(EighthContract.Schedule.KEY_ACTV_ID));

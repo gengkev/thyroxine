@@ -3,4 +3,8 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="navigation_drawer_width">304dp</dimen>
+    <dimen name="action_bar_size">56dp</dimen>
+    <dimen name="action_bar_size_eighth_block">128dp</dimen>
+
+    <dimen name="toolbar_elevation">4dp</dimen>
 </resources>

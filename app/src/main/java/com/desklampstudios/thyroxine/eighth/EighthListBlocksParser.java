@@ -24,7 +24,6 @@ class EighthListBlocksParser extends AbstractXMLParser {
         super(context);
     }
 
-    // after this, call nextBlock until it returns null
     public void beginListBlocks(@NonNull InputStream in)
             throws XmlPullParserException, IOException, IodineAuthException {
         if (parsingBegun) {
@@ -40,9 +39,6 @@ class EighthListBlocksParser extends AbstractXMLParser {
             throw AuthErrorParser.readAuth(mParser, mContext);
         }
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
-
-        mParser.nextTag();
-        mParser.require(XmlPullParser.START_TAG, ns, "blocks");
     }
 
     @NonNull
@@ -50,25 +46,38 @@ class EighthListBlocksParser extends AbstractXMLParser {
         if (!parsingBegun) {
             throw new IllegalStateException();
         }
+
+        mParser.nextTag();
+        mParser.require(XmlPullParser.START_TAG, ns, "blocks");
+
+        ArrayList<EighthBlockAndActv> blocks = readBlockList(mParser);
+
+        stopParse();
+        return blocks;
+    }
+
+    @NonNull
+    private static ArrayList<EighthBlockAndActv> readBlockList(@NonNull XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, "blocks");
+
         ArrayList<EighthBlockAndActv> blocks = new ArrayList<>();
 
-        while (mParser.next() != XmlPullParser.END_TAG) {
-            if (mParser.getEventType() != XmlPullParser.START_TAG) {
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
-            String name = mParser.getName();
+            String name = parser.getName();
             switch (name) {
                 case "block":
-                    blocks.add(readBlock(mParser));
+                    blocks.add(readBlock(parser));
                     break;
                 default:
-                    skip(mParser);
+                    skip(parser);
                     break;
             }
         }
 
-        // no more entries found
-        stopParse();
         return blocks;
     }
 
@@ -84,8 +93,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
-            String name = parser.getName();
-            switch (name) {
+            switch (parser.getName()) {
                 case "bid":
                     blockBuilder.blockId(
                             readInt(parser, "bid"));

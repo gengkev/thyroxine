@@ -13,7 +13,7 @@
 
         <View
             android:layout_width="fill_parent"
-            android:layout_height="1dp"
+            android:layout_height="0dp"
             android:background="#1F000000" />
 
     </RelativeLayout>
@@ -21,6 +21,7 @@
     <TextView android:id="@+id/schedule_header_textview"
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginStart="68dp"
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"

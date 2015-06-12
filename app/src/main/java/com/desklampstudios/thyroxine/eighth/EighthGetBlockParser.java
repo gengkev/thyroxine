@@ -25,7 +25,6 @@ class EighthGetBlockParser extends AbstractXMLParser {
         super(context);
     }
 
-    // after this, call nextActivity until it returns null
     @NonNull
     public EighthBlockAndActv beginGetBlock(@NonNull InputStream in)
             throws XmlPullParserException, IOException, IodineAuthException {
@@ -46,13 +45,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
         // getBlock API begins with currently selected block, then all activities
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "block");
-        EighthBlockAndActv blockAndActv = EighthListBlocksParser.readBlock(mParser);
-
-        // advance to activities
-        mParser.nextTag();
-        mParser.require(XmlPullParser.START_TAG, ns, "activities");
-
-        return blockAndActv;
+        return EighthListBlocksParser.readBlock(mParser);
     }
 
     @NonNull
@@ -61,24 +54,38 @@ class EighthGetBlockParser extends AbstractXMLParser {
         if (!parsingBegun) {
             throw new IllegalStateException();
         }
+
+        // advance to activities
+        mParser.nextTag();
+        mParser.require(XmlPullParser.START_TAG, ns, "activities");
+
+        ArrayList<Pair<EighthActv, EighthActvInstance>> actvs = readActivityList(mParser);
+
+        stopParse();
+        return actvs;
+    }
+
+    @NonNull
+    private static ArrayList<Pair<EighthActv, EighthActvInstance>> readActivityList(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, "activities");
+
         ArrayList<Pair<EighthActv, EighthActvInstance>> activities = new ArrayList<>();
 
-        while (mParser.next() != XmlPullParser.END_TAG) {
-            if (mParser.getEventType() != XmlPullParser.START_TAG) {
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
-            switch (mParser.getName()) {
+            switch (parser.getName()) {
                 case "activity":
-                    activities.add(readActivity(mParser));
+                    activities.add(readActivity(parser));
                     break;
                 default:
-                    skip(mParser);
+                    skip(parser);
                     break;
             }
         }
 
-        // No more entries found
-        stopParse();
         return activities;
     }
 

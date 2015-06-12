@@ -109,7 +109,10 @@ public class ScheduleFragment extends Fragment
                 if (cursor != null && cursor.moveToPosition(pos)) {
                     int blockId = cursor.getInt(cursor.getColumnIndex(
                             EighthContract.Blocks.KEY_BLOCK_ID));
-                    onBlockClick(blockId);
+                    String date = cursor.getString(cursor.getColumnIndex(
+                            EighthContract.Blocks.KEY_DATE));
+                    onBlockClick(new EighthBlock.Builder()
+                            .blockId(blockId).date(date).build());
                 } else {
                     Log.w(TAG, "cursor invalid: " + cursor);
                 }
@@ -200,11 +203,12 @@ public class ScheduleFragment extends Fragment
     }
 
     // Called when an item in the adapter is clicked
-    private void onBlockClick(int blockId) {
+    private void onBlockClick(EighthBlock block) {
         //Toast.makeText(getActivity(), "Block: " + block, Toast.LENGTH_LONG).show();
 
-        Intent intent = new Intent(getActivity(), BlockActivity.class);
-        intent.putExtra(BlockFragment.ARG_BLOCK_ID, blockId);
+        Intent intent = new Intent(getActivity(), DayActivity.class);
+        intent.putExtra(DayActivity.ARG_DATE, block.date);
+        intent.putExtra(DayActivity.ARG_BLOCK_ID, block.blockId);
         startActivity(intent);
     }
 

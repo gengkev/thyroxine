@@ -79,7 +79,9 @@ public class Utils {
     public static enum DateFormats {
         FULL_DATETIME, // Monday, January 1, 1970 12:00 AM
         FULL_DATE, // Monday, January 1, 1970
+        FULL_DATE_NO_WEEKDAY, // January 1, 1970
         MED_DAYMONTH, // Jan 1
+        FULL_WEEKDAY, // Monday
         WEEKDAY; // Mon
 
         public String format(Context context, long millis) {
@@ -91,9 +93,15 @@ public class Utils {
                 return DateUtils.formatDateTime(context, millis,
                         DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY |
                                 DateUtils.FORMAT_SHOW_YEAR);
+            } else if (this == FULL_DATE_NO_WEEKDAY) {
+                return DateUtils.formatDateTime(context, millis,
+                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
             } else if (this == MED_DAYMONTH) {
                 return DateUtils.formatDateTime(context, millis,
                         DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
+            } else if (this == FULL_WEEKDAY) {
+                DateFormat format = new SimpleDateFormat("EEEE", Locale.getDefault());
+                return format.format(new Date(millis));
             } else if (this == WEEKDAY) {
                 DateFormat format = new SimpleDateFormat("EEE", Locale.getDefault());
                 return format.format(new Date(millis));

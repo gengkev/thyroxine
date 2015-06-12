@@ -1,39 +1,85 @@
 package com.desklampstudios.thyroxine;
 
-import android.content.res.Configuration;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
+import com.desklampstudios.thyroxine.directory.DirectoryInfo;
+import com.desklampstudios.thyroxine.directory.DirectoryInfoParser;
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.accountswitcher.AccountHeader;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
 
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
+    private static final int ITEM_NEWS = 0;
+    private static final int ITEM_EIGHTH = 1;
+    private static final int ITEM_BELL_SCHEDULE = 2;
+    private static final int ITEM_LINKS = 3;
+    private static final int ITEM_SETTINGS = 4;
+    private static final int ITEM_SIGN_OUT = 5;
 
-    private NavDrawerAdapter mDrawerAdapter;
-    private int mDrawerSelectedPosition = 0;
-    private String[] mNavTitles;
+    private AccountHeader.Result mAccountHeader;
+    private Drawer.Result mDrawer;
+
+    private IDrawerItem[] mDrawerItems = {
+            new PrimaryDrawerItem()
+                    .withName(R.string.title_fragment_news)
+                    .withIdentifier(ITEM_NEWS),
+            new PrimaryDrawerItem()
+                    .withName(R.string.title_fragment_eighth)
+                    .withIdentifier(ITEM_EIGHTH),
+            new PrimaryDrawerItem()
+                    .withName(R.string.title_fragment_bell_schedule)
+                    .withIdentifier(ITEM_BELL_SCHEDULE),
+            new PrimaryDrawerItem()
+                    .withName(R.string.title_fragment_links)
+                    .withIdentifier(ITEM_LINKS),
+            new DividerDrawerItem(),
+            new PrimaryDrawerItem()
+                    .withName(R.string.action_settings)
+                    .withIdentifier(ITEM_SETTINGS),
+            new PrimaryDrawerItem()
+                    .withName(R.string.action_sign_out_short)
+                    .withIdentifier(ITEM_SIGN_OUT)
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,74 +90,108 @@ public class MainActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // load savedInstanceState
-        if (savedInstanceState != null) {
-            mDrawerSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
-        }
-
         // Configure synchronization
         IodineAuthenticator.configureSync(this);
 
-        // Navigation Drawer
-        mNavTitles = getResources().getStringArray(R.array.nav_titles);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        // TODO: credit NASA (http://hubblesite.org/gallery/album/entire/pr2012010c/)
+        // Create account header
+        mAccountHeader = new AccountHeader()
+                .withActivity(this)
+                .withHeaderBackground(R.color.md_blue_grey_200)
+                .withProfiles(new ArrayList<IProfile>())
+                .withSelectionListEnabled(false)
+                .withProfileImagesClickable(false)
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean isCurrent) {
+                        Log.i(TAG, "changed profile: " + profile);
+                        return false;
+                    }
+                })
+                .build();
 
-        // create drawer toggle
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,
-                mDrawerLayout,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close
-        );
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        // Create navigation drawer
+        mDrawer = new Drawer()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .addDrawerItems(mDrawerItems)
+                .withAccountHeader(mAccountHeader)
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position,
+                                            long id, IDrawerItem drawerItem) {
+                        int identifier = drawerItem.getIdentifier();
+                        Log.i(TAG, "got identifier " + identifier);
+                        if (identifier == ITEM_SIGN_OUT) {
+                            IodineAuthenticator.attemptLogout(MainActivity.this);
+                        } else {
+                            loadItem(identifier);
+                        }
+                    }
+                })
+                .build();
 
-        // create RecyclerView to display drawer items
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.left_drawer_list);
+        // select drawer position
+        int drawerPosition = 0;
+        if (savedInstanceState != null) {
+            drawerPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
+        }
+        mDrawer.setSelection(drawerPosition);
 
-        mDrawerAdapter = new NavDrawerAdapter();
-        recyclerView.setAdapter(mDrawerAdapter);
-
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        // select an item in drawer
-        selectItem(mDrawerSelectedPosition, false);
+        // load profile
+        Account account = IodineAuthenticator.getIodineAccount(this);
+        if (account != null) {
+            new ProfileLoader(this, account).execute((Void) null);
+        }
     }
 
-    /** Swaps fragments in the main content view */
-    private void selectItem(int position, boolean force) {
-        mDrawerSelectedPosition = position;
+    public void loadItem(int identifier) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment oldFragment = fragmentManager.findFragmentById(R.id.container);
+        //Fragment oldFragment = fragmentManager.findFragmentById(R.id.container);
 
-        // Only swap fragment if necessary, or if one doesn't exist already
-        if (force || oldFragment == null) {
-            Fragment fragment;
-            switch (position) {
-                case 0:
-                    fragment = NewsFragment.newInstance();
-                    break;
-                case 1:
-                    fragment = ScheduleFragment.newInstance();
-                    break;
-                default:
-                    fragment = PlaceholderFragment.newInstance(
-                            mNavTitles[position] + " (placeholder)");
-                    break;
-            }
-
-            // Insert the fragment by replacing any existing fragment
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, fragment)
-                    .commit();
+        Fragment fragment;
+        String title;
+        switch (identifier) {
+            case ITEM_NEWS:
+                title = getString(R.string.title_fragment_news);
+                fragment = NewsFragment.newInstance();
+                break;
+            case ITEM_EIGHTH:
+                title = getString(R.string.title_fragment_eighth);
+                fragment = ScheduleFragment.newInstance();
+                break;
+            case ITEM_BELL_SCHEDULE:
+                title = getString(R.string.title_fragment_bell_schedule);
+                fragment = PlaceholderFragment.newInstance(title + " (placeholder)");
+                break;
+            case ITEM_LINKS:
+                title = getString(R.string.title_fragment_links);
+                fragment = PlaceholderFragment.newInstance(title + " (placeholder)");
+                break;
+            case ITEM_SETTINGS:
+                title = getString(R.string.action_settings);
+                fragment = PlaceholderFragment.newInstance(title + " (placeholder)");
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
 
-        // Highlight the selected item, update the title, and close the drawer
-        mDrawerAdapter.setSelectedPosition(position);
-        setTitle(mNavTitles[position]);
-        mDrawerLayout.closeDrawer(Gravity.START);
+        // Insert the fragment by replacing any existing fragment
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, fragment)
+                .commit();
+
+        // Update title
+        setTitle(title);
     }
 
+    public void setProfile(String name, String email, Drawable icon) {
+        ArrayList<IProfile> profiles = new ArrayList<>();
+        profiles.add(new ProfileDrawerItem().withName(name).withEmail(email).withIcon(icon));
+        mAccountHeader.setProfiles(profiles);
+    }
+
+    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -120,11 +200,6 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // If the drawer toggle handles it, it will return true
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
         switch (item.getItemId()) {
             case R.id.action_logout:
                 IodineAuthenticator.attemptLogout(this);
@@ -132,35 +207,14 @@ public class MainActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
-    }
+    */
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         // save drawer state
-        outState.putInt(STATE_SELECTED_POSITION, mDrawerSelectedPosition);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Close drawer on back button press
-        if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
-            mDrawerLayout.closeDrawer(Gravity.START);
-            return;
-        }
-        super.onBackPressed();
+        outState.putInt(STATE_SELECTED_POSITION, mDrawer.getCurrentSelection());
     }
 
     /**
@@ -194,53 +248,126 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public class NavDrawerAdapter extends RecyclerView.Adapter<ViewHolder> {
-        int mSelected = 0;
+    public class ProfileLoader extends AsyncTask<Void, Void, Void> {
+        @Nullable private Exception mException = null;
 
-        public void setSelectedPosition(int selected) {
-            int oldPosition = mSelected;
-            mSelected = selected;
-            notifyItemChanged(oldPosition);
-            notifyItemChanged(selected);
+        private final Activity mActivity;
+        private final Account mAccount;
+
+        private DirectoryInfo info;
+        private Bitmap icon;
+
+        public ProfileLoader(Activity activity, Account account) {
+            mActivity = activity;
+            mAccount = account;
         }
 
-        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.navdrawer_item, parent, false);
+        protected Void doInBackground(Void... params) {
+            final AccountManager am = AccountManager.get(mActivity);
 
-            final ViewHolder holder = new ViewHolder(v);
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int position = holder.getPosition();
-                    selectItem(position, true);
+            boolean authTokenRetry = false;
+            while (true) {
+                String authToken;
+                try {
+                    authToken = am.blockingGetAuthToken(mAccount,
+                            IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
+                } catch (IOException e) {
+                    Log.e(TAG, "Connection error: " + e.toString());
+                    mException = e;
+                    return null;
+                } catch (@NonNull OperationCanceledException | AuthenticatorException e) {
+                    Log.e(TAG, "Authentication error: " + e.toString());
+                    mException = e;
+                    return null;
                 }
-            });
-            return holder;
+                Log.v(TAG, "Got auth token: " + authToken);
+
+                try {
+                    info = getDirectoryInfo(authToken);
+                    icon = getUserIcon(info.iodineUid + "", authToken);
+                } catch (IodineAuthException.NotLoggedInException e) {
+                    Log.d(TAG, "Not logged in, oh no!", e);
+                    am.invalidateAuthToken(mAccount.type, authToken);
+
+                    // Automatically retry, but only once
+                    if (!authTokenRetry) {
+                        authTokenRetry = true;
+                        Log.d(TAG, "Retrying fetch with new auth token.");
+                        continue;
+                    } else {
+                        Log.e(TAG, "Retried to get auth token already, quitting.");
+                        return null;
+                    }
+                } catch (IOException | IodineAuthException e) {
+                    Log.e(TAG, "Connection error: " + e.toString());
+                    mException = e;
+                    return null;
+                } catch (XmlPullParserException e) {
+                    Log.e(TAG, "XML error: " + e.toString());
+                    mException = e;
+                    return null;
+                }
+                break;
+            }
+
+            return null;
+        }
+
+        private DirectoryInfo getDirectoryInfo(String authToken)
+                throws XmlPullParserException, IOException, IodineAuthException {
+
+            InputStream stream = null;
+            DirectoryInfoParser parser = null;
+            try {
+                stream = IodineApiHelper.getDirectoryInfo("", authToken);
+
+                parser = new DirectoryInfoParser(mActivity);
+                parser.beginInfo(stream);
+
+                return parser.parseDirectoryInfo();
+
+            } finally {
+                if (parser != null)
+                    parser.stopParse();
+                try {
+                    if (stream != null)
+                        stream.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "IOException when closing stream: " + e);
+                }
+            }
+        }
+
+        private Bitmap getUserIcon(String uid, String authToken) throws IOException {
+            InputStream stream = null;
+            try {
+                stream = IodineApiHelper.getUserIcon(uid, authToken);
+
+                return BitmapFactory.decodeStream(stream);
+
+            } finally {
+                try {
+                    if (stream != null)
+                        stream.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "IOException when closing stream: " + e);
+                }
+            }
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            String title = mNavTitles[position];
-            holder.mTextView.setText(title);
-            holder.mView.setActivated(position == mSelected);
-        }
+        protected void onPostExecute(@Nullable Void result) {
+            if (mException != null) {
+                Log.e(TAG, "exception", mException);
+                return;
+            }
 
-        @Override
-        public int getItemCount() {
-            return mNavTitles.length;
-        }
-    }
+            Log.d(TAG, "Got profile result: " + info);
+            Log.d(TAG, "Got bitmap icon: " + icon);
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        @NonNull public final View mView;
-        @NonNull public final TextView mTextView;
-        public ViewHolder(@NonNull View v) {
-            super(v);
-            mView = v;
-            mTextView = (TextView) v.findViewById(R.id.navdrawer_item_text);
+            Drawable drawable = new BitmapDrawable(mActivity.getResources(), icon);
+            setProfile(info.name.getCommonName(), info.tjhsstId, drawable);
         }
     }
 }
