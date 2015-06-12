@@ -97,14 +97,15 @@ public class MainActivity extends ActionBarActivity {
         // Create account header
         mAccountHeader = new AccountHeader()
                 .withActivity(this)
-                .withHeaderBackground(R.drawable.nasa_abell_520)
+                .withHeaderBackground(R.color.md_blue_grey_200)
                 .withProfiles(new ArrayList<IProfile>())
                 .withSelectionListEnabled(false)
                 .withProfileImagesClickable(false)
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
-                    public void onProfileChanged(View view, IProfile profile) {
+                    public boolean onProfileChanged(View view, IProfile profile, boolean isCurrent) {
                         Log.i(TAG, "changed profile: " + profile);
+                        return false;
                     }
                 })
                 .build();
