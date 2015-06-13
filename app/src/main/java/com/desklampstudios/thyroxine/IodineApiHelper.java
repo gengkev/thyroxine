@@ -137,7 +137,7 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200) {
+        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
             throw new IOException("Response code invalid: " + conn.getResponseCode());
         }
         return new BufferedInputStream(conn.getInputStream());
