@@ -32,7 +32,9 @@ import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.accountswitcher.AccountHeader;
+import com.mikepenz.materialdrawer.accountswitcher.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -56,8 +58,8 @@ public class MainActivity extends ActionBarActivity {
     private static final int ITEM_SETTINGS = 4;
     private static final int ITEM_SIGN_OUT = 5;
 
-    private AccountHeader.Result mAccountHeader;
-    private Drawer.Result mDrawer;
+    private AccountHeader mAccountHeader;
+    private Drawer mDrawer;
 
     private IDrawerItem[] mDrawerItems = {
             new PrimaryDrawerItem()
@@ -95,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
 
         // TODO: credit NASA (http://hubblesite.org/gallery/album/entire/pr2012010c/)
         // Create account header
-        mAccountHeader = new AccountHeader()
+        mAccountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.color.md_blue_grey_200)
                 .withProfiles(new ArrayList<IProfile>())
@@ -111,21 +113,23 @@ public class MainActivity extends ActionBarActivity {
                 .build();
 
         // Create navigation drawer
-        mDrawer = new Drawer()
+        mDrawer = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
                 .addDrawerItems(mDrawerItems)
                 .withAccountHeader(mAccountHeader)
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position,
+                    public boolean onItemClick(AdapterView<?> parent, View view, int position,
                                             long id, IDrawerItem drawerItem) {
                         int identifier = drawerItem.getIdentifier();
                         Log.i(TAG, "got identifier " + identifier);
                         if (identifier == ITEM_SIGN_OUT) {
                             IodineAuthenticator.attemptLogout(MainActivity.this);
+                            return false;
                         } else {
                             loadItem(identifier);
+                            return false;
                         }
                     }
                 })
