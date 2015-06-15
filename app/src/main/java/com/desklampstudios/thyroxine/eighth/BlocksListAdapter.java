@@ -61,7 +61,7 @@ class BlocksListAdapter extends CursorAdapter {
             actvInstanceFlags = values.getAsLong(EighthContract.ActvInstances.KEY_FLAGS);
         }
         catch (NullPointerException e) { // they'll just be default values
-            Log.w(TAG, "NullPointerException getting actvId, actvFlags, or actvInstanceFlags: " + e);
+            Log.w(TAG, "NullPointerException getting actvId, actvFlags, or actvInstanceFlags", e);
         }
 
         //String blockStr = mContext.getResources().getString(R.string.block_title, block.type);

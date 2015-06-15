@@ -121,7 +121,7 @@ class SignupActvTask extends AsyncTask<Object, Void, Void> {
                 if (stream != null)
                     stream.close();
             } catch (IOException e) {
-                Log.e(TAG, "IOException when closing stream: " + e);
+                Log.e(TAG, "IOException when closing stream", e);
             }
         }
     }

@@ -277,11 +277,11 @@ public class MainActivity extends ActionBarActivity {
                     authToken = am.blockingGetAuthToken(mAccount,
                             IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
                 } catch (IOException e) {
-                    Log.e(TAG, "Connection error: " + e.toString());
+                    Log.e(TAG, "Connection error", e);
                     mException = e;
                     return null;
                 } catch (@NonNull OperationCanceledException | AuthenticatorException e) {
-                    Log.e(TAG, "Authentication error: " + e.toString());
+                    Log.e(TAG, "Authentication error", e);
                     mException = e;
                     return null;
                 }
@@ -304,11 +304,11 @@ public class MainActivity extends ActionBarActivity {
                         return null;
                     }
                 } catch (IOException | IodineAuthException e) {
-                    Log.e(TAG, "Connection error: " + e.toString());
+                    Log.e(TAG, "Connection error", e);
                     mException = e;
                     return null;
                 } catch (XmlPullParserException e) {
-                    Log.e(TAG, "XML error: " + e.toString());
+                    Log.e(TAG, "XML parsing error", e);
                     mException = e;
                     return null;
                 }
@@ -338,7 +338,7 @@ public class MainActivity extends ActionBarActivity {
                     if (stream != null)
                         stream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "IOException when closing stream: " + e);
+                    Log.e(TAG, "IOException when closing stream", e);
                 }
             }
         }
@@ -355,7 +355,7 @@ public class MainActivity extends ActionBarActivity {
                     if (stream != null)
                         stream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "IOException when closing stream: " + e);
+                    Log.e(TAG, "IOException when closing stream", e);
                 }
             }
         }

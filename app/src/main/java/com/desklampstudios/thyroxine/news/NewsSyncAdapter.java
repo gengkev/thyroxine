@@ -80,11 +80,11 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                 authToken = am.blockingGetAuthToken(account,
                         IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
             } catch (IOException e) {
-                Log.e(TAG, "Connection error: " + e.toString());
+                Log.e(TAG, "Connection error", e);
                 syncResult.stats.numIoExceptions++;
                 return;
             } catch (OperationCanceledException | AuthenticatorException e) {
-                Log.e(TAG, "Authentication error: " + e.toString());
+                Log.e(TAG, "Authentication error", e);
                 syncResult.stats.numAuthExceptions++;
                 return;
             }
@@ -113,11 +113,11 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                 syncResult.stats.numAuthExceptions++;
                 return;
             } catch (IOException e) {
-                Log.e(TAG, "Connection error: " + e.toString());
+                Log.e(TAG, "Connection error", e);
                 syncResult.stats.numIoExceptions++;
                 return;
             } catch (XmlPullParserException e) {
-                Log.e(TAG, "XML error: " + e.toString());
+                Log.e(TAG, "XML parsing error", e);
                 syncResult.stats.numParseExceptions++;
                 return;
             }
@@ -159,7 +159,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (stream != null)
                     stream.close();
             } catch (IOException e) {
-                Log.e(TAG, "IOException when closing stream: " + e);
+                Log.e(TAG, "IOException when closing stream", e);
             }
         }
     }

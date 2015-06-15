@@ -237,7 +237,7 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
                         username, password, IodineAuthenticatorActivity.this);
             } catch (IodineAuthException | IOException | XmlPullParserException e) {
                 mException = e;
-                Log.w(TAG, "attemptLogin threw exception: " + e);
+                Log.w(TAG, "attemptLogin threw exception", e);
                 return null;
             }
             Log.d(TAG, "attemptLogin succeeded, authToken: " + authToken);

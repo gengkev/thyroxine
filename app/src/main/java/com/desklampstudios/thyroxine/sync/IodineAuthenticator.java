@@ -126,11 +126,11 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
             }
             catch (IodineAuthException e) {
                 // Do nothing. Username/password probably incorrect
-                Log.e(TAG, "Getting auth token failed with IodineAuthException: " + e);
+                Log.e(TAG, "Getting auth token failed with IodineAuthException", e);
             }
             catch (IOException | XmlPullParserException e) {
                 // Network error, probably
-                Log.e(TAG, "Getting auth token failed with network error: " + e);
+                Log.e(TAG, "Getting auth token failed with network error", e);
                 throw new NetworkErrorException(e);
             }
         }
