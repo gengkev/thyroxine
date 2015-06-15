@@ -260,7 +260,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
         EighthListBlocksParser parser = null;
 
         try {
-            stream = IodineApiHelper.getBlockList(authToken);
+            stream = IodineApiHelper.getBlockList(getContext(), authToken);
 
             parser = new EighthListBlocksParser(getContext());
             parser.beginListBlocks(stream);

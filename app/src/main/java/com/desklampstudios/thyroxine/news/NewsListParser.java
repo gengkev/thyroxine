@@ -24,8 +24,7 @@ class NewsListParser extends AbstractXMLParser {
         super(context);
     }
 
-    public void beginFeed(InputStream in)
-            throws XmlPullParserException, IOException, IodineAuthException {
+    public void beginFeed(InputStream in) throws XmlPullParserException, IOException {
         if (parsingBegun) {
             stopParse();
         }
@@ -34,9 +33,6 @@ class NewsListParser extends AbstractXMLParser {
         mParser.setInput(mInputStream, null);
 
         mParser.nextTag();
-        if (mParser.getName().equals("auth")) { // Auth error
-            throw AuthErrorParser.readAuth(mParser, mContext);
-        }
         mParser.require(XmlPullParser.START_TAG, ns, "news");
 
         parsingBegun = true;

@@ -145,7 +145,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         NewsListParser parser = null;
 
         try {
-            stream = IodineApiHelper.getNewsList(authToken);
+            stream = IodineApiHelper.getNewsList(getContext(), authToken);
 
             parser = new NewsListParser(getContext());
             parser.beginFeed(stream);

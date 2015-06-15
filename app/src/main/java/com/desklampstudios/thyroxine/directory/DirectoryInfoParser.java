@@ -21,8 +21,7 @@ public class DirectoryInfoParser extends AbstractXMLParser {
         super(context);
     }
 
-    public void beginInfo(@NonNull InputStream in)
-            throws XmlPullParserException, IOException, IodineAuthException {
+    public void beginInfo(@NonNull InputStream in) throws XmlPullParserException, IOException {
         if (parsingBegun) {
             stopParse();
         }
@@ -32,9 +31,6 @@ public class DirectoryInfoParser extends AbstractXMLParser {
         parsingBegun = true;
 
         mParser.nextTag();
-        if (mParser.getName().equals("auth")) { // Auth error
-            throw AuthErrorParser.readAuth(mParser, mContext);
-        }
         mParser.require(XmlPullParser.START_TAG, ns, "studentdirectory");
     }
 

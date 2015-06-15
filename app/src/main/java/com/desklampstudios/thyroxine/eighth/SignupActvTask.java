@@ -107,7 +107,7 @@ class SignupActvTask extends AsyncTask<Object, Void, Void> {
         EighthSignupActvParser parser = null;
 
         try {
-            stream = IodineApiHelper.signupActivity(blockId, actvId, authToken);
+            stream = IodineApiHelper.signupActivity(mActivity, blockId, actvId, authToken);
 
             parser = new EighthSignupActvParser(mActivity);
             parser.beginSignupActivity(stream);

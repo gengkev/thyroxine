@@ -18,7 +18,7 @@ class EighthSignupActvParser extends AbstractXMLParser {
     }
 
     public void beginSignupActivity(InputStream in)
-            throws XmlPullParserException, IOException, IodineAuthException {
+            throws XmlPullParserException, IOException {
         if (parsingBegun) {
             stopParse();
         }
@@ -28,9 +28,7 @@ class EighthSignupActvParser extends AbstractXMLParser {
         parsingBegun = true;
 
         mParser.nextTag();
-        if (mParser.getName().equals("auth")) { // Auth error
-            throw AuthErrorParser.readAuth(mParser, mContext);
-        } else if (mParser.getName().equals("error")) { // Params error
+        if (mParser.getName().equals("error")) { // Params error
             String message = readText(mParser, "error");
             throw new IOException(message);
         }

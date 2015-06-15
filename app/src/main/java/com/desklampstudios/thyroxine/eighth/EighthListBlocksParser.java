@@ -25,7 +25,7 @@ class EighthListBlocksParser extends AbstractXMLParser {
     }
 
     public void beginListBlocks(@NonNull InputStream in)
-            throws XmlPullParserException, IOException, IodineAuthException {
+            throws XmlPullParserException, IOException {
         if (parsingBegun) {
             stopParse();
         }
@@ -35,9 +35,6 @@ class EighthListBlocksParser extends AbstractXMLParser {
         parsingBegun = true;
 
         mParser.nextTag();
-        if (mParser.getName().equals("auth")) { // Auth error
-            throw AuthErrorParser.readAuth(mParser, mContext);
-        }
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
     }
 

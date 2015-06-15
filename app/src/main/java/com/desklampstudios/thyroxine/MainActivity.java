@@ -324,7 +324,7 @@ public class MainActivity extends ActionBarActivity {
             InputStream stream = null;
             DirectoryInfoParser parser = null;
             try {
-                stream = IodineApiHelper.getDirectoryInfo("", authToken);
+                stream = IodineApiHelper.getDirectoryInfo(mActivity, "", authToken);
 
                 parser = new DirectoryInfoParser(mActivity);
                 parser.beginInfo(stream);
@@ -343,10 +343,11 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        private Bitmap getUserIcon(String uid, String authToken) throws IOException {
+        private Bitmap getUserIcon(String uid, String authToken)
+                throws XmlPullParserException, IOException, IodineAuthException{
             InputStream stream = null;
             try {
-                stream = IodineApiHelper.getUserIcon(uid, authToken);
+                stream = IodineApiHelper.getUserIcon(mActivity, uid, authToken);
 
                 return BitmapFactory.decodeStream(stream);
 

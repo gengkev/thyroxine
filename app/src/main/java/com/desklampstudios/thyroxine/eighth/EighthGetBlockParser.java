@@ -27,7 +27,7 @@ class EighthGetBlockParser extends AbstractXMLParser {
 
     @NonNull
     public EighthBlockAndActv beginGetBlock(@NonNull InputStream in)
-            throws XmlPullParserException, IOException, IodineAuthException {
+            throws XmlPullParserException, IOException {
         if (parsingBegun) {
             stopParse();
         }
@@ -37,9 +37,6 @@ class EighthGetBlockParser extends AbstractXMLParser {
         parsingBegun = true;
 
         mParser.nextTag();
-        if (mParser.getName().equals("auth")) { // Auth error
-            throw AuthErrorParser.readAuth(mParser, mContext);
-        }
         mParser.require(XmlPullParser.START_TAG, ns, "eighth");
 
         // getBlock API begins with currently selected block, then all activities

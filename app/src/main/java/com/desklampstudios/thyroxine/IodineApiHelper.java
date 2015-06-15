@@ -39,20 +39,36 @@ public class IodineApiHelper {
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
 
+    private static void checkResponseCode(Context context, HttpsURLConnection conn)
+            throws IOException, XmlPullParserException, IodineAuthException {
+
+        // Note that to read 4xx response codes, one must use getErrorStream() (see #16)
+        switch (conn.getResponseCode()) {
+            case 200:
+                break;
+            case 401:
+                AuthErrorParser parser = new AuthErrorParser(context);
+                parser.beginAuthError(conn.getErrorStream());
+                throw parser.nextAuth();
+            default:
+                throw new IOException("Unexpected response code: " + conn.getResponseCode());
+        }
+    }
+
     @NonNull
-    public static InputStream getPublicNewsFeed() throws IOException {
+    public static InputStream getPublicNewsFeed(Context context)
+            throws IOException, XmlPullParserException, IodineAuthException {
         URL url = new URL(PUBLIC_NEWS_FEED_URL);
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
-        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
-            throw new IOException("Response code invalid: " + conn.getResponseCode());
-        }
+        checkResponseCode(context, conn);
         return new BufferedInputStream(conn.getInputStream());
     }
 
     @NonNull
-    public static InputStream getNewsList(String cookieHeader) throws IOException {
+    public static InputStream getNewsList(Context context, String cookieHeader)
+            throws IOException, XmlPullParserException, IodineAuthException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
         URL url = new URL(NEWS_LIST_URL);
@@ -60,9 +76,7 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
-            throw new IOException("Response code invalid: " + conn.getResponseCode());
-        }
+        checkResponseCode(context, conn);
         return new BufferedInputStream(conn.getInputStream());
     }
 
@@ -72,7 +86,8 @@ public class IodineApiHelper {
     }
 
     @NonNull
-    public static InputStream getBlock(int blockId, String cookieHeader) throws IOException {
+    public static InputStream getBlock(Context context, int blockId, String cookieHeader)
+            throws IOException, XmlPullParserException, IodineAuthException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
         URL url = new URL(String.format(BLOCK_GET_URL, blockId));
@@ -80,14 +95,13 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
-            throw new IOException("Response code invalid: " + conn.getResponseCode());
-        }
+        checkResponseCode(context, conn);
         return new BufferedInputStream(conn.getInputStream());
     }
 
     @NonNull
-    public static InputStream getBlockList(String cookieHeader) throws IOException {
+    public static InputStream getBlockList(Context context, String cookieHeader)
+            throws IOException, XmlPullParserException, IodineAuthException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
         URL url = new URL(BLOCK_LIST_URL);
@@ -95,15 +109,13 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
-            throw new IOException("Response code invalid: " + conn.getResponseCode());
-        }
+        checkResponseCode(context, conn);
         return new BufferedInputStream(conn.getInputStream());
     }
 
     @NonNull
-    public static InputStream signupActivity(int blockId, int actvId, String cookieHeader)
-            throws IOException {
+    public static InputStream signupActivity(Context context, int blockId, int actvId, String cookieHeader)
+            throws IOException, XmlPullParserException, IodineAuthException {
 
         // create query params
         String query = "bid=" + URLEncoder.encode(String.valueOf(blockId), "UTF-8") +
@@ -122,14 +134,13 @@ public class IodineApiHelper {
         outWriter.write(query);
         outWriter.close();
 
-        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
-            throw new IOException("Response code invalid: " + conn.getResponseCode());
-        }
+        checkResponseCode(context, conn);
         return new BufferedInputStream(conn.getInputStream());
     }
 
     @NonNull
-    public static InputStream getDirectoryInfo(String uid, String cookieHeader) throws IOException {
+    public static InputStream getDirectoryInfo(Context context, String uid, String cookieHeader)
+            throws IOException, XmlPullParserException, IodineAuthException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
         URL url = new URL(String.format(DIRECTORY_INFO_URL, uid));
@@ -137,14 +148,13 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200 && conn.getResponseCode() != 401) {
-            throw new IOException("Response code invalid: " + conn.getResponseCode());
-        }
+        checkResponseCode(context, conn);
         return new BufferedInputStream(conn.getInputStream());
     }
 
     @NonNull
-    public static InputStream getUserIcon(String uid, String cookieHeader) throws IOException {
+    public static InputStream getUserIcon(Context context, String uid, String cookieHeader)
+            throws IOException, XmlPullParserException, IodineAuthException {
         Log.v(TAG, "Cookies: " + cookieHeader);
 
         URL url = new URL(String.format(USER_ICON_URL, uid));
@@ -152,15 +162,13 @@ public class IodineApiHelper {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Cookie", cookieHeader);
 
-        if (conn.getResponseCode() != 200) {
-            throw new IOException("Response code invalid: " + conn.getResponseCode());
-        }
+        checkResponseCode(context, conn);
         return new BufferedInputStream(conn.getInputStream());
     }
 
     @Nullable
-    public static String attemptLogin(String username, String password, Context context)
-            throws IodineAuthException, IOException, XmlPullParserException {
+    public static String attemptLogin(Context context, String username, String password)
+            throws IOException, XmlPullParserException, IodineAuthException {
 
         // create query params
         String query = "login_username=" + URLEncoder.encode(username, "UTF-8") +
