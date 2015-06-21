@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -13,11 +14,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,15 +37,6 @@ import com.desklampstudios.thyroxine.directory.DirectoryInfoParser;
 import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.accountswitcher.AccountHeader;
-import com.mikepenz.materialdrawer.accountswitcher.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -47,41 +44,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
 
-    private static final int ITEM_NEWS = 0;
-    private static final int ITEM_EIGHTH = 1;
-    private static final int ITEM_BELL_SCHEDULE = 2;
-    private static final int ITEM_LINKS = 3;
-    private static final int ITEM_SETTINGS = 4;
-    private static final int ITEM_SIGN_OUT = 5;
-
-    private AccountHeader mAccountHeader;
-    private Drawer mDrawer;
-
-    private IDrawerItem[] mDrawerItems = {
-            new PrimaryDrawerItem()
-                    .withName(R.string.title_fragment_news)
-                    .withIdentifier(ITEM_NEWS),
-            new PrimaryDrawerItem()
-                    .withName(R.string.title_fragment_eighth)
-                    .withIdentifier(ITEM_EIGHTH),
-            new PrimaryDrawerItem()
-                    .withName(R.string.title_fragment_bell_schedule)
-                    .withIdentifier(ITEM_BELL_SCHEDULE),
-            new PrimaryDrawerItem()
-                    .withName(R.string.title_fragment_links)
-                    .withIdentifier(ITEM_LINKS),
-            new DividerDrawerItem(),
-            new PrimaryDrawerItem()
-                    .withName(R.string.action_settings)
-                    .withIdentifier(ITEM_SETTINGS),
-            new PrimaryDrawerItem()
-                    .withName(R.string.action_sign_out_short)
-                    .withIdentifier(ITEM_SIGN_OUT)
-    };
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private NavigationView mDrawerNavigationView;
+    private View mDrawerHeaderView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,52 +65,42 @@ public class MainActivity extends ActionBarActivity {
         // Configure synchronization
         IodineAuthenticator.configureSync(this);
 
-        // TODO: credit NASA (http://hubblesite.org/gallery/album/entire/pr2012010c/)
-        // Create account header
-        mAccountHeader = new AccountHeaderBuilder()
-                .withActivity(this)
-                .withHeaderBackground(R.color.md_blue_grey_200)
-                .withProfiles(new ArrayList<IProfile>())
-                .withSelectionListEnabled(false)
-                .withProfileImagesClickable(false)
-                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                    @Override
-                    public boolean onProfileChanged(View view, IProfile profile, boolean isCurrent) {
-                        Log.i(TAG, "changed profile: " + profile);
-                        return false;
-                    }
-                })
-                .build();
+        // Navigation drawer
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerNavigationView = (NavigationView) findViewById(R.id.drawer_navigation);
+        mDrawerHeaderView = findViewById(R.id.drawer_header);
 
-        // Create navigation drawer
-        mDrawer = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .addDrawerItems(mDrawerItems)
-                .withAccountHeader(mAccountHeader)
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(AdapterView<?> parent, View view, int position,
-                                            long id, IDrawerItem drawerItem) {
-                        int identifier = drawerItem.getIdentifier();
-                        Log.i(TAG, "got identifier " + identifier);
-                        if (identifier == ITEM_SIGN_OUT) {
-                            IodineAuthenticator.attemptLogout(MainActivity.this);
-                            return false;
-                        } else {
-                            loadItem(identifier);
-                            return false;
-                        }
-                    }
-                })
-                .build();
+        // Create drawer toggle
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+        );
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        // listen for navigation changes
+        mDrawerNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                if (item.getItemId() == R.id.navigation_item_sign_out) {
+                    IodineAuthenticator.attemptLogout(MainActivity.this);
+                    return false;
+                }
+                selectItem(item.getItemId());
+                item.setChecked(true);
+                mDrawerLayout.closeDrawer(mDrawerNavigationView);
+                return true;
+            }
+        });
 
         // select drawer position
-        int drawerPosition = 0;
-        if (savedInstanceState != null) {
-            drawerPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
-        }
-        mDrawer.setSelection(drawerPosition);
+        int drawerPosition = R.id.navigation_item_news;
+        //if (savedInstanceState != null) {
+        //    drawerPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION, drawerPosition);
+        //}
+        selectItem(drawerPosition);
 
         // load profile
         Account account = IodineAuthenticator.getIodineAccount(this);
@@ -149,30 +109,30 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public void loadItem(int identifier) {
+    public boolean selectItem(int id) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         //Fragment oldFragment = fragmentManager.findFragmentById(R.id.container);
 
         Fragment fragment;
         String title;
-        switch (identifier) {
-            case ITEM_NEWS:
+        switch (id) {
+            case R.id.navigation_item_news:
                 title = getString(R.string.title_fragment_news);
                 fragment = NewsFragment.newInstance();
                 break;
-            case ITEM_EIGHTH:
+            case R.id.navigation_item_eighth:
                 title = getString(R.string.title_fragment_eighth);
                 fragment = ScheduleFragment.newInstance();
                 break;
-            case ITEM_BELL_SCHEDULE:
+            case R.id.navigation_item_bell_schedule:
                 title = getString(R.string.title_fragment_bell_schedule);
                 fragment = PlaceholderFragment.newInstance(title + " (placeholder)");
                 break;
-            case ITEM_LINKS:
+            case R.id.navigation_item_links:
                 title = getString(R.string.title_fragment_links);
                 fragment = PlaceholderFragment.newInstance(title + " (placeholder)");
                 break;
-            case ITEM_SETTINGS:
+            case R.id.navigation_item_settings:
                 title = getString(R.string.action_settings);
                 fragment = PlaceholderFragment.newInstance(title + " (placeholder)");
                 break;
@@ -187,12 +147,15 @@ public class MainActivity extends ActionBarActivity {
 
         // Update title
         setTitle(title);
+        return true;
     }
 
     public void setProfile(String name, String email, Drawable icon) {
-        ArrayList<IProfile> profiles = new ArrayList<>();
-        profiles.add(new ProfileDrawerItem().withName(name).withEmail(email).withIcon(icon));
-        mAccountHeader.setProfiles(profiles);
+        TextView nameView = (TextView) mDrawerHeaderView.findViewById(R.id.drawer_header_name);
+        nameView.setText(name);
+
+        TextView emailView = (TextView) mDrawerHeaderView.findViewById(R.id.drawer_header_email);
+        emailView.setText(email);
     }
 
     /*
@@ -201,24 +164,52 @@ public class MainActivity extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+    */
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // If the drawer toggle handles it, it will return true
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        /*
         switch (item.getItemId()) {
             case R.id.action_logout:
                 IodineAuthenticator.attemptLogout(this);
                 return true;
         }
+        */
         return super.onOptionsItemSelected(item);
     }
-    */
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         // save drawer state
-        outState.putInt(STATE_SELECTED_POSITION, mDrawer.getCurrentSelection());
+        // outState.putInt(STATE_SELECTED_POSITION, mDrawer.getCurrentSelection());
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Close drawer on back button press
+        if (mDrawerLayout.isDrawerOpen(mDrawerNavigationView)) {
+            mDrawerLayout.closeDrawer(mDrawerNavigationView);
+            return;
+        }
+        super.onBackPressed();
     }
 
     /**

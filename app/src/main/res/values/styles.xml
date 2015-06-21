@@ -5,7 +5,7 @@
 
     </style>
 
-    <style name="AppTheme.Base" parent="MaterialDrawerTheme.Light.DarkToolbar">
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>

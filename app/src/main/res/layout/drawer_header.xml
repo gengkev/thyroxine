@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_header"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="24dp"
+    android:paddingBottom="8dp"
+    android:background="@color/primary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/keyline_1"
+        android:paddingEnd="@dimen/keyline_1"
+        android:gravity="center_vertical">
+
+        <TextView android:id="@+id/drawer_header_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Angela William"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView android:id="@+id/drawer_header_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2017awilliam"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_item_news"
+            android:checked="true"
+            android:title="@string/title_fragment_news"/>
+        <item
+            android:id="@+id/navigation_item_eighth"
+            android:title="@string/title_fragment_eighth"/>
+        <item
+            android:id="@+id/navigation_item_bell_schedule"
+            android:title="@string/title_fragment_bell_schedule"/>
+        <item
+            android:id="@+id/navigation_item_links"
+            android:title="@string/title_fragment_links"/>
+        <item
+            android:id="@+id/navigation_item_settings"
+            android:title="@string/action_settings"/>
+        <item
+            android:id="@+id/navigation_item_sign_out"
+            android:title="@string/action_sign_out_short"/>
+    </group>
+</menu>
