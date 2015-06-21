@@ -1,13 +1,13 @@
 thyroxine
 =========
 
-Unofficial Android client for TJ Iodine. Currently in development. There's a lot to be done!
+Unofficial Android client for TJ Iodine. Currently in development. There's a lot to be done! See the [Roadmap](https://github.com/gengkev/thyroxine/wiki/Roadmap).
 
-Check out the wiki to the right! There's a [roadmap of features](https://github.com/gengkev/thyroxine/wiki/Roadmap).
+You should probably also check out [Iolite](https://github.com/el1t/Iolite) which is pretty cool, and despite its shortfalls, it's a lot more usable at the moment.
 
-Also you should probably also check out [Iolite](https://github.com/el1t/Iolite) which is pretty cool.
+I wrote the unofficial [iodine-api-docs](https://github.com/gengkev/iodine-api-docs), which started on this wiki. But now it looks like we're moving to Ion, which does have a nicer api (#18), but requires re-implementing tons of stuff.
+
 
 ## Contributing
-If you would like to contribute feel free to do so or just shoot me an email whenever :c
 
-Help improve the super rad [Iodine API documentation](https://github.com/gengkev/thyroxine/wiki/Iodine-API-Documentation) on the wiki! It's getting kind of long, which is annoying. Probably because too much ranting. But it's still better than scouring the Iodine source code.
+If you would like to contribute, feel free to submit pull requests and things, seriously. I have no idea what I'm doing.
