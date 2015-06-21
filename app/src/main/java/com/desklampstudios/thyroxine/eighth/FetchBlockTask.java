@@ -133,7 +133,7 @@ class FetchBlockTask extends AsyncTask<Integer, Void, List<Pair<EighthActv, Eigh
     }
 
     public interface ActvsResultListener {
-        public void onActvsResult(List<Pair<EighthActv, EighthActvInstance>> pairList);
-        public void onError(Exception exception);
+        void onActvsResult(List<Pair<EighthActv, EighthActvInstance>> pairList);
+        void onError(Exception exception);
     }
 }

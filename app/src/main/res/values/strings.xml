@@ -10,7 +10,6 @@
     <string name="error">Error</string>
     <string name="error_database">Database error</string>
     <string name="unexpected_error">Unexpected error: %1$s</string>
-    <string name="attempt_login_try_again">We\'re trying to log you in. Please try again.</string>
 
     <!-- Navigation drawer strings -->
     <string name="navigation_drawer_open">Open navigation drawer</string>

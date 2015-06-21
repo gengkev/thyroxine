@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
-import com.desklampstudios.thyroxine.AuthErrorParser;
-import com.desklampstudios.thyroxine.IodineAuthException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -15,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class DirectoryInfoParser extends AbstractXMLParser {
-    public static final String TAG = DirectoryInfoParser.class.getName();
+    private static final String TAG = DirectoryInfoParser.class.getName();
 
     public DirectoryInfoParser(Context context) throws XmlPullParserException {
         super(context);
@@ -52,7 +50,7 @@ public class DirectoryInfoParser extends AbstractXMLParser {
     }
 
     @NonNull
-    public static DirectoryInfo readDirectoryInfo(XmlPullParser parser)
+    private static DirectoryInfo readDirectoryInfo(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "info");
 

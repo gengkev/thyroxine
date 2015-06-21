@@ -16,7 +16,7 @@ class NewsDatabase extends SQLiteOpenHelper {
 
     // NewsEntry table
     interface Tables {
-        static final String TABLE_NEWSENTRIES = "newsEntries";
+        String TABLE_NEWSENTRIES = "newsEntries";
     }
 
     public NewsDatabase(Context context) {

@@ -19,7 +19,6 @@
         <TextView android:id="@+id/drawer_header_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Angela William"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -27,7 +26,6 @@
         <TextView android:id="@+id/drawer_header_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="2017awilliam"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
 

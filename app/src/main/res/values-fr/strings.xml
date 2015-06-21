@@ -10,7 +10,6 @@
     <string name="error">Erreur</string>
     <string name="error_database">Erreur de base de données</string>
     <string name="unexpected_error">Erreur inattendue : %1$s</string>
-    <string name="attempt_login_try_again">On est en train de vous connecter. Veuillez réessayer.</string>
 
     <!-- Navigation drawer strings -->
     <string name="navigation_drawer_open">Ouvrir le tiroir de navigation</string>

@@ -164,7 +164,7 @@ class SignupActvTask extends AsyncTask<Object, Void, Void> {
     }
 
     public interface SignupResultListener {
-        public void onSignupResult();
-        public void onError(@NonNull Exception e);
+        void onSignupResult();
+        void onError(@NonNull Exception e);
     }
 }

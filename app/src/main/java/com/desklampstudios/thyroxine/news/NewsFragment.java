@@ -52,8 +52,7 @@ public class NewsFragment extends Fragment
     private boolean mSyncActive = false;
     private boolean mSyncPending = false;
 
-    public NewsFragment() {
-    }
+    public NewsFragment() {}
 
     /**
      * Use this factory method to create a new instance of
@@ -118,25 +117,6 @@ public class NewsFragment extends Fragment
         checkLoginState();
         getLoaderManager().initLoader(NEWS_LOADER, null, this);
     }
-
-    /*
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.news, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_refresh_news:
-                retrieveNews();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-    */
 
     @Override
     public void onResume() {

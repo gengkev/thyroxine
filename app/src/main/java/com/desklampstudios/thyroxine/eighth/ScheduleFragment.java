@@ -38,6 +38,7 @@ import java.util.List;
  */
 public class ScheduleFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, SyncStatusObserver {
+
     private static final String TAG = ScheduleFragment.class.getSimpleName();
     private static final int BLOCKS_LOADER = 0;
 
@@ -64,8 +65,7 @@ public class ScheduleFragment extends Fragment
 
     private SimpleSectionedListAdapter.Section[] mSections;
 
-    public ScheduleFragment() {
-    }
+    public ScheduleFragment() {}
 
     @NonNull
     public static ScheduleFragment newInstance() {

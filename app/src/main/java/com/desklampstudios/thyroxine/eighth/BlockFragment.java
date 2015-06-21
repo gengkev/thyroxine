@@ -52,11 +52,9 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     @Nullable private SignupActvTask mSignupActvTask;
 
     private ActvsListAdapter mAdapter;
-    private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
-    public BlockFragment() {
-    }
+    public BlockFragment() {}
 
     @NonNull
     public static BlockFragment newInstance(int bid) {
@@ -91,6 +89,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             }
         });
 
+        /*
         mAdapter.addItem(new Pair<>(
                 new EighthActv.Builder()
                         .actvId(999)
@@ -103,6 +102,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                         .roomsStr("All the rooms")
                         .build()
         ));
+        */
     }
 
     @Override
@@ -113,18 +113,18 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         View view = inflater.inflate(R.layout.fragment_eighth_block, container, false);
 
         // RecyclerView!
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setHasFixedSize(true); // changes in content don't change layout size
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.actvs_list);
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setHasFixedSize(true); // changes in content don't change layout size
 
         // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(layoutManager);
 
         // dividers between items
         //RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(
         //        getActivity(), DividerItemDecoration.VERTICAL_LIST);
-        //mRecyclerView.addItemDecoration(itemDecoration);
+        //recyclerView.addItemDecoration(itemDecoration);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.primary);
@@ -132,19 +132,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             @Override
             public void onRefresh() {
                 retrieveBlock();
-            }
-        });
-
-        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                //int scrollY = getScrollY();
-                //toolbar.setTranslationY(Math.max(-scrollY, blahblah));
-
-                //Log.d(TAG, "getBottom=" + toolbar.getBottom() + ", getHeight=" + toolbar.getHeight());
-                //Log.d(TAG, "scrollY=" + scrollY);
             }
         });
 
@@ -314,5 +301,6 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        mAdapter.setSelectedActvId(-1);
     }
 }

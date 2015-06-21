@@ -3,8 +3,6 @@ package com.desklampstudios.thyroxine.eighth;
 import android.content.Context;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
-import com.desklampstudios.thyroxine.AuthErrorParser;
-import com.desklampstudios.thyroxine.IodineAuthException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

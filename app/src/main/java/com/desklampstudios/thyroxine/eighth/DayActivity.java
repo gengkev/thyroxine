@@ -2,6 +2,7 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,8 +12,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +25,7 @@ import com.desklampstudios.thyroxine.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DayActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DayActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = DayActivity.class.getSimpleName();
     public static final String ARG_DATE = "date";
     public static final String ARG_BLOCK_ID = BlockFragment.ARG_BLOCK_ID;
@@ -52,9 +52,14 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_day);
 
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        // use toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // enable Up button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // unpack values from intent
         if (getIntent() != null) {
             mDate = getIntent().getStringExtra(ARG_DATE);
             mBlockId = getIntent().getIntExtra(ARG_BLOCK_ID, -1);
@@ -65,7 +70,7 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
 
         // set title as date
         String dateStr = Utils.DateFormats.FULL_DATE.formatBasicDate(this, mDate);
-        getSupportActionBar().setTitle(dateStr);
+        setTitle(dateStr);
 
         // get references
         mHeaderView = findViewById(R.id.header);
@@ -159,7 +164,7 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
 
         /**
          * Return the title of the item at {@code position}. This is important as what this method
-         * returns is what is displayed in the {@link SlidingTabLayout}.
+         * returns is what is displayed in the {@link TabLayout}.
          */
         @Override
         public CharSequence getPageTitle(int position) {

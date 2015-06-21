@@ -76,7 +76,7 @@ public class Utils {
      * The default locale is preferred, for localization.
      * All timezones here are relative to the user so they should be OK.
      */
-    public static enum DateFormats {
+    public enum DateFormats {
         FULL_DATETIME, // Monday, January 1, 1970 12:00 AM
         FULL_DATE, // Monday, January 1, 1970
         FULL_DATE_NO_WEEKDAY, // January 1, 1970

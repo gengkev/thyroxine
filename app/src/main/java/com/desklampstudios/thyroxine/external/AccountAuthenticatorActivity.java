@@ -1,7 +1,7 @@
 /*
  * AccountAuthenticatorActivity originally from Android source code, found at:
  * https://github.com/android/platform_frameworks_base/blob/master/core/java/android/accounts/AccountAuthenticatorActivity.java
- * Modifications: extended ActionBarActivity, changed package, made class abstract
+ * Modifications: extended AppCompatActivity, changed package, made class abstract
  */
 
 /*
@@ -25,7 +25,7 @@ package com.desklampstudios.thyroxine.external;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 
 /**
  * Base class for implementing an Activity that is used to help implement an
@@ -41,7 +41,7 @@ import android.support.v7.app.ActionBarActivity;
  * is never set or if it is set to null then error {@link AccountManager#ERROR_CODE_CANCELED}
  * will be called on the response.
  */
-public abstract class AccountAuthenticatorActivity extends ActionBarActivity {
+public abstract class AccountAuthenticatorActivity extends AppCompatActivity {
     private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
     private Bundle mResultBundle = null;
 

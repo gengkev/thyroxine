@@ -57,10 +57,10 @@ class NewsEntry implements Comparable<NewsEntry> {
 
     public static class Builder {
         private int newsId;
-        @NonNull private String title;
+        @NonNull private String title = "";
         private long published;
-        @NonNull private String content;
-        @NonNull private String contentSnippet;
+        @NonNull private String content = "";
+        @NonNull private String contentSnippet = "";
         private boolean liked;
         private int numLikes;
 

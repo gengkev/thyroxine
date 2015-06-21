@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
-import com.desklampstudios.thyroxine.AuthErrorParser;
-import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
 
 import org.xmlpull.v1.XmlPullParser;

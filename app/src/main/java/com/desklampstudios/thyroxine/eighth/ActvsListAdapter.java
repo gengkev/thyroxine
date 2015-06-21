@@ -30,7 +30,6 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Nullable private OnItemClickListener mListener = null;
 
     private int mSelectedActvId = -1;
-    @NonNull private EighthBlock mBlock = new EighthBlock.Builder().date("1970-01-01").build();
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public ActvsListAdapter(@NonNull Context context) {
@@ -45,10 +44,6 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void setSelectedActvId(int actvId) {
         this.mSelectedActvId = actvId;
         notifyDataSetChanged();
-    }
-
-    public void setBlock(EighthBlock block) {
-        this.mBlock = block;
     }
 
     // Create new views (invoked by the layout manager)
@@ -274,7 +269,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public interface OnItemClickListener {
-        public void onItemClick(View view, int pos);
-        public boolean onItemLongClick(View view, int pos);
+        void onItemClick(View view, int pos);
+        boolean onItemLongClick(View view, int pos);
     }
 }

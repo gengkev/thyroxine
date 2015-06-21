@@ -89,9 +89,9 @@ public class SyncUtils {
     }
 
     public interface MergeInterface<T, U> {
-        public ContentValues toContentValues(T item);
-        public T fromContentValues(ContentValues values);
-        public U getId(T item);
-        public Uri buildContentUri(U id);
+        ContentValues toContentValues(T item);
+        T fromContentValues(ContentValues values);
+        U getId(T item);
+        Uri buildContentUri(U id);
     }
 }

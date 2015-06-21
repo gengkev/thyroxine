@@ -18,18 +18,14 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.directory.DirectoryInfo;
@@ -42,7 +38,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -109,9 +104,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public boolean selectItem(int id) {
+    private void selectItem(int id) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        //Fragment oldFragment = fragmentManager.findFragmentById(R.id.container);
 
         Fragment fragment;
         String title;
@@ -147,38 +141,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Update title
         setTitle(title);
-        return true;
     }
 
-    public void setProfile(String name, String email, Drawable icon) {
+    private void setProfile(String name, String email, Drawable icon) {
         TextView nameView = (TextView) mDrawerHeaderView.findViewById(R.id.drawer_header_name);
         nameView.setText(name);
 
         TextView emailView = (TextView) mDrawerHeaderView.findViewById(R.id.drawer_header_email);
         emailView.setText(email);
-    }
 
-    /*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        // TODO: show icon
     }
-    */
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // If the drawer toggle handles it, it will return true
+        // Allow the drawer toggle to attempt to handle it
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        /*
-        switch (item.getItemId()) {
-            case R.id.action_logout:
-                IodineAuthenticator.attemptLogout(this);
-                return true;
-        }
-        */
         return super.onOptionsItemSelected(item);
     }
 
@@ -280,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     info = getDirectoryInfo(authToken);
-                    icon = getUserIcon(info.iodineUid + "", authToken);
+                    icon = getUserIcon(String.valueOf(info.iodineUid), authToken);
                 } catch (IodineAuthException.NotLoggedInException e) {
                     Log.d(TAG, "Not logged in, oh no!", e);
                     am.invalidateAuthToken(mAccount.type, authToken);
