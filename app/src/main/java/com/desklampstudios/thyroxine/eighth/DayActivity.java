@@ -2,6 +2,7 @@ package com.desklampstudios.thyroxine.eighth;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -20,7 +21,6 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.BuildConfig;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
-import com.google.samples.apps.iosched.ui.widget.SlidingTabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
     private List<EighthBlock> mBlocks;
 
     private View mHeaderView;
-    private SlidingTabLayout mSlidingTabLayout;
+    private TabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
 
     @Override
@@ -72,11 +72,9 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
         ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
-
-        mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
-        mSlidingTabLayout.setCustomTabView(R.layout.tab_indicator, android.R.id.text1);
-        mSlidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.colorAccent));
-        mSlidingTabLayout.setDistributeEvenly(true);
+        mSlidingTabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
+        mSlidingTabLayout.setTabMode(TabLayout.MODE_FIXED);
+        mSlidingTabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
 
         // initialize loader
         getSupportLoaderManager().initLoader(BLOCKS_LOADER, null, this);
@@ -118,7 +116,7 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
         mViewPager.setAdapter(new DayPagerAdapter(getSupportFragmentManager()));
 
         // Give the SlidingTabLayout the ViewPager, AFTER the ViewPager's PagerAdapter is set.
-        mSlidingTabLayout.setViewPager(mViewPager);
+        mSlidingTabLayout.setupWithViewPager(mViewPager);
 
         // try to set correct item
         for (int i = 0; i < mBlocks.size(); i++) {
@@ -128,6 +126,7 @@ public class DayActivity extends ActionBarActivity implements LoaderManager.Load
                 break;
             }
         }
+        Log.d(TAG, "could not find correct position");
     }
 
     @Override
