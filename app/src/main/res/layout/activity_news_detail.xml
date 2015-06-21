@@ -9,31 +9,31 @@
 
     <include layout="@layout/default_toolbar" />
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/background"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:paddingTop="@dimen/activity_vertical_margin"
+        style="@style/ViewAreaTheme">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="4dp"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <TextView android:id="@+id/news_entry_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
+                android:paddingStart="@dimen/keyline_1"
+                android:paddingEnd="@dimen/keyline_1"
                 android:textSize="24sp"
                 tools:text="Title" />
 
             <TextView android:id="@+id/news_entry_published"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingStart="@dimen/keyline_1"
+                android:paddingEnd="@dimen/keyline_1"
                 android:textSize="16sp"
                 android:textColor="?android:textColorSecondary"
                 tools:text="Published" />
@@ -41,27 +41,29 @@
             <TextView android:id="@+id/news_entry_likes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingStart="@dimen/keyline_1"
+                android:paddingEnd="@dimen/keyline_1"
                 android:textSize="16sp"
                 android:textColor="?android:textColorSecondary"
                 tools:text="Likes" />
 
-        </LinearLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="8dp">
-
-            <WebView android:id="@+id/news_entry_webview"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/background" />
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
 
-        </FrameLayout>
+                <WebView android:id="@+id/news_entry_webview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/background" />
 
-    </LinearLayout>
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>

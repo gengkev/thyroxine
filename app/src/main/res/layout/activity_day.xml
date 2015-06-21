@@ -29,12 +29,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="104dp"
-        android:background="@color/background">
+        style="@style/ViewAreaTheme">
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
     </FrameLayout>
 
     <LinearLayout
@@ -50,13 +51,15 @@
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
             app:popupTheme="@style/Theme.AppCompat.Light.DarkActionBar"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            style="@style/ToolbarTheme" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/sliding_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
     </LinearLayout>
 
 </FrameLayout>

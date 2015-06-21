@@ -1,16 +1,21 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="AppTheme.Base">
-
     </style>
 
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground">?attr/colorPrimaryDark</item>
+    </style>
+
+    <!-- Drop shadow effect -->
+    <style name="ViewAreaTheme">
+        <item name="android:background">@color/background</item>
+        <item name="android:foreground">?android:windowContentOverlay</item>
+    </style>
+    <style name="ToolbarTheme">
     </style>
 
 </resources>
