@@ -14,6 +14,7 @@ class EighthActvInstance {
     @NonNull public final String comment;
     public final long flags;
     @NonNull public final String roomsStr;
+    @NonNull public final String sponsorsStr;
     public final int memberCount;
     public final int capacity;
 
@@ -23,6 +24,7 @@ class EighthActvInstance {
         this.comment = builder.comment;
         this.flags = builder.flags;
         this.roomsStr = builder.roomsStr;
+        this.sponsorsStr = builder.sponsorsStr;
         this.memberCount = builder.memberCount;
         this.capacity = builder.capacity;
     }
@@ -39,8 +41,8 @@ class EighthActvInstance {
     @Override
     public String toString() {
         return String.format("EighthActvInstance[actvId=%d, blockId=%d, comment=%s, flags=%s, " +
-                "roomsStr=%s, memberCount=%d, capacity=%d]",
-                actvId, blockId, comment, flags, roomsStr, memberCount, capacity);
+                "roomsStr=%s, sponsorsStr=%s, memberCount=%d, capacity=%d]",
+                actvId, blockId, comment, flags, roomsStr, sponsorsStr, memberCount, capacity);
     }
 
     @Override
@@ -63,6 +65,7 @@ class EighthActvInstance {
         @NonNull private String comment = "";
         private long flags = 0;
         @NonNull private String roomsStr = "";
+        @NonNull private String sponsorsStr = "";
         private int memberCount = 0;
         private int capacity = -1;
 
@@ -98,6 +101,10 @@ class EighthActvInstance {
         }
         public Builder roomsStr(@NonNull String roomsStr) {
             this.roomsStr = roomsStr;
+            return this;
+        }
+        public Builder sponsorsStr(@NonNull String sponsorsStr) {
+            this.sponsorsStr = sponsorsStr;
             return this;
         }
         public Builder memberCount(int memberCount) {

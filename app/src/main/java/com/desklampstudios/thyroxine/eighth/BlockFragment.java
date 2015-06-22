@@ -165,10 +165,12 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     // Called when an item in the adapter is clicked
     private void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
         String text = getString(R.string.actv_toast_text,
+                pair.first.actvId,
                 pair.first.name,
-                pair.second.roomsStr,
-                pair.second.comment,
                 pair.first.description,
+                pair.second.comment,
+                pair.second.roomsStr,
+                pair.second.sponsorsStr,
                 pair.second.memberCount,
                 pair.second.capacity
         );

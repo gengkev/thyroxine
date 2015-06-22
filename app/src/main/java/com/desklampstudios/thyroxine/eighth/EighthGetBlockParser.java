@@ -125,6 +125,10 @@ class EighthGetBlockParser extends AbstractXMLParser {
                     actvInstanceBuilder.roomsStr(
                             readBlockRooms(parser));
                     break;
+                case "block_sponsors":
+                    actvInstanceBuilder.sponsorsStr(
+                            readBlockSponsors(parser));
+                    break;
                 case "member_count":
                     actvInstanceBuilder.memberCount(
                             readInt(parser, "member_count"));
@@ -232,5 +236,64 @@ class EighthGetBlockParser extends AbstractXMLParser {
         }
 
         return name;
+    }
+
+    @NonNull
+    private static String readBlockSponsors(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "block_sponsors");
+
+        ArrayList<String> sponsors = new ArrayList<>();
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            switch (parser.getName()) {
+                case "sponsor":
+                    sponsors.add(readSponsor(parser));
+                    break;
+                default:
+                    skip(parser);
+                    break;
+            }
+        }
+
+        parser.require(XmlPullParser.END_TAG, ns, "block_sponsors");
+
+        return Utils.join(sponsors, ", ");
+    }
+    @NonNull
+    private static String readSponsor(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "sponsor");
+
+        String fname = "";
+        String lname = "";
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            switch (parser.getName()) {
+                case "fname":
+                    fname = Utils.cleanHtml(readText(parser, "fname"));
+                    break;
+                case "lname":
+                    lname = Utils.cleanHtml(readText(parser, "lname"));
+                    break;
+                default:
+                    skip(parser);
+                    break;
+            }
+        }
+
+        // Assuming that both aren't empty
+        if (fname.isEmpty()) {
+            return lname;
+        } else if (lname.isEmpty()) {
+            return fname;
+        }
+        return String.format("%s, %s.", lname, fname.substring(0, 1));
     }
 }

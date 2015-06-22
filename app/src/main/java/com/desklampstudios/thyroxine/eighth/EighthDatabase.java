@@ -14,7 +14,7 @@ import static com.desklampstudios.thyroxine.eighth.EighthContract.Schedule;
 class EighthDatabase extends SQLiteOpenHelper {
     private static final String TAG = EighthDatabase.class.getSimpleName();
 
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "thyroxine.db.eighth";
 
     interface Tables {
@@ -81,6 +81,7 @@ class EighthDatabase extends SQLiteOpenHelper {
                         ActvInstances.KEY_COMMENT + " TEXT NOT NULL, " +
                         ActvInstances.KEY_FLAGS + " INTEGER NOT NULL, " +
                         ActvInstances.KEY_ROOMS_STR + " TEXT NOT NULL, " +
+                        ActvInstances.KEY_SPONSORS_STR + " TEXT NOT NULL, " +
                         ActvInstances.KEY_MEMBER_COUNT + " INTEGER NOT NULL, " +
                         ActvInstances.KEY_CAPACITY + " INTEGER NOT NULL, " +
 

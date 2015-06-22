@@ -81,11 +81,12 @@
     <string name="actv_description_placeholder">(Aucune description)</string>
     <string name="actvInstance_rooms_placeholder">(Aucune salle)</string>
     <string name="actv_toast_text">
-        NOM: %1$s
-        \nSALLES: %2$s
-        \nCOMMENTAIRES: %3$s
-        \nDESCRIPTION: %4$s
-        \nINSCRITS: %5$d / %6$d
+        [%1$d] %2$s
+        \nDESCRIPTION: %3$s
+        \nCOMMENTAIRES: %4$s
+        \nSALLES: %5$s
+        \nPROMOTEURS: %6$s
+        \nINSCRITS: %7$d / %8$d
     </string>
 
     <string name="actv_not_selected"><![CDATA[<i>Non selectionnée</i>]]></string>

@@ -139,6 +139,7 @@ class EighthContract {
         public static final String KEY_COMMENT = "actvInstance_comment";
         public static final String KEY_FLAGS = "actvInstance_flags";
         public static final String KEY_ROOMS_STR = "actvInstance_rooms_str";
+        public static final String KEY_SPONSORS_STR = "actvInstance_sponsors_str";
         public static final String KEY_MEMBER_COUNT = "actvInstance_member_count";
         public static final String KEY_CAPACITY = "actvInstance_capacity";
 
@@ -164,6 +165,7 @@ class EighthContract {
                     .comment(values.getAsString(KEY_COMMENT))
                     .flags(values.getAsLong(KEY_FLAGS))
                     .roomsStr(values.getAsString(KEY_ROOMS_STR))
+                    .sponsorsStr(values.getAsString(KEY_SPONSORS_STR))
                     .memberCount(values.getAsInteger(KEY_MEMBER_COUNT))
                     .capacity(values.getAsInteger(KEY_CAPACITY))
                     .build();
@@ -176,6 +178,7 @@ class EighthContract {
             values.put(KEY_COMMENT, actvInstance.comment);
             values.put(KEY_FLAGS, actvInstance.flags);
             values.put(KEY_ROOMS_STR, actvInstance.roomsStr);
+            values.put(KEY_SPONSORS_STR, actvInstance.sponsorsStr);
             values.put(KEY_MEMBER_COUNT, actvInstance.memberCount);
             values.put(KEY_CAPACITY, actvInstance.capacity);
             return values;
