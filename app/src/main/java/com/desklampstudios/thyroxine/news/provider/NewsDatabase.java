@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.provider;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import static com.desklampstudios.thyroxine.news.NewsContract.NewsEntries;
+import static com.desklampstudios.thyroxine.news.provider.NewsContract.NewsEntries;
 
 class NewsDatabase extends SQLiteOpenHelper {
     private static final String TAG = NewsDatabase.class.getSimpleName();

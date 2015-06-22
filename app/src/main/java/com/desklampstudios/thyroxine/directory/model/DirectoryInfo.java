@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.directory;
+package com.desklampstudios.thyroxine.directory.model;
 
 import android.support.annotation.NonNull;
 

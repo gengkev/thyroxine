@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.sync;
+package com.desklampstudios.thyroxine;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
@@ -8,8 +8,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
-import com.desklampstudios.thyroxine.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

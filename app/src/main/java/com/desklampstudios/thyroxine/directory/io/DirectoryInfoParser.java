@@ -1,10 +1,11 @@
-package com.desklampstudios.thyroxine.directory;
+package com.desklampstudios.thyroxine.directory.io;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
+import com.desklampstudios.thyroxine.directory.model.DirectoryInfo;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

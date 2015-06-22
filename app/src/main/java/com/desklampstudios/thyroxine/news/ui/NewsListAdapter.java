@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.ui;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.news.provider.NewsContract;
 
 class NewsListAdapter extends CursorAdapter {
     private static final String TAG = NewsListAdapter.class.getSimpleName();

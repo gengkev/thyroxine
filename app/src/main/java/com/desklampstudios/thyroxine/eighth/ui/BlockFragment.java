@@ -29,7 +29,7 @@ import com.desklampstudios.thyroxine.eighth.io.EighthSignupException;
 import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import java.util.List;
 

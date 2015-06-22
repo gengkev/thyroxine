@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.sync;
 
 import android.app.Service;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -21,16 +21,17 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.desklampstudios.thyroxine.IodineApiHelper;
-import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.auth.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.desklampstudios.thyroxine.sync.SyncUtils;
+import com.desklampstudios.thyroxine.news.io.IodineNewsApi;
+import com.desklampstudios.thyroxine.news.model.NewsEntry;
+import com.desklampstudios.thyroxine.news.provider.NewsContract;
+import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
+import com.desklampstudios.thyroxine.SyncUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Part II. Get news list
             try {
-                newsList = fetchNews(authToken);
+                newsList = IodineNewsApi.fetchNewsList(getContext(), authToken);
             } catch (IodineAuthException.NotLoggedInException e) {
                 Log.d(TAG, "Not logged in, invalidating auth token", e);
                 am.invalidateAuthToken(account.type, authToken);
@@ -135,33 +136,6 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         Log.v(TAG, "Updated database; done syncing");
-    }
-
-    @NonNull
-    private List<NewsEntry> fetchNews(String authToken)
-            throws IodineAuthException, IOException, XmlPullParserException {
-
-        InputStream stream = null;
-        NewsListParser parser = null;
-
-        try {
-            stream = IodineApiHelper.getNewsList(getContext(), authToken);
-
-            parser = new NewsListParser(getContext());
-            parser.beginFeed(stream);
-
-            return parser.parseEntries();
-
-        } finally {
-            if (parser != null)
-                parser.stopParse();
-            try {
-                if (stream != null)
-                    stream.close();
-            } catch (IOException e) {
-                Log.e(TAG, "IOException when closing stream", e);
-            }
-        }
     }
 
     private void updateNewsData(@NonNull List<NewsEntry> newsList,

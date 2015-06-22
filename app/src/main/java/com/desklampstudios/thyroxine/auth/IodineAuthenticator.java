@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.sync;
+package com.desklampstudios.thyroxine.auth;
 
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
@@ -20,12 +20,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.BuildConfig;
-import com.desklampstudios.thyroxine.IodineApiHelper;
-import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.MainActivity;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.eighth.sync.EighthSyncAdapter;
-import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
+import com.desklampstudios.thyroxine.news.sync.NewsSyncAdapter;
 
 import org.xmlpull.v1.XmlPullParserException;
 

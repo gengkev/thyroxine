@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.ui;
 
 import android.app.LoaderManager;
 import android.content.ContentValues;
@@ -23,9 +23,11 @@ import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.news.io.IodineNewsApi;
+import com.desklampstudios.thyroxine.news.model.NewsEntry;
+import com.desklampstudios.thyroxine.news.provider.NewsContract;
 
 public class NewsDetailActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -93,7 +95,7 @@ public class NewsDetailActivity extends AppCompatActivity
 
         String shareSubject = mNewsEntry.title;
         String shareMessage = mNewsEntry.title + "\n" +
-                IodineApiHelper.getNewsShowUrl(mNewsEntry.newsId);
+                IodineNewsApi.getNewsShowUrl(mNewsEntry.newsId);
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
@@ -119,7 +121,7 @@ public class NewsDetailActivity extends AppCompatActivity
             case R.id.news_entry_browser: {
                 if (mNewsEntry != null) {
                     // open in browser
-                    String link = IodineApiHelper.getNewsShowUrl(mNewsEntry.newsId);
+                    String link = IodineNewsApi.getNewsShowUrl(mNewsEntry.newsId);
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                     startActivity(browserIntent);
                     return true;

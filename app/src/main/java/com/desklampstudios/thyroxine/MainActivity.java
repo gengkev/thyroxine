@@ -7,7 +7,6 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -28,16 +27,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.desklampstudios.thyroxine.directory.DirectoryInfo;
-import com.desklampstudios.thyroxine.directory.DirectoryInfoParser;
+import com.desklampstudios.thyroxine.auth.IodineAuthException;
+import com.desklampstudios.thyroxine.directory.io.IodineDirectoryApi;
+import com.desklampstudios.thyroxine.directory.model.DirectoryInfo;
 import com.desklampstudios.thyroxine.eighth.ui.ScheduleFragment;
-import com.desklampstudios.thyroxine.news.NewsFragment;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.news.ui.NewsFragment;
+import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -259,8 +258,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.v(TAG, "Got auth token: " + authToken);
 
                 try {
-                    info = getDirectoryInfo(authToken);
-                    icon = getUserIcon(String.valueOf(info.iodineUid), authToken);
+                    info = IodineDirectoryApi.getDirectoryInfo(MainActivity.this, "", authToken);
+                    String uidString = String.valueOf(info.iodineUid);
+                    icon = IodineDirectoryApi.getUserIcon(MainActivity.this, uidString, authToken);
                 } catch (IodineAuthException.NotLoggedInException e) {
                     Log.d(TAG, "Not logged in, oh no!", e);
                     am.invalidateAuthToken(mAccount.type, authToken);
@@ -287,49 +287,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             return null;
-        }
-
-        private DirectoryInfo getDirectoryInfo(String authToken)
-                throws XmlPullParserException, IOException, IodineAuthException {
-
-            InputStream stream = null;
-            DirectoryInfoParser parser = null;
-            try {
-                stream = IodineApiHelper.getDirectoryInfo(mActivity, "", authToken);
-
-                parser = new DirectoryInfoParser(mActivity);
-                parser.beginInfo(stream);
-
-                return parser.parseDirectoryInfo();
-
-            } finally {
-                if (parser != null)
-                    parser.stopParse();
-                try {
-                    if (stream != null)
-                        stream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "IOException when closing stream", e);
-                }
-            }
-        }
-
-        private Bitmap getUserIcon(String uid, String authToken)
-                throws XmlPullParserException, IOException, IodineAuthException{
-            InputStream stream = null;
-            try {
-                stream = IodineApiHelper.getUserIcon(mActivity, uid, authToken);
-
-                return BitmapFactory.decodeStream(stream);
-
-            } finally {
-                try {
-                    if (stream != null)
-                        stream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "IOException when closing stream", e);
-                }
-            }
         }
 
         @Override

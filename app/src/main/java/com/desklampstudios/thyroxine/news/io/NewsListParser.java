@@ -1,10 +1,11 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.io;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.news.model.NewsEntry;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

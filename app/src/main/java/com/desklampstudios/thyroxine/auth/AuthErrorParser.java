@@ -1,8 +1,10 @@
-package com.desklampstudios.thyroxine;
+package com.desklampstudios.thyroxine.auth;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.desklampstudios.thyroxine.AbstractXMLParser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

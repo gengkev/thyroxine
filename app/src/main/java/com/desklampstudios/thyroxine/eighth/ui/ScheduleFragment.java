@@ -28,7 +28,7 @@ import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 import com.desklampstudios.thyroxine.eighth.sync.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.external.SimpleSectionedListAdapter;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,10 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.model;
 
 import android.support.annotation.NonNull;
 
 import com.desklampstudios.thyroxine.Utils;
 
-class NewsEntry implements Comparable<NewsEntry> {
+public class NewsEntry implements Comparable<NewsEntry> {
     public final int newsId;
     @NonNull public final String title;
     public final long published;

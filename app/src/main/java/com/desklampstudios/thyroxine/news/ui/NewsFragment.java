@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.ui;
 
 import android.accounts.Account;
 import android.app.Activity;
@@ -23,7 +23,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.news.provider.NewsContract;
+import com.desklampstudios.thyroxine.news.sync.NewsSyncAdapter;
+import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 /**
  * A simple {@link Fragment} subclass.

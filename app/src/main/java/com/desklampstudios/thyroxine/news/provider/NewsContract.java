@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.provider;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -6,7 +6,9 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 
-class NewsContract {
+import com.desklampstudios.thyroxine.news.model.NewsEntry;
+
+public class NewsContract {
     // Warning: for now, also declared in strings.xml
     public static final String CONTENT_AUTHORITY = "com.desklampstudios.thyroxine.news";
 
@@ -23,16 +25,16 @@ class NewsContract {
         public static final String CONTENT_ITEM_TYPE_NEWSENTRIES =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/newsEntry";
 
-        static final String KEY_TITLE = "news_title";
-        static final String KEY_PUBLISHED = "news_published";
-        static final String KEY_NEWS_ID = "news_id";
-        static final String KEY_CONTENT = "news_content";
-        static final String KEY_CONTENT_SNIPPET = "news_content_snippet";
-        static final String KEY_LIKED = "news_liked";
-        static final String KEY_NUM_LIKES = "news_num_likes";
+        public static final String KEY_TITLE = "news_title";
+        public static final String KEY_PUBLISHED = "news_published";
+        public static final String KEY_NEWS_ID = "news_id";
+        public static final String KEY_CONTENT = "news_content";
+        public static final String KEY_CONTENT_SNIPPET = "news_content_snippet";
+        public static final String KEY_LIKED = "news_liked";
+        public static final String KEY_NUM_LIKES = "news_num_likes";
 
         /** Default "ORDER BY" clause */
-        static final String DEFAULT_SORT = KEY_PUBLISHED + " DESC";
+        public static final String DEFAULT_SORT = KEY_PUBLISHED + " DESC";
 
         @NonNull
         public static Uri buildEntryUri(int newsId) {
@@ -46,7 +48,7 @@ class NewsContract {
 
         // converting to and from not-really-pojos yooooo
         @NonNull
-        static NewsEntry fromContentValues(@NonNull ContentValues values) {
+        public static NewsEntry fromContentValues(@NonNull ContentValues values) {
             return new NewsEntry.Builder()
                     .newsId(values.getAsInteger(KEY_NEWS_ID))
                     .title(values.getAsString(KEY_TITLE))
@@ -58,7 +60,7 @@ class NewsContract {
                     .build();
         }
         @NonNull
-        static ContentValues toContentValues(@NonNull NewsEntry entry) {
+        public static ContentValues toContentValues(@NonNull NewsEntry entry) {
             ContentValues values = new ContentValues();
             values.put(KEY_TITLE, entry.title);
             values.put(KEY_PUBLISHED, entry.published);

@@ -22,7 +22,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
 
-import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.auth.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.eighth.io.IodineEighthApi;
 import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
@@ -30,8 +30,8 @@ import com.desklampstudios.thyroxine.eighth.model.EighthActv;
 import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
-import com.desklampstudios.thyroxine.sync.SyncUtils;
+import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
+import com.desklampstudios.thyroxine.SyncUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 

@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.sync;
+package com.desklampstudios.thyroxine.auth;
 
 import android.app.Service;
 import android.content.Intent;

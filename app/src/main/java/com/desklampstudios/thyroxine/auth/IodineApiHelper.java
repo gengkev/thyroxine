@@ -1,13 +1,13 @@
-package com.desklampstudios.thyroxine;
+package com.desklampstudios.thyroxine.auth;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.desklampstudios.thyroxine.Utils;
+
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -25,16 +25,16 @@ public class IodineApiHelper {
     private static final String IODINE_BASE_URL = "https://" + IODINE_DOMAIN;
     private static final String LOGIN_URL = IODINE_BASE_URL + "/api/";
 
-    private static final String PUBLIC_NEWS_FEED_URL = IODINE_BASE_URL + "/feeds/rss";
-    private static final String NEWS_LIST_URL = IODINE_BASE_URL + "/api/news/list?end=100";
+    public static final String PUBLIC_NEWS_FEED_URL = IODINE_BASE_URL + "/feeds/rss";
+    public static final String NEWS_LIST_URL = IODINE_BASE_URL + "/api/news/list?end=100";
     public static final String NEWS_SHOW_URL = IODINE_BASE_URL + "/news/show/";
 
     public static final String BLOCK_LIST_URL = IODINE_BASE_URL + "/api/eighth/list_blocks";
     public static final String BLOCK_GET_URL = IODINE_BASE_URL + "/api/eighth/get_block/%d";
     public static final String SIGNUP_ACTIVITY_URL = IODINE_BASE_URL + "/api/eighth/signup_activity";
 
-    private static final String DIRECTORY_INFO_URL = IODINE_BASE_URL + "/api/studentdirectory/info/%s";
-    private static final String USER_ICON_URL = IODINE_BASE_URL + "/pictures/%s/main";
+    public static final String DIRECTORY_INFO_URL = IODINE_BASE_URL + "/api/studentdirectory/info/%s";
+    public static final String USER_ICON_URL = IODINE_BASE_URL + "/pictures/%s/main";
 
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
@@ -53,65 +53,6 @@ public class IodineApiHelper {
             default:
                 throw new IOException("Unexpected response code: " + conn.getResponseCode());
         }
-    }
-
-    @NonNull
-    public static InputStream getPublicNewsFeed(Context context)
-            throws IOException, XmlPullParserException, IodineAuthException {
-        URL url = new URL(PUBLIC_NEWS_FEED_URL);
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-
-        checkResponseCode(context, conn);
-        return new BufferedInputStream(conn.getInputStream());
-    }
-
-    @NonNull
-    public static InputStream getNewsList(Context context, String cookieHeader)
-            throws IOException, XmlPullParserException, IodineAuthException {
-        Log.v(TAG, "Cookies: " + cookieHeader);
-
-        URL url = new URL(NEWS_LIST_URL);
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Cookie", cookieHeader);
-
-        checkResponseCode(context, conn);
-        return new BufferedInputStream(conn.getInputStream());
-    }
-
-    @NonNull
-    public static String getNewsShowUrl(int newsId) {
-        return NEWS_SHOW_URL + newsId;
-    }
-
-
-    @NonNull
-    public static InputStream getDirectoryInfo(Context context, String uid, String cookieHeader)
-            throws IOException, XmlPullParserException, IodineAuthException {
-        Log.v(TAG, "Cookies: " + cookieHeader);
-
-        URL url = new URL(String.format(DIRECTORY_INFO_URL, uid));
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Cookie", cookieHeader);
-
-        checkResponseCode(context, conn);
-        return new BufferedInputStream(conn.getInputStream());
-    }
-
-    @NonNull
-    public static InputStream getUserIcon(Context context, String uid, String cookieHeader)
-            throws IOException, XmlPullParserException, IodineAuthException {
-        Log.v(TAG, "Cookies: " + cookieHeader);
-
-        URL url = new URL(String.format(USER_ICON_URL, uid));
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Cookie", cookieHeader);
-
-        checkResponseCode(context, conn);
-        return new BufferedInputStream(conn.getInputStream());
     }
 
     @Nullable

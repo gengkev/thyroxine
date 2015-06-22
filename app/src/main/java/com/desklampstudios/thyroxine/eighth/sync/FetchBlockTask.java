@@ -9,10 +9,10 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.auth.IodineAuthException;
 import com.desklampstudios.thyroxine.eighth.io.IodineEighthApi;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
-import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
+import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 

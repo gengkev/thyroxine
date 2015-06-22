@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.sync;
+package com.desklampstudios.thyroxine.auth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -23,8 +23,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.desklampstudios.thyroxine.IodineApiHelper;
-import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.external.AccountAuthenticatorActivity;
 
@@ -33,8 +31,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import static com.desklampstudios.thyroxine.IodineAuthException.InvalidPasswordException;
-import static com.desklampstudios.thyroxine.IodineAuthException.InvalidUsernameException;
+import static com.desklampstudios.thyroxine.auth.IodineAuthException.InvalidPasswordException;
+import static com.desklampstudios.thyroxine.auth.IodineAuthException.InvalidUsernameException;
 
 /**
  * A login screen that offers login via username/password.

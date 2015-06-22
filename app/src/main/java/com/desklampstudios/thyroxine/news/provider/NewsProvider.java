@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.news;
+package com.desklampstudios.thyroxine.news.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
@@ -16,8 +16,8 @@ import com.desklampstudios.thyroxine.external.SelectionBuilder;
 
 import java.util.ArrayList;
 
-import static com.desklampstudios.thyroxine.news.NewsContract.NewsEntries;
-import static com.desklampstudios.thyroxine.news.NewsDatabase.Tables;
+import static com.desklampstudios.thyroxine.news.provider.NewsContract.NewsEntries;
+import static com.desklampstudios.thyroxine.news.provider.NewsDatabase.Tables;
 
 public class NewsProvider extends ContentProvider {
     private static final int NEWSENTRIES = 100;

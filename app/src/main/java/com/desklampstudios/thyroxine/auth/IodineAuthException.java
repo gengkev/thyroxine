@@ -1,7 +1,9 @@
-package com.desklampstudios.thyroxine;
+package com.desklampstudios.thyroxine.auth;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+
+import com.desklampstudios.thyroxine.R;
 
 public class IodineAuthException extends Exception {
     public IodineAuthException(String msg) {

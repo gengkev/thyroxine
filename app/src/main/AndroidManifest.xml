@@ -18,7 +18,7 @@
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
     <!-- Permission to protect SyncAdapters -->
-    <permission android:name="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER"
+    <permission android:name="com.desklampstudios.thyroxine.auth.SYNC_ADAPTER"
         android:protectionLevel="signature" />
 
     <application
@@ -37,10 +37,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".sync.IodineAuthenticatorActivity"
+        <activity android:name=".auth.IodineAuthenticatorActivity"
             android:label="@string/title_activity_iodine_login"
             android:windowSoftInputMode="adjustResize|stateVisible" />
-        <activity android:name=".news.NewsDetailActivity"
+        <activity android:name=".news.ui.NewsDetailActivity"
             android:label="@string/title_activity_entry_detail"
             android:parentActivityName=".MainActivity" />
         <activity android:name=".eighth.ui.DayActivity"
@@ -48,7 +48,7 @@
             android:parentActivityName=".MainActivity" />
 
         <!-- News content provider -->
-        <provider android:name=".news.NewsProvider"
+        <provider android:name=".news.provider.NewsProvider"
             android:authorities="@string/news_content_authority"
             android:exported="false"
             android:syncable="true"
@@ -62,7 +62,7 @@
             android:label="@string/eighth_provider_name" />
 
         <!-- Authenticator service for Iodine login -->
-        <service android:name=".sync.IodineAuthenticatorService"
+        <service android:name=".auth.IodineAuthenticatorService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -73,7 +73,7 @@
         </service>
 
         <!-- SyncAdapter service for News -->
-        <service android:name=".news.NewsSyncService"
+        <service android:name=".news.sync.NewsSyncService"
             android:exported="true"
             android:process=":sync"
             android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER">
