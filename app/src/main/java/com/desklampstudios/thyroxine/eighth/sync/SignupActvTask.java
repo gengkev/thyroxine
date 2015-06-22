@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -13,17 +13,20 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.eighth.io.EighthSignupException;
+import com.desklampstudios.thyroxine.eighth.io.IodineEighthApi;
+import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
+import com.desklampstudios.thyroxine.eighth.model.EighthActv;
+import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 
-class SignupActvTask extends AsyncTask<Object, Void, Void> {
+public class SignupActvTask extends AsyncTask<Object, Void, Void> {
     private static final String TAG = SignupActvTask.class.getSimpleName();
 
     private final Activity mActivity;
@@ -65,7 +68,7 @@ class SignupActvTask extends AsyncTask<Object, Void, Void> {
             Log.v(TAG, "Got auth token: " + authToken);
 
             try {
-                doSignup(blockId, actvId, authToken);
+                IodineEighthApi.doSignup(mActivity, blockId, actvId, authToken);
             } catch (IodineAuthException.NotLoggedInException e) {
                 Log.d(TAG, "Not logged in, oh no!", e);
                 am.invalidateAuthToken(mAccount.type, authToken);
@@ -98,32 +101,6 @@ class SignupActvTask extends AsyncTask<Object, Void, Void> {
         updateDatabase(blockId, actv, actvInstance);
 
         return null;
-    }
-
-    private void doSignup(int blockId, int actvId, String authToken)
-            throws EighthSignupException, IodineAuthException, IOException, XmlPullParserException {
-
-        InputStream stream = null;
-        EighthSignupActvParser parser = null;
-
-        try {
-            stream = IodineApiHelper.signupActivity(mActivity, blockId, actvId, authToken);
-
-            parser = new EighthSignupActvParser(mActivity);
-            parser.beginSignupActivity(stream);
-
-            parser.checkResult();
-
-        } finally {
-            if (parser != null)
-                parser.stopParse();
-            try {
-                if (stream != null)
-                    stream.close();
-            } catch (IOException e) {
-                Log.e(TAG, "IOException when closing stream", e);
-            }
-        }
     }
 
     // TODO: make less hacky

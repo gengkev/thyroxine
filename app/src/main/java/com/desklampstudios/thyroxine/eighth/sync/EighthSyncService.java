@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.sync;
 
 import android.app.Service;
 import android.content.Intent;

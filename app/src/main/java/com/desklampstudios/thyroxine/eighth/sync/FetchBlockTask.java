@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -6,22 +6,20 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.Pair;
 
-import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
+import com.desklampstudios.thyroxine.eighth.io.IodineEighthApi;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-class FetchBlockTask extends AsyncTask<Integer, Void, List<Pair<EighthActv, EighthActvInstance>>> {
+public class FetchBlockTask extends AsyncTask<Integer, Void, List<EighthBlockAndActv>> {
     private static final String TAG = FetchBlockTask.class.getSimpleName();
 
     private final Activity mActivity;
@@ -38,11 +36,11 @@ class FetchBlockTask extends AsyncTask<Integer, Void, List<Pair<EighthActv, Eigh
 
     @Nullable
     @Override
-    protected List<Pair<EighthActv, EighthActvInstance>> doInBackground(Integer... params) {
+    protected List<EighthBlockAndActv> doInBackground(Integer... params) {
         final int blockId = params[0];
         final AccountManager am = AccountManager.get(mActivity);
 
-        List<Pair<EighthActv, EighthActvInstance>> pairList;
+        List<EighthBlockAndActv> pairList;
         boolean authTokenRetry = false;
         while (true) {
             // Part I. Get auth token
@@ -63,7 +61,7 @@ class FetchBlockTask extends AsyncTask<Integer, Void, List<Pair<EighthActv, Eigh
 
             // Part II. Get block (list of activities)
             try {
-                pairList = fetchActivities(blockId, authToken);
+                pairList = IodineEighthApi.fetchActivities(mActivity, blockId, authToken);
             } catch (IodineAuthException.NotLoggedInException e) {
                 Log.d(TAG, "Not logged in, invalidating auth token", e);
                 am.invalidateAuthToken(mAccount.type, authToken);
@@ -93,36 +91,8 @@ class FetchBlockTask extends AsyncTask<Integer, Void, List<Pair<EighthActv, Eigh
         return pairList;
     }
 
-    @NonNull
-    private List<Pair<EighthActv, EighthActvInstance>> fetchActivities(int blockId, String authToken)
-            throws IodineAuthException, IOException, XmlPullParserException {
-
-        InputStream stream = null;
-        EighthGetBlockParser parser = null;
-
-        try {
-            stream = IodineApiHelper.getBlock(mActivity, blockId, authToken);
-
-            parser = new EighthGetBlockParser(mActivity);
-            EighthListBlocksParser.EighthBlockAndActv blockPair = parser.beginGetBlock(stream);
-            Log.d(TAG, "Block: " + blockPair.block);
-
-            return parser.parseActivities();
-
-        } finally {
-            if (parser != null)
-                parser.stopParse();
-            try {
-                if (stream != null)
-                    stream.close();
-            } catch (IOException e) {
-                Log.e(TAG, "IOException when closing stream", e);
-            }
-        }
-    }
-
     @Override
-    protected void onPostExecute(List<Pair<EighthActv, EighthActvInstance>> pairList) {
+    protected void onPostExecute(List<EighthBlockAndActv> pairList) {
         if (pairList == null) {
             mResultListener.onError(mException);
             return;
@@ -133,7 +103,7 @@ class FetchBlockTask extends AsyncTask<Integer, Void, List<Pair<EighthActv, Eigh
     }
 
     public interface ActvsResultListener {
-        void onActvsResult(List<Pair<EighthActv, EighthActvInstance>> pairList);
+        void onActvsResult(List<EighthBlockAndActv> pairList);
         void onError(Exception exception);
     }
 }

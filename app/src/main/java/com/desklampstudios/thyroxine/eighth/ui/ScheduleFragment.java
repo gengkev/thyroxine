@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.ui;
 
 import android.accounts.Account;
 import android.app.Activity;
@@ -24,6 +24,9 @@ import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
+import com.desklampstudios.thyroxine.eighth.sync.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.external.SimpleSectionedListAdapter;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 

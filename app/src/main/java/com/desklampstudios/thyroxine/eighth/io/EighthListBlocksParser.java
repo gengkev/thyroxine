@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.io;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -6,6 +6,10 @@ import android.util.Pair;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.model.EighthActv;
+import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -168,19 +172,5 @@ class EighthListBlocksParser extends AbstractXMLParser {
         }
 
         return dateStr;
-    }
-
-    public static class EighthBlockAndActv {
-        @NonNull public final EighthBlock block;
-        @NonNull public final EighthActv actv;
-        @NonNull public final EighthActvInstance actvInstance;
-
-        public EighthBlockAndActv(@NonNull EighthBlock block,
-                                  @NonNull EighthActv actv,
-                                  @NonNull EighthActvInstance actvInstance) {
-            this.block = block;
-            this.actv = actv;
-            this.actvInstance = actvInstance;
-        }
     }
 }

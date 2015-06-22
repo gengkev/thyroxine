@@ -30,7 +30,7 @@ import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.directory.DirectoryInfo;
 import com.desklampstudios.thyroxine.directory.DirectoryInfoParser;
-import com.desklampstudios.thyroxine.eighth.ScheduleFragment;
+import com.desklampstudios.thyroxine.eighth.ui.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.NewsFragment;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 

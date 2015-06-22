@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +14,9 @@ import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.model.EighthActv;
+import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +27,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = ActvsListAdapter.class.getSimpleName();
     private static final int TYPE_ITEM = 1;
 
-    @NonNull private final List<Pair<EighthActv, EighthActvInstance>> mDataset;
+    @NonNull private final List<EighthBlockAndActv> mDataset;
     @NonNull private final Context mContext;
     @Nullable private OnItemClickListener mListener = null;
 
@@ -71,9 +73,9 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             final ViewHolder itemHolder = (ViewHolder) holder;
             final int itemPosition = actualPosition;
 
-            Pair<EighthActv, EighthActvInstance> pair = getItem(itemPosition);
-            EighthActv actv = pair.first;
-            EighthActvInstance actvInstance = pair.second;
+            EighthBlockAndActv pair = getItem(itemPosition);
+            EighthActv actv = pair.actv;
+            EighthActvInstance actvInstance = pair.actvInstance;
 
             itemHolder.mNameView.setText(formatName(actv));
             itemHolder.mDescriptionView.setText(formatDescription(actv, actvInstance));
@@ -191,8 +193,8 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String group = getGroup(actv);
         String prevGroup = "";
         if (position > 0) {
-            Pair<EighthActv, EighthActvInstance> prevPair = getItem(position - 1);
-            prevGroup = getGroup(prevPair.first);
+            EighthBlockAndActv prevPair = getItem(position - 1);
+            prevGroup = getGroup(prevPair.actv);
         }
 
         if (!group.equals(prevGroup)) {
@@ -215,20 +217,20 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    public void addItem(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
+    public void addItem(@NonNull EighthBlockAndActv pair) {
         addItem(mDataset.size(), pair);
     }
 
-    public void addItem(int pos, @NonNull Pair<EighthActv, EighthActvInstance> pair) {
+    public void addItem(int pos, @NonNull EighthBlockAndActv pair) {
         mDataset.add(pos, pair);
         notifyItemInserted(pos);
     }
 
-    public Pair<EighthActv, EighthActvInstance> getItem(int pos) {
+    public EighthBlockAndActv getItem(int pos) {
         return mDataset.get(pos);
     }
 
-    public void replaceAllItems(@NonNull Collection<Pair<EighthActv, EighthActvInstance>> pairList) {
+    public void replaceAllItems(@NonNull Collection<EighthBlockAndActv> pairList) {
         int oldSize = mDataset.size();
         mDataset.clear();
         mDataset.addAll(pairList);

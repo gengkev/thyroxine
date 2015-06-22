@@ -1,9 +1,9 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-class EighthActv implements Comparable<EighthActv> {
+public class EighthActv implements Comparable<EighthActv> {
     public static final int NOT_SELECTED_AID = 999;
 
     public static final int FLAG_ALL = 127;

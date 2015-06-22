@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.ui;
 
 import android.accounts.Account;
 import android.content.ContentValues;
@@ -14,7 +14,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +23,12 @@ import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.sync.FetchBlockTask;
+import com.desklampstudios.thyroxine.eighth.sync.SignupActvTask;
+import com.desklampstudios.thyroxine.eighth.io.EighthSignupException;
+import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 
 import java.util.List;
@@ -78,12 +83,12 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mAdapter.setOnItemClickListener(new ActvsListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int pos) {
-                Pair<EighthActv, EighthActvInstance> pair = mAdapter.getItem(pos);
+                EighthBlockAndActv pair = mAdapter.getItem(pos);
                 onActvClick(pair);
             }
             @Override
             public boolean onItemLongClick(View view, int pos) {
-                Pair<EighthActv, EighthActvInstance> pair = mAdapter.getItem(pos);
+                EighthBlockAndActv pair = mAdapter.getItem(pos);
                 changeSelectedActv(pair);
                 return true;
             }
@@ -163,16 +168,16 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     // Called when an item in the adapter is clicked
-    private void onActvClick(@NonNull Pair<EighthActv, EighthActvInstance> pair) {
+    private void onActvClick(@NonNull EighthBlockAndActv pair) {
         String text = getString(R.string.actv_toast_text,
-                pair.first.actvId,
-                pair.first.name,
-                pair.first.description,
-                pair.second.comment,
-                pair.second.roomsStr,
-                pair.second.sponsorsStr,
-                pair.second.memberCount,
-                pair.second.capacity
+                pair.actv.actvId,
+                pair.actv.name,
+                pair.actv.description,
+                pair.actvInstance.comment,
+                pair.actvInstance.roomsStr,
+                pair.actvInstance.sponsorsStr,
+                pair.actvInstance.memberCount,
+                pair.actvInstance.capacity
         );
         Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
     }
@@ -210,7 +215,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         // Load stuff using AsyncTask
         mFetchBlockTask = new FetchBlockTask(getActivity(), account, new FetchBlockTask.ActvsResultListener() {
             @Override
-            public void onActvsResult(List<Pair<EighthActv, EighthActvInstance>> pairList) {
+            public void onActvsResult(List<EighthBlockAndActv> pairList) {
                 mFetchBlockTask = null;
                 mSwipeRefreshLayout.setRefreshing(false); // syncing done
 
@@ -228,14 +233,14 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         mFetchBlockTask.execute(blockId);
     }
 
-    private void changeSelectedActv(@NonNull final Pair<EighthActv, EighthActvInstance> pair) {
+    private void changeSelectedActv(@NonNull final EighthBlockAndActv pair) {
         if (mSignupActvTask != null) {
             String message = getActivity().getString(R.string.signup_changing_wait);
             Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             return;
         }
 
-        String message = getActivity().getString(R.string.signup_changing, pair.first.name);
+        String message = getActivity().getString(R.string.signup_changing, pair.actv.name);
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
 
         Account account = IodineAuthenticator.getIodineAccount(getActivity());
@@ -243,7 +248,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             @Override
             public void onSignupResult() {
                 mSignupActvTask = null;
-                String message = getActivity().getString(R.string.signup_success, pair.first.name);
+                String message = getActivity().getString(R.string.signup_success, pair.actv.name);
                 Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
             }
 
@@ -251,7 +256,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             public void onError(@NonNull Exception exception) {
                 mSignupActvTask = null;
                 if (exception instanceof EighthSignupException) {
-                    String message = getActivity().getString(R.string.signup_failure, pair.first.name)
+                    String message = getActivity().getString(R.string.signup_failure, pair.actv.name)
                             + "\n" + exception.getMessage();
                     Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                 } else {
@@ -260,7 +265,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
                 }
             }
         });
-        mSignupActvTask.execute(blockId, pair.first, pair.second);
+        mSignupActvTask.execute(blockId, pair.actv, pair.actvInstance);
     }
 
     @Nullable

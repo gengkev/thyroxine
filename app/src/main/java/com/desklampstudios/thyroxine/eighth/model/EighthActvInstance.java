@@ -1,9 +1,9 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-class EighthActvInstance {
+public class EighthActvInstance {
     public static final int FLAG_ALL = 7168;
     public static final int FLAG_ATTENDANCETAKEN = 1024;
     public static final int FLAG_CANCELLED = 2048;

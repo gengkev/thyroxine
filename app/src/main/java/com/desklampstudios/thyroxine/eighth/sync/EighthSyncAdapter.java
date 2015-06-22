@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -22,20 +22,22 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
 
-import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.io.IodineEighthApi;
+import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
+import com.desklampstudios.thyroxine.eighth.model.EighthActv;
+import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
 import com.desklampstudios.thyroxine.sync.IodineAuthenticator;
 import com.desklampstudios.thyroxine.sync.SyncUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.desklampstudios.thyroxine.eighth.EighthListBlocksParser.EighthBlockAndActv;
 
 public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = EighthSyncAdapter.class.getSimpleName();
@@ -191,7 +193,7 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Part II. Get schedule (list of blocks)
             try {
-                schedule = fetchSchedule(authToken);
+                schedule = IodineEighthApi.fetchSchedule(getContext(), authToken);
             } catch (IodineAuthException.NotLoggedInException e) {
                 Log.d(TAG, "Not logged in, invalidating auth token", e);
                 am.invalidateAuthToken(account.type, authToken);
@@ -251,33 +253,6 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.v(TAG, "Updated database; done syncing");
     }
 
-
-    @NonNull
-    private List<EighthBlockAndActv> fetchSchedule(String authToken)
-            throws IodineAuthException, IOException, XmlPullParserException {
-
-        InputStream stream = null;
-        EighthListBlocksParser parser = null;
-
-        try {
-            stream = IodineApiHelper.getBlockList(getContext(), authToken);
-
-            parser = new EighthListBlocksParser(getContext());
-            parser.beginListBlocks(stream);
-
-            return parser.parseBlocks();
-
-        } finally {
-            if (parser != null)
-                parser.stopParse();
-            try {
-                if (stream != null)
-                    stream.close();
-            } catch (IOException e) {
-                Log.e(TAG, "IOException when closing stream", e);
-            }
-        }
-    }
 
     // TODO: get rid of all this, it's ridiculous
     /**

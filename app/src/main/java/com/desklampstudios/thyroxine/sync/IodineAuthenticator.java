@@ -12,7 +12,6 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -25,7 +24,7 @@ import com.desklampstudios.thyroxine.IodineApiHelper;
 import com.desklampstudios.thyroxine.IodineAuthException;
 import com.desklampstudios.thyroxine.MainActivity;
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.eighth.EighthSyncAdapter;
+import com.desklampstudios.thyroxine.eighth.sync.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.news.NewsSyncAdapter;
 
 import org.xmlpull.v1.XmlPullParserException;

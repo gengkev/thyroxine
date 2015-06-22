@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,7 +7,7 @@ import com.desklampstudios.thyroxine.Utils;
 
 import java.text.ParseException;
 
-class EighthBlock implements Comparable<EighthBlock> {
+public class EighthBlock implements Comparable<EighthBlock> {
     public final int blockId;
     @NonNull public final String date;
     @NonNull public final String type;

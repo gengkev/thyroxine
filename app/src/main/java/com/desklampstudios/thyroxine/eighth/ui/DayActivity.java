@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.ui;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -21,6 +21,8 @@ import android.widget.Toast;
 import com.desklampstudios.thyroxine.BuildConfig;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 
 import java.util.ArrayList;
 import java.util.List;

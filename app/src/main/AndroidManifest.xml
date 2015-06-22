@@ -43,7 +43,7 @@
         <activity android:name=".news.NewsDetailActivity"
             android:label="@string/title_activity_entry_detail"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".eighth.DayActivity"
+        <activity android:name=".eighth.ui.DayActivity"
             android:label="@string/title_activity_day"
             android:parentActivityName=".MainActivity" />
 
@@ -55,7 +55,7 @@
             android:label="@string/news_provider_name" />
 
         <!-- Eighth content provider -->
-        <provider android:name=".eighth.EighthProvider"
+        <provider android:name=".eighth.provider.EighthProvider"
             android:authorities="@string/eighth_content_authority"
             android:exported="false"
             android:syncable="true"
@@ -86,7 +86,7 @@
         </service>
 
         <!-- SyncAdapter service for Eighth -->
-        <service android:name=".eighth.EighthSyncService"
+        <service android:name=".eighth.sync.EighthSyncService"
             android:exported="true"
             android:process=":sync"
             android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER">

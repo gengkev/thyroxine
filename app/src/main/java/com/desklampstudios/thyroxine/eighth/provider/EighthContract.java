@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.provider;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -6,7 +6,11 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 
-class EighthContract {
+import com.desklampstudios.thyroxine.eighth.model.EighthActv;
+import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
+
+public class EighthContract {
     // Warning: for now, also declared in strings.xml
     public static final String CONTENT_AUTHORITY = "com.desklampstudios.thyroxine.eighth";
 

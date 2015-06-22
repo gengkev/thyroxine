@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.provider;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,10 +6,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import static com.desklampstudios.thyroxine.eighth.EighthContract.ActvInstances;
-import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
-import static com.desklampstudios.thyroxine.eighth.EighthContract.Blocks;
-import static com.desklampstudios.thyroxine.eighth.EighthContract.Schedule;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.ActvInstances;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.Actvs;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.Blocks;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.Schedule;
 
 class EighthDatabase extends SQLiteOpenHelper {
     private static final String TAG = EighthDatabase.class.getSimpleName();

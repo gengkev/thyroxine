@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.ui;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,6 +16,10 @@ import android.widget.TextView;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
+import com.desklampstudios.thyroxine.eighth.model.EighthActv;
+import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 
 import java.util.ArrayList;
 

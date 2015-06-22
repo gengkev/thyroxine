@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
@@ -16,11 +16,11 @@ import com.desklampstudios.thyroxine.external.SelectionBuilder;
 
 import java.util.ArrayList;
 
-import static com.desklampstudios.thyroxine.eighth.EighthContract.ActvInstances;
-import static com.desklampstudios.thyroxine.eighth.EighthContract.Actvs;
-import static com.desklampstudios.thyroxine.eighth.EighthContract.Blocks;
-import static com.desklampstudios.thyroxine.eighth.EighthContract.Schedule;
-import static com.desklampstudios.thyroxine.eighth.EighthDatabase.Tables;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.ActvInstances;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.Actvs;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.Blocks;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthContract.Schedule;
+import static com.desklampstudios.thyroxine.eighth.provider.EighthDatabase.Tables;
 
 public class EighthProvider extends ContentProvider {
     private static final int ACTVS = 100;

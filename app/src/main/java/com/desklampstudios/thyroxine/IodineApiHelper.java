@@ -29,9 +29,9 @@ public class IodineApiHelper {
     private static final String NEWS_LIST_URL = IODINE_BASE_URL + "/api/news/list?end=100";
     public static final String NEWS_SHOW_URL = IODINE_BASE_URL + "/news/show/";
 
-    private static final String BLOCK_LIST_URL = IODINE_BASE_URL + "/api/eighth/list_blocks";
-    private static final String BLOCK_GET_URL = IODINE_BASE_URL + "/api/eighth/get_block/%d";
-    private static final String SIGNUP_ACTIVITY_URL = IODINE_BASE_URL + "/api/eighth/signup_activity";
+    public static final String BLOCK_LIST_URL = IODINE_BASE_URL + "/api/eighth/list_blocks";
+    public static final String BLOCK_GET_URL = IODINE_BASE_URL + "/api/eighth/get_block/%d";
+    public static final String SIGNUP_ACTIVITY_URL = IODINE_BASE_URL + "/api/eighth/signup_activity";
 
     private static final String DIRECTORY_INFO_URL = IODINE_BASE_URL + "/api/studentdirectory/info/%s";
     private static final String USER_ICON_URL = IODINE_BASE_URL + "/pictures/%s/main";
@@ -39,7 +39,7 @@ public class IodineApiHelper {
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
 
-    private static void checkResponseCode(Context context, HttpsURLConnection conn)
+    public static void checkResponseCode(Context context, HttpsURLConnection conn)
             throws IOException, XmlPullParserException, IodineAuthException {
 
         // Note that to read 4xx response codes, one must use getErrorStream() (see #16)
@@ -85,58 +85,6 @@ public class IodineApiHelper {
         return NEWS_SHOW_URL + newsId;
     }
 
-    @NonNull
-    public static InputStream getBlock(Context context, int blockId, String cookieHeader)
-            throws IOException, XmlPullParserException, IodineAuthException {
-        Log.v(TAG, "Cookies: " + cookieHeader);
-
-        URL url = new URL(String.format(BLOCK_GET_URL, blockId));
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Cookie", cookieHeader);
-
-        checkResponseCode(context, conn);
-        return new BufferedInputStream(conn.getInputStream());
-    }
-
-    @NonNull
-    public static InputStream getBlockList(Context context, String cookieHeader)
-            throws IOException, XmlPullParserException, IodineAuthException {
-        Log.v(TAG, "Cookies: " + cookieHeader);
-
-        URL url = new URL(BLOCK_LIST_URL);
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Cookie", cookieHeader);
-
-        checkResponseCode(context, conn);
-        return new BufferedInputStream(conn.getInputStream());
-    }
-
-    @NonNull
-    public static InputStream signupActivity(Context context, int blockId, int actvId, String cookieHeader)
-            throws IOException, XmlPullParserException, IodineAuthException {
-
-        // create query params
-        String query = "bid=" + URLEncoder.encode(String.valueOf(blockId), "UTF-8") +
-                "&aid=" + URLEncoder.encode(String.valueOf(actvId), "UTF-8");
-
-        // create request
-        URL url = new URL(SIGNUP_ACTIVITY_URL);
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Cookie", cookieHeader);
-        conn.setFixedLengthStreamingMode(query.length());
-        conn.setInstanceFollowRedirects(false);
-
-        // write output and begin request
-        OutputStreamWriter outWriter = new OutputStreamWriter(conn.getOutputStream());
-        outWriter.write(query);
-        outWriter.close();
-
-        checkResponseCode(context, conn);
-        return new BufferedInputStream(conn.getInputStream());
-    }
 
     @NonNull
     public static InputStream getDirectoryInfo(Context context, String uid, String cookieHeader)

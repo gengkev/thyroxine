@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.eighth;
+package com.desklampstudios.thyroxine.eighth.io;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -6,6 +6,10 @@ import android.util.Pair;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.eighth.model.EighthActv;
+import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
+import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -14,10 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import static com.desklampstudios.thyroxine.eighth.EighthListBlocksParser.EighthBlockAndActv;
-
 class EighthGetBlockParser extends AbstractXMLParser {
     private static final String TAG = EighthGetBlockParser.class.getSimpleName();
+
+    private EighthBlock mBlock;
 
     public EighthGetBlockParser(Context context) throws XmlPullParserException {
         super(context);
@@ -40,11 +44,14 @@ class EighthGetBlockParser extends AbstractXMLParser {
         // getBlock API begins with currently selected block, then all activities
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "block");
-        return EighthListBlocksParser.readBlock(mParser);
+
+        EighthBlockAndActv blockAndActv = EighthListBlocksParser.readBlock(mParser);
+        mBlock = blockAndActv.block;
+        return blockAndActv;
     }
 
     @NonNull
-    public ArrayList<Pair<EighthActv, EighthActvInstance>> parseActivities()
+    public ArrayList<EighthBlockAndActv> parseActivities()
             throws XmlPullParserException, IOException {
         if (!parsingBegun) {
             throw new IllegalStateException();
@@ -54,18 +61,18 @@ class EighthGetBlockParser extends AbstractXMLParser {
         mParser.nextTag();
         mParser.require(XmlPullParser.START_TAG, ns, "activities");
 
-        ArrayList<Pair<EighthActv, EighthActvInstance>> actvs = readActivityList(mParser);
+        ArrayList<EighthBlockAndActv> actvs = readActivityList(mParser, mBlock);
 
         stopParse();
         return actvs;
     }
 
     @NonNull
-    private static ArrayList<Pair<EighthActv, EighthActvInstance>> readActivityList(XmlPullParser parser)
+    private static ArrayList<EighthBlockAndActv> readActivityList(XmlPullParser parser, EighthBlock block)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "activities");
 
-        ArrayList<Pair<EighthActv, EighthActvInstance>> activities = new ArrayList<>();
+        ArrayList<EighthBlockAndActv> activities = new ArrayList<>();
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -73,7 +80,10 @@ class EighthGetBlockParser extends AbstractXMLParser {
             }
             switch (parser.getName()) {
                 case "activity":
-                    activities.add(readActivity(parser));
+                    Pair<EighthActv, EighthActvInstance> actvPair = readActivity(parser);
+                    EighthBlockAndActv blockAndActv = new EighthBlockAndActv(
+                            block, actvPair.first, actvPair.second);
+                    activities.add(blockAndActv);
                     break;
                 default:
                     skip(parser);
