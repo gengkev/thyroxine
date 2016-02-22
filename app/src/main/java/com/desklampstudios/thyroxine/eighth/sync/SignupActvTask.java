@@ -1,7 +1,6 @@
 package com.desklampstudios.thyroxine.eighth.sync;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
@@ -13,13 +12,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.desklampstudios.thyroxine.auth.IodineAuthException;
+import com.desklampstudios.thyroxine.iodine.IodineAuthException;
+import com.desklampstudios.thyroxine.iodine.IodineAuthUtils;
 import com.desklampstudios.thyroxine.eighth.io.EighthSignupException;
 import com.desklampstudios.thyroxine.eighth.io.IodineEighthApi;
 import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
 import com.desklampstudios.thyroxine.eighth.model.EighthActv;
 import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
-import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -48,56 +47,45 @@ public class SignupActvTask extends AsyncTask<Object, Void, Void> {
         final EighthActv actv = (EighthActv) params[1];
         final EighthActvInstance actvInstance = (EighthActvInstance) params[2];
         final int actvId = actv.actvId;
-        final AccountManager am = AccountManager.get(mActivity);
 
-        boolean authTokenRetry = false;
-        while (true) {
-            String authToken;
-            try {
-                authToken = am.blockingGetAuthToken(mAccount,
-                        IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
-            } catch (IOException e) {
-                Log.e(TAG, "Connection error: " + e.toString());
-                mException = e;
-                return null;
-            } catch (@NonNull OperationCanceledException | AuthenticatorException e) {
-                Log.e(TAG, "Authentication error: " + e.toString());
-                mException = e;
-                return null;
-            }
-            Log.v(TAG, "Got auth token: " + authToken);
-
-            try {
-                IodineEighthApi.doSignup(mActivity, blockId, actvId, authToken);
-            } catch (IodineAuthException.NotLoggedInException e) {
-                Log.d(TAG, "Not logged in, oh no!", e);
-                am.invalidateAuthToken(mAccount.type, authToken);
-
-                // Automatically retry, but only once
-                if (!authTokenRetry) {
-                    authTokenRetry = true;
-                    Log.d(TAG, "Retrying fetch with new auth token.");
-                    continue;
-                } else {
-                    Log.e(TAG, "Retried to get auth token already, quitting.");
+        try {
+            IodineAuthUtils.withAuthTokenBlocking(mActivity, mAccount, new IodineAuthUtils.AuthTokenOperation<Void>() {
+                @Override
+                public Void performOperation(String authToken)
+                        throws IodineAuthException, IOException, XmlPullParserException, EighthSignupException {
+                    IodineEighthApi.doSignup(mActivity, blockId, actvId, authToken);
                     return null;
                 }
-            } catch (EighthSignupException e) {
-                mException = e;
-                return null;
-            } catch (IOException | IodineAuthException e) {
-                Log.e(TAG, "Connection error: " + e.toString());
-                mException = e;
-                return null;
-            } catch (XmlPullParserException e) {
-                Log.e(TAG, "XML error: " + e.toString());
-                mException = e;
-                return null;
-            }
-            break;
+            });
+        } catch (EighthSignupException e) {
+            Log.d(TAG, "Signup failed", e);
+            mException = e;
+            return null;
+        } catch (IOException e) {
+            Log.e(TAG, "Connection error", e);
+            mException = e;
+            return null;
+        } catch (OperationCanceledException e) {
+            Log.e(TAG, "Operation canceled", e);
+            mException = e;
+            return null;
+        } catch (AuthenticatorException e) {
+            Log.e(TAG, "Authenticator error", e);
+            mException = e;
+            return null;
+        } catch (IodineAuthException e) {
+            Log.e(TAG, "Auth error", e);
+            mException = e;
+            return null;
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XML error", e);
+            mException = e;
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        // Part III. Update database
+        // Update database
         updateDatabase(blockId, actv, actvInstance);
 
         return null;

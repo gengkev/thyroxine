@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.auth;
+package com.desklampstudios.thyroxine.iodine;
 
 import android.app.Service;
 import android.content.Intent;

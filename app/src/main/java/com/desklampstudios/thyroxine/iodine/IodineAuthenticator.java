@@ -1,15 +1,10 @@
-package com.desklampstudios.thyroxine.auth;
+package com.desklampstudios.thyroxine.iodine;
 
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
 import android.accounts.NetworkErrorException;
-import android.accounts.OperationCanceledException;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,11 +14,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.desklampstudios.thyroxine.BuildConfig;
-import com.desklampstudios.thyroxine.MainActivity;
 import com.desklampstudios.thyroxine.R;
-import com.desklampstudios.thyroxine.eighth.sync.EighthSyncAdapter;
-import com.desklampstudios.thyroxine.news.sync.NewsSyncAdapter;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -175,124 +166,6 @@ public class IodineAuthenticator extends AbstractAccountAuthenticator {
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account,
                               String[] features) throws NetworkErrorException {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the first Iodine account stored in the account manager, or null if not logged in.
-     *
-     * <p>(Note that not logged in means that no account exists on the device -- not the same as
-     * IodineAuthError.NotLoggedInException, which may indicate expired credentials.)
-     *
-     * @param context The context used to access the account service
-     * @return The Iodine account, or null
-     */
-    @Nullable
-    public static Account getIodineAccount(@NonNull Context context) {
-        // Get an instance of the Android account manager
-        AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
-
-        // List all accounts of this type
-        Account[] accounts = am.getAccountsByType(IodineAuthenticator.ACCOUNT_TYPE);
-
-        if (accounts.length == 0) {
-            Log.w(TAG, "getIodineAccount: no accounts found (not logged in)");
-            return null;
-        } else if (accounts.length > 1) {
-            Log.w(TAG, "getIodineAccount: more than one account: " + Arrays.toString(accounts));
-        }
-        return accounts[0];
-    }
-
-    public static void attemptLogout(@NonNull final Activity activity) {
-        final AccountManager am = AccountManager.get(activity);
-        final AccountManagerCallback<Boolean> callback = new AccountManagerCallback<Boolean>() {
-            @Override
-            public void run(AccountManagerFuture<Boolean> future) {
-                try {
-                    Boolean result = future.getResult();
-                    if (result == null || result.equals(Boolean.FALSE)) {
-                        throw new Exception("result was " + result);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Error trying to remove account", e);
-                    String message = activity.getString(R.string.error_removing_account, e.toString());
-                    Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Log.i(TAG, "Successfully removed account.");
-                Toast.makeText(activity, R.string.sign_out_success, Toast.LENGTH_LONG).show();
-            }
-        };
-
-        final Account account = IodineAuthenticator.getIodineAccount(activity);
-        am.removeAccount(account, callback, null);
-        activity.finish();
-    }
-
-    /**
-     * Attempts to add an Iodine account.
-     * @param activity The activity used to open the login activity and as a context.
-     */
-    public static void attemptAddAccount(@NonNull final Activity activity) {
-        final AccountManager am = AccountManager.get(activity);
-        final AccountManagerCallback<Bundle> callback = new AccountManagerCallback<Bundle>() {
-            @Override
-            public void run(AccountManagerFuture<Bundle> future) {
-                Bundle result;
-                try {
-                    result = future.getResult();
-                } catch (OperationCanceledException | IOException | AuthenticatorException e) {
-                    Log.e(TAG, "Error trying to add account", e);
-                    String message = activity.getString(R.string.error_adding_account, e.toString());
-                    Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Account newAccount = new Account(
-                        result.getString(AccountManager.KEY_ACCOUNT_NAME),
-                        result.getString(AccountManager.KEY_ACCOUNT_TYPE));
-
-                // Check that this new account is correct
-                if (BuildConfig.DEBUG) {
-                    Account iodineAccount = IodineAuthenticator.getIodineAccount(activity);
-                    if (iodineAccount == null || !iodineAccount.equals(newAccount))
-                        throw new AssertionError();
-                }
-
-                // Start MainActivity
-                Intent intent = new Intent(activity, MainActivity.class);
-                activity.startActivity(intent);
-            }
-        };
-        am.addAccount(IodineAuthenticator.ACCOUNT_TYPE,
-                IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN,
-                null, null, activity, callback, null);
-        activity.finish();
-    }
-
-    static void onAccountCreated(Account newAccount) {
-        // Configure sync with Iodine account
-        EighthSyncAdapter.configureSync(newAccount);
-        NewsSyncAdapter.configureSync(newAccount);
-
-        // Request initial sync
-        EighthSyncAdapter.syncImmediately(newAccount, false);
-        NewsSyncAdapter.syncImmediately(newAccount, false);
-    }
-
-    /**
-     * Makes sure synchronization is set up properly, retrieving the Iodine account
-     * and configuring periodic synchronization with the SyncAdapters.
-     * @param context Context used to get accounts
-     */
-    public static void configureSync(@NonNull Context context) {
-        // Find Iodine account (may not exist)
-        Account iodineAccount = IodineAuthenticator.getIodineAccount(context);
-        if (iodineAccount != null) {
-            // Configure sync with Iodine account
-            EighthSyncAdapter.configureSync(iodineAccount);
-            NewsSyncAdapter.configureSync(iodineAccount);
-        }
     }
 }
 

@@ -24,11 +24,11 @@ import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.iodine.IodineAuthUtils;
 import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 import com.desklampstudios.thyroxine.eighth.sync.EighthSyncAdapter;
 import com.desklampstudios.thyroxine.external.SimpleSectionedListAdapter;
-import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +151,7 @@ public class ScheduleFragment extends Fragment
         mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, this);
 
         // initialize mSyncActive, mSyncPending
-        final Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        final Account account = IodineAuthUtils.getIodineAccount(getActivity());
         mSyncActive = ContentResolver.isSyncActive(
                 account, EighthContract.CONTENT_AUTHORITY);
         mSyncPending = ContentResolver.isSyncPending(
@@ -178,7 +178,7 @@ public class ScheduleFragment extends Fragment
     @Override
     public void onStatusChanged(int which) {
         final Activity activity = getActivity();
-        final Account account = IodineAuthenticator.getIodineAccount(activity);
+        final Account account = IodineAuthUtils.getIodineAccount(activity);
 
         final boolean syncActive = ContentResolver.isSyncActive(
                 account, EighthContract.CONTENT_AUTHORITY);
@@ -216,10 +216,10 @@ public class ScheduleFragment extends Fragment
     }
 
     private Account checkLoginState() {
-        Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        Account account = IodineAuthUtils.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
-            IodineAuthenticator.attemptAddAccount(getActivity());
+            IodineAuthUtils.attemptAddAccount(getActivity());
         }
         return account;
     }

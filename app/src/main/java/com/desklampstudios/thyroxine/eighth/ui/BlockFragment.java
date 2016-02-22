@@ -23,13 +23,13 @@ import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.iodine.IodineAuthUtils;
 import com.desklampstudios.thyroxine.eighth.sync.FetchBlockTask;
 import com.desklampstudios.thyroxine.eighth.sync.SignupActvTask;
 import com.desklampstudios.thyroxine.eighth.io.EighthSignupException;
 import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
-import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import java.util.List;
 
@@ -187,10 +187,10 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
             Log.w(TAG, "getActivity() is null");
             return null;
         }
-        Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        Account account = IodineAuthUtils.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
-            IodineAuthenticator.attemptAddAccount(getActivity());
+            IodineAuthUtils.attemptAddAccount(getActivity());
         }
         return account;
     }
@@ -243,7 +243,7 @@ public class BlockFragment extends Fragment implements LoaderManager.LoaderCallb
         String message = getActivity().getString(R.string.signup_changing, pair.actv.name);
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
 
-        Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        Account account = IodineAuthUtils.getIodineAccount(getActivity());
         mSignupActvTask = new SignupActvTask(getActivity(), account, new SignupActvTask.SignupResultListener() {
             @Override
             public void onSignupResult() {

@@ -4,8 +4,8 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.desklampstudios.thyroxine.auth.IodineApiHelper;
-import com.desklampstudios.thyroxine.auth.IodineAuthException;
+import com.desklampstudios.thyroxine.iodine.IodineApiHelper;
+import com.desklampstudios.thyroxine.iodine.IodineAuthException;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
 
 import org.xmlpull.v1.XmlPullParserException;

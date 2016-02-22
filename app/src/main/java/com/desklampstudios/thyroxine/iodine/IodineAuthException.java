@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.auth;
+package com.desklampstudios.thyroxine.iodine;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

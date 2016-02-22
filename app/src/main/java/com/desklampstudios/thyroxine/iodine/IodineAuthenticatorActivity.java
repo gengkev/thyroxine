@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.auth;
+package com.desklampstudios.thyroxine.iodine;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -31,8 +31,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import static com.desklampstudios.thyroxine.auth.IodineAuthException.InvalidPasswordException;
-import static com.desklampstudios.thyroxine.auth.IodineAuthException.InvalidUsernameException;
+import static com.desklampstudios.thyroxine.iodine.IodineAuthException.InvalidPasswordException;
+import static com.desklampstudios.thyroxine.iodine.IodineAuthException.InvalidUsernameException;
 
 /**
  * A login screen that offers login via username/password.
@@ -166,7 +166,7 @@ public class IodineAuthenticatorActivity extends AccountAuthenticatorActivity {
         }
 
         // get things started
-        IodineAuthenticator.onAccountCreated(account);
+        IodineAuthUtils.onAccountCreated(account);
 
         // Update the auth token (to prevent an extra round-trip)
         am.setAuthToken(account, IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, authToken);

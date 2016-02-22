@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.desklampstudios.thyroxine.AbstractXMLParser;
-import com.desklampstudios.thyroxine.auth.IodineApiHelper;
+import com.desklampstudios.thyroxine.iodine.IodineApiHelper;
 import com.desklampstudios.thyroxine.Utils;
 import com.desklampstudios.thyroxine.news.model.NewsEntry;
 

@@ -37,7 +37,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".auth.IodineAuthenticatorActivity"
+        <activity android:name=".iodine.IodineAuthenticatorActivity"
             android:label="@string/title_activity_iodine_login"
             android:windowSoftInputMode="adjustResize|stateVisible" />
         <activity android:name=".news.ui.NewsDetailActivity"
@@ -62,7 +62,7 @@
             android:label="@string/eighth_provider_name" />
 
         <!-- Authenticator service for Iodine login -->
-        <service android:name=".auth.IodineAuthenticatorService"
+        <service android:name=".iodine.IodineAuthenticatorService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />

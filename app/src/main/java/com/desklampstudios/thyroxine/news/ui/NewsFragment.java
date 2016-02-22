@@ -23,9 +23,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.desklampstudios.thyroxine.R;
+import com.desklampstudios.thyroxine.iodine.IodineAuthUtils;
 import com.desklampstudios.thyroxine.news.provider.NewsContract;
 import com.desklampstudios.thyroxine.news.sync.NewsSyncAdapter;
-import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -130,7 +130,7 @@ public class NewsFragment extends Fragment
         mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, this);
 
         // initialize mSyncActive, mSyncPending
-        final Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        final Account account = IodineAuthUtils.getIodineAccount(getActivity());
         mSyncActive = ContentResolver.isSyncActive(
                 account, NewsContract.CONTENT_AUTHORITY);
         mSyncPending = ContentResolver.isSyncPending(
@@ -157,7 +157,7 @@ public class NewsFragment extends Fragment
     @Override
     public void onStatusChanged(int which) {
         final Activity activity = getActivity();
-        final Account account = IodineAuthenticator.getIodineAccount(activity);
+        final Account account = IodineAuthUtils.getIodineAccount(activity);
 
         final boolean syncActive = ContentResolver.isSyncActive(
                 account, NewsContract.CONTENT_AUTHORITY);
@@ -194,10 +194,10 @@ public class NewsFragment extends Fragment
     }
 
     private Account checkLoginState() {
-        Account account = IodineAuthenticator.getIodineAccount(getActivity());
+        Account account = IodineAuthUtils.getIodineAccount(getActivity());
         if (account == null) { // not logged in
             Toast.makeText(getActivity(), R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
-            IodineAuthenticator.attemptAddAccount(getActivity());
+            IodineAuthUtils.attemptAddAccount(getActivity());
         }
         return account;
     }

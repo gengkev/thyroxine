@@ -1,7 +1,6 @@
 package com.desklampstudios.thyroxine;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
@@ -27,12 +26,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.desklampstudios.thyroxine.auth.IodineAuthException;
+import com.desklampstudios.thyroxine.iodine.IodineAuthException;
+import com.desklampstudios.thyroxine.iodine.IodineAuthUtils;
 import com.desklampstudios.thyroxine.directory.io.IodineDirectoryApi;
 import com.desklampstudios.thyroxine.directory.model.DirectoryInfo;
 import com.desklampstudios.thyroxine.eighth.ui.ScheduleFragment;
 import com.desklampstudios.thyroxine.news.ui.NewsFragment;
-import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Configure synchronization
-        IodineAuthenticator.configureSync(this);
+        IodineAuthUtils.configureSync(this);
 
         // Navigation drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -79,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 if (item.getItemId() == R.id.navigation_item_sign_out) {
-                    IodineAuthenticator.attemptLogout(MainActivity.this);
+                    IodineAuthUtils.attemptLogout(MainActivity.this);
                     return false;
                 }
                 selectItem(item.getItemId());
@@ -97,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         selectItem(drawerPosition);
 
         // load profile
-        Account account = IodineAuthenticator.getIodineAccount(this);
+        Account account = IodineAuthUtils.getIodineAccount(this);
         if (account != null) {
             new ProfileLoader(this, account).execute((Void) null);
         }
@@ -238,52 +237,39 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            final AccountManager am = AccountManager.get(mActivity);
-
-            boolean authTokenRetry = false;
-            while (true) {
-                String authToken;
-                try {
-                    authToken = am.blockingGetAuthToken(mAccount,
-                            IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
-                } catch (IOException e) {
-                    Log.e(TAG, "Connection error", e);
-                    mException = e;
-                    return null;
-                } catch (@NonNull OperationCanceledException | AuthenticatorException e) {
-                    Log.e(TAG, "Authentication error", e);
-                    mException = e;
-                    return null;
-                }
-                Log.v(TAG, "Got auth token: " + authToken);
-
-                try {
-                    info = IodineDirectoryApi.getDirectoryInfo(MainActivity.this, "", authToken);
-                    String uidString = String.valueOf(info.iodineUid);
-                    icon = IodineDirectoryApi.getUserIcon(MainActivity.this, uidString, authToken);
-                } catch (IodineAuthException.NotLoggedInException e) {
-                    Log.d(TAG, "Not logged in, oh no!", e);
-                    am.invalidateAuthToken(mAccount.type, authToken);
-
-                    // Automatically retry, but only once
-                    if (!authTokenRetry) {
-                        authTokenRetry = true;
-                        Log.d(TAG, "Retrying fetch with new auth token.");
-                        continue;
-                    } else {
-                        Log.e(TAG, "Retried to get auth token already, quitting.");
+            try {
+                IodineAuthUtils.withAuthTokenBlocking(mActivity, mAccount, new IodineAuthUtils.AuthTokenOperation<Void>() {
+                    @Override
+                    public Void performOperation(String authToken)
+                            throws IodineAuthException, IOException, XmlPullParserException {
+                        info = IodineDirectoryApi.getDirectoryInfo(MainActivity.this, "", authToken);
+                        String uidString = String.valueOf(info.iodineUid);
+                        icon = IodineDirectoryApi.getUserIcon(MainActivity.this, uidString, authToken);
                         return null;
                     }
-                } catch (IOException | IodineAuthException e) {
-                    Log.e(TAG, "Connection error", e);
-                    mException = e;
-                    return null;
-                } catch (XmlPullParserException e) {
-                    Log.e(TAG, "XML parsing error", e);
-                    mException = e;
-                    return null;
-                }
-                break;
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "Connection error", e);
+                mException = e;
+                return null;
+            } catch (OperationCanceledException e) {
+                Log.e(TAG, "Operation canceled", e);
+                mException = e;
+                return null;
+            } catch (AuthenticatorException e) {
+                Log.e(TAG, "Authenticator error", e);
+                mException = e;
+                return null;
+            } catch (IodineAuthException e) {
+                Log.e(TAG, "Auth error", e);
+                mException = e;
+                return null;
+            } catch (XmlPullParserException e) {
+                Log.e(TAG, "XML parsing error", e);
+                mException = e;
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
 
             return null;

@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.auth;
+package com.desklampstudios.thyroxine.iodine;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -21,9 +21,10 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class IodineApiHelper {
     private static final String TAG = IodineApiHelper.class.getSimpleName();
-    private static final String IODINE_DOMAIN = "iodine.tjhsst.edu";
-    private static final String IODINE_BASE_URL = "https://" + IODINE_DOMAIN;
-    private static final String LOGIN_URL = IODINE_BASE_URL + "/api/";
+
+    public static final String IODINE_DOMAIN = "iodine.tjhsst.edu";
+    public static final String IODINE_BASE_URL = "https://" + IODINE_DOMAIN;
+    public static final String LOGIN_URL = IODINE_BASE_URL + "/api/";
 
     public static final String PUBLIC_NEWS_FEED_URL = IODINE_BASE_URL + "/feeds/rss";
     public static final String NEWS_LIST_URL = IODINE_BASE_URL + "/api/news/list?end=100";
@@ -38,6 +39,7 @@ public class IodineApiHelper {
 
     private static final String SESSION_ID_COOKIE = "PHPSESSID";
     private static final String PASS_VECTOR_COOKIE = "IODINE_PASS_VECTOR";
+
 
     public static void checkResponseCode(Context context, HttpsURLConnection conn)
             throws IOException, XmlPullParserException, IodineAuthException {
@@ -64,7 +66,7 @@ public class IodineApiHelper {
                 "&login_password=" + URLEncoder.encode(password, "UTF-8");
 
         // create request
-        URL url = new URL(LOGIN_URL);
+        URL url = new URL(IodineApiHelper.LOGIN_URL);
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setFixedLengthStreamingMode(query.length());

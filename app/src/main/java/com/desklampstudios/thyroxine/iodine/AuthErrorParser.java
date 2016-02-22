@@ -1,4 +1,4 @@
-package com.desklampstudios.thyroxine.auth;
+package com.desklampstudios.thyroxine.iodine;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -12,7 +12,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class AuthErrorParser extends AbstractXMLParser {
+class AuthErrorParser extends AbstractXMLParser {
     private static final String TAG = AuthErrorParser.class.getSimpleName();
 
     public AuthErrorParser(Context context) throws XmlPullParserException {

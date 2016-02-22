@@ -6,8 +6,8 @@ import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.desklampstudios.thyroxine.auth.IodineApiHelper;
-import com.desklampstudios.thyroxine.auth.IodineAuthException;
+import com.desklampstudios.thyroxine.iodine.IodineApiHelper;
+import com.desklampstudios.thyroxine.iodine.IodineAuthException;
 import com.desklampstudios.thyroxine.directory.model.DirectoryInfo;
 
 import org.xmlpull.v1.XmlPullParserException;

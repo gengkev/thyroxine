@@ -1,7 +1,6 @@
 package com.desklampstudios.thyroxine.eighth.sync;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
@@ -22,15 +21,15 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
 
-import com.desklampstudios.thyroxine.auth.IodineAuthException;
+import com.desklampstudios.thyroxine.iodine.IodineAuthException;
 import com.desklampstudios.thyroxine.Utils;
+import com.desklampstudios.thyroxine.iodine.IodineAuthUtils;
 import com.desklampstudios.thyroxine.eighth.io.IodineEighthApi;
 import com.desklampstudios.thyroxine.eighth.provider.EighthContract;
 import com.desklampstudios.thyroxine.eighth.model.EighthActv;
 import com.desklampstudios.thyroxine.eighth.model.EighthActvInstance;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlock;
 import com.desklampstudios.thyroxine.eighth.model.EighthBlockAndActv;
-import com.desklampstudios.thyroxine.auth.IodineAuthenticator;
 import com.desklampstudios.thyroxine.SyncUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -169,59 +168,38 @@ public class EighthSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(@NonNull Account account, @NonNull Bundle extras, String authority,
                               @NonNull ContentProviderClient provider, @NonNull SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
-        final AccountManager am = AccountManager.get(getContext());
 
         List<EighthBlockAndActv> schedule;
-        boolean authTokenRetry = false;
-        while (true) {
-            // Part I. Get auth token
-            String authToken;
-            try {
-                authToken = am.blockingGetAuthToken(account,
-                        IodineAuthenticator.IODINE_COOKIE_AUTH_TOKEN, true);
-            } catch (IOException e) {
-                Log.e(TAG, "Connection error", e);
-                syncResult.stats.numIoExceptions++;
-                return;
-            } catch (OperationCanceledException | AuthenticatorException e) {
-                Log.e(TAG, "Authentication error", e);
-                syncResult.stats.numAuthExceptions++;
-                return;
-            }
-            Log.v(TAG, "Got auth token: " + authToken);
-
-
-            // Part II. Get schedule (list of blocks)
-            try {
-                schedule = IodineEighthApi.fetchSchedule(getContext(), authToken);
-            } catch (IodineAuthException.NotLoggedInException e) {
-                Log.d(TAG, "Not logged in, invalidating auth token", e);
-                am.invalidateAuthToken(account.type, authToken);
-
-                // Automatically retry sync, but only once
-                if (!authTokenRetry) {
-                    authTokenRetry = true;
-                    Log.d(TAG, "Retrying sync with new auth token.");
-                    continue;
-                } else {
-                    Log.e(TAG, "Retried to get auth token already, quitting.");
-                    syncResult.stats.numAuthExceptions++;
-                    return;
-                }
-            } catch (IodineAuthException e) {
-                Log.e(TAG, "Iodine auth error", e);
-                syncResult.stats.numAuthExceptions++;
-                return;
-            } catch (IOException e) {
-                Log.e(TAG, "Connection error", e);
-                syncResult.stats.numIoExceptions++;
-                return;
-            } catch (XmlPullParserException e) {
-                Log.e(TAG, "XML parsing error", e);
-                syncResult.stats.numParseExceptions++;
-                return;
-            }
-            break;
+        try {
+            schedule = IodineAuthUtils.withAuthTokenBlocking(getContext(), account,
+                    new IodineAuthUtils.AuthTokenOperation<List<EighthBlockAndActv>>() {
+                        @Override
+                        public List<EighthBlockAndActv> performOperation(String authToken) throws Exception {
+                            return IodineEighthApi.fetchSchedule(getContext(), authToken);
+                        }
+                    });
+        } catch (IOException e) {
+            Log.e(TAG, "Connection error", e);
+            syncResult.stats.numIoExceptions++;
+            return;
+        } catch (OperationCanceledException e) {
+            Log.e(TAG, "Operation canceled", e);
+            syncResult.stats.numAuthExceptions++;
+            return;
+        } catch (AuthenticatorException e) {
+            Log.e(TAG, "Authentication error", e);
+            syncResult.stats.numAuthExceptions++;
+            return;
+        } catch (IodineAuthException e) {
+            Log.e(TAG, "Iodine auth error", e);
+            syncResult.stats.numAuthExceptions++;
+            return;
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XML parsing error", e);
+            syncResult.stats.numParseExceptions++;
+            return;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         Log.v(TAG, "Got schedule (" + schedule.size() + " blocks)");
