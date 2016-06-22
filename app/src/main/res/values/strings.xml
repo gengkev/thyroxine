@@ -52,6 +52,17 @@
     <string name="error_not_logged_in">Not logged in</string>
     <string name="iodine_auth_error">Iodine authentication error: %1$s</string>
 
+    <!-- Login strings for Ion -->
+    <string name="login_instructions_ion">
+        Sign in below with your TJHSST Ion account.
+    </string>
+    <string name="login_disclaimer_ion">
+        This application is not officially affiliated with Ion. Your username and password
+        will not be stored.
+    </string>
+    <string name="action_sign_in_ion">Sign into Thyroxine with Ion</string>
+    <string name="ion_auth_error">Ion authentication error: %1$s</string>
+
     <!-- News strings -->
     <string name="news_provider_name">News</string>
     <string name="title_fragment_news">News</string>
