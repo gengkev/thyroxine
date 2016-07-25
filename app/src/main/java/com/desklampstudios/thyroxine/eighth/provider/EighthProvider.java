@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.desklampstudios.thyroxine.external.SelectionBuilder;
 
@@ -122,7 +123,11 @@ public class EighthProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(@NonNull Uri uri, @NonNull ContentValues values) {
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
+        if (values == null) {
+            throw new IllegalArgumentException("Cannot insert null ContentValues");
+        }
+
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         Uri returnUri;

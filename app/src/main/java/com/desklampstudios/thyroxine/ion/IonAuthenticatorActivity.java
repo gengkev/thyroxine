@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -12,10 +13,10 @@ import android.net.UrlQuerySanitizer;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -42,6 +43,7 @@ public class IonAuthenticatorActivity extends AccountAuthenticatorActivity {
     private View mProgressView;
     private WebView mWebView;
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -157,10 +159,22 @@ public class IonAuthenticatorActivity extends AccountAuthenticatorActivity {
     }
 
     private class OAuthWebViewClient extends WebViewClient {
+        @SuppressWarnings("deprecation")
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            final Uri uri = Uri.parse(url);
+            return handleUri(uri);
+        }
+
+        @TargetApi(Build.VERSION_CODES.N)
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            final Uri uri = request.getUrl();
+            return handleUri(uri);
+        }
+
+        private boolean handleUri(Uri uri) {
             Uri redirectUri = Uri.parse(IonApiHelper.REDIRECT_URL);
-            Uri uri = Uri.parse(url);
             if (uri.getHost().equals(redirectUri.getHost()) &&
                     uri.getPath().equals(redirectUri.getPath())) {
                 handleOnComplete(uri);

@@ -40,6 +40,9 @@
         <activity android:name=".iodine.IodineAuthenticatorActivity"
             android:label="@string/title_activity_iodine_login"
             android:windowSoftInputMode="adjustResize|stateVisible" />
+        <activity android:name=".ion.IonAuthenticatorActivity"
+            android:label="@string/title_activity_iodine_login"
+            android:windowSoftInputMode="adjustResize|stateVisible" />
         <activity android:name=".news.ui.NewsDetailActivity"
             android:label="@string/title_activity_entry_detail"
             android:parentActivityName=".MainActivity" />

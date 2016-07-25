@@ -70,10 +70,8 @@ public class NewsSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               @NonNull ContentProviderClient provider, @NonNull SyncResult syncResult) {
         Log.d(TAG, "onPerformSync for account " + account);
-        final AccountManager am = AccountManager.get(getContext());
 
         List<NewsEntry> newsList;
-
         try {
             newsList = IodineAuthUtils.withAuthTokenBlocking(getContext(), account,
                     new IodineAuthUtils.AuthTokenOperation<List<NewsEntry>>() {

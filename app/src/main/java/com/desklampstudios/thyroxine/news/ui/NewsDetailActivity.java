@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
@@ -68,7 +69,7 @@ public class NewsDetailActivity extends AppCompatActivity
         mLikesView = (TextView) findViewById(R.id.news_entry_likes);
         mWebView = (WebView) findViewById(R.id.news_entry_webview);
 
-        mWebView.setBackgroundColor(getResources().getColor(R.color.background));
+        mWebView.setBackgroundColor(ContextCompat.getColor(this, R.color.background));
 
         // initialize loader
         getLoaderManager().initLoader(0, null, this);
@@ -132,7 +133,7 @@ public class NewsDetailActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSupportActionModeStarted(ActionMode mode) {
+    public void onSupportActionModeStarted(@NonNull ActionMode mode) {
         // Workaround so that there aren't two action bars upon text selection
         getSupportActionBar().hide();
 
@@ -140,7 +141,7 @@ public class NewsDetailActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSupportActionModeFinished(ActionMode mode) {
+    public void onSupportActionModeFinished(@NonNull ActionMode mode) {
         // Workaround so that there aren't two action bars upon text selection
         getSupportActionBar().show();
 

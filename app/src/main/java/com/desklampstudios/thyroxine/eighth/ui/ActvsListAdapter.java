@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
@@ -65,44 +66,42 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int actualPosition) {
-        final Resources resources = mContext.getResources();
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int actualPosition) {
         final int viewType = getItemViewType(actualPosition);
 
         if (viewType == TYPE_ITEM) {
             final ViewHolder itemHolder = (ViewHolder) holder;
-            final int itemPosition = actualPosition;
 
-            EighthBlockAndActv pair = getItem(itemPosition);
+            EighthBlockAndActv pair = getItem(actualPosition);
             EighthActv actv = pair.actv;
             EighthActvInstance actvInstance = pair.actvInstance;
 
             itemHolder.mNameView.setText(formatName(actv));
             itemHolder.mDescriptionView.setText(formatDescription(actv, actvInstance));
-            itemHolder.mGroupView.setText(formatGroup(actv, itemPosition));
+            itemHolder.mGroupView.setText(formatGroup(actv, actualPosition));
 
             long allFlags = actv.flags | actvInstance.flags;
             boolean full = actvInstance.isFull();
 
             // display statuses
-            String statusText = getActvStatuses(resources, allFlags, full);
+            String statusText = getActvStatuses(allFlags, full);
             itemHolder.mStatusView.setText(Html.fromHtml(statusText));
 
             // set background color
-            int color = getActvColor(resources, actualPosition, allFlags);
+            int color = getActvColor(actualPosition, allFlags);
             itemHolder.mView.findViewById(R.id.eighth_activity_content).setBackgroundColor(color);
 
             // set event listeners
             itemHolder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mListener != null) mListener.onItemClick(view, itemPosition);
+                    if (mListener != null) mListener.onItemClick(view, itemHolder.getAdapterPosition());
                 }
             });
             itemHolder.mView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-                    return mListener != null && mListener.onItemLongClick(view, itemPosition);
+                    return mListener != null && mListener.onItemLongClick(view, itemHolder.getAdapterPosition());
                 }
             });
         }
@@ -111,7 +110,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    private int getActvColor(@NonNull final Resources resources, int position, long flags) {
+    private int getActvColor(int position, long flags) {
         int color = 0;
 /*
         // restricted
@@ -123,7 +122,7 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 */
         // cancelled
         if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
-            color = resources.getColor((position % 2 == 0) ?
+            color = ContextCompat.getColor(mContext, (position % 2 == 0) ?
                     R.color.actvInstance_background_cancelled_1 :
                     R.color.actvInstance_background_cancelled_2);
         }
@@ -131,39 +130,39 @@ class ActvsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @NonNull
-    private String getActvStatuses(@NonNull final Resources resources, long flags, boolean full) {
+    private String getActvStatuses(long flags, boolean full) {
         ArrayList<String> statuses = new ArrayList<>();
-        final String fontColor = resources.getString(R.string.font_color);
+        final String fontColor = mContext.getString(R.string.font_color);
 
         // sticky (always? implies restricted)
         if ((flags & EighthActv.FLAG_STICKY) != 0) {
-            int textColor = resources.getColor(R.color.actv_textColor_sticky);
+            int textColor = ContextCompat.getColor(mContext, R.color.actv_textColor_sticky);
             statuses.add(String.format(fontColor,
-                    resources.getString(R.string.actv_status_sticky),
+                    mContext.getString(R.string.actv_status_sticky),
                     Utils.colorToHtmlHex(textColor)));
         }
         // restricted
         else if ((flags & EighthActv.FLAG_RESTRICTED) != 0) {
-            int textColor = resources.getColor(R.color.actv_textColor_restricted);
+            int textColor = ContextCompat.getColor(mContext, R.color.actv_textColor_restricted);
             statuses.add(String.format(fontColor,
-                    resources.getString(R.string.actv_status_restricted),
+                    mContext.getString(R.string.actv_status_restricted),
                     Utils.colorToHtmlHex(textColor)));
         }
 
         // full
         if (full) {
-            int textColor = resources.getColor(R.color.actvInstance_textColor_full);
+            int textColor = ContextCompat.getColor(mContext, R.color.actvInstance_textColor_full);
             statuses.add(String.format(fontColor,
-                    resources.getString(R.string.actvInstance_status_full),
+                    mContext.getString(R.string.actvInstance_status_full),
                     Utils.colorToHtmlHex(textColor)));
         }
 
         // cancelled
         if ((flags & EighthActvInstance.FLAG_CANCELLED) != 0) {
-            int textColor = resources.getColor(R.color.actvInstance_textColor_cancelled);
+            int textColor = ContextCompat.getColor(mContext, R.color.actvInstance_textColor_cancelled);
             statuses.clear(); // clear other statuses
-            statuses.add(resources.getString(R.string.font_color,
-                    resources.getString(R.string.actvInstance_status_cancelled),
+            statuses.add(mContext.getString(R.string.font_color,
+                    mContext.getString(R.string.actvInstance_status_cancelled),
                     Utils.colorToHtmlHex(textColor)));
         }
 

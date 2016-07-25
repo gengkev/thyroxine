@@ -37,7 +37,7 @@ public class IodineEighthApi {
         IodineApiHelper.checkResponseCode(context, conn);
 
         // Parse data
-        InputStream stream = new BufferedInputStream(conn.getInputStream());;
+        InputStream stream = new BufferedInputStream(conn.getInputStream());
         EighthGetBlockParser parser = new EighthGetBlockParser(context);
 
         try {
@@ -69,7 +69,7 @@ public class IodineEighthApi {
         IodineApiHelper.checkResponseCode(context, conn);
 
         // Parse data
-        InputStream stream = new BufferedInputStream(conn.getInputStream());;
+        InputStream stream = new BufferedInputStream(conn.getInputStream());
         EighthListBlocksParser parser = new EighthListBlocksParser(context);
 
         try {

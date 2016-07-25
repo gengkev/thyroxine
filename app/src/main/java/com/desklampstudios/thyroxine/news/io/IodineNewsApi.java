@@ -64,7 +64,7 @@ public class IodineNewsApi {
         IodineApiHelper.checkResponseCode(context, conn);
 
         // Parse data
-        InputStream stream = new BufferedInputStream(conn.getInputStream());;
+        InputStream stream = new BufferedInputStream(conn.getInputStream());
         NewsListParser parser = new NewsListParser(context);
 
         try {
