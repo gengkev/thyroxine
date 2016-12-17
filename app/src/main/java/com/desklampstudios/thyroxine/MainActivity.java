@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         // listen for navigation changes
         mDrawerNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.navigation_item_sign_out) {
                     IodineAuthUtils.attemptLogout(MainActivity.this);
                     return false;
