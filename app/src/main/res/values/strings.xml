@@ -113,9 +113,11 @@
 
     <!-- SyncAdapter related strings -->
     <string name="iodine_authenticator_name">Thyroxine (Iodine)</string>
+    <string name="ion_authenticator_name">Thyroxine (Ion)</string>
     <string name="iodine_account_only_one">
         Only one Iodine account can exist at a time. To add another, remove the current one first.
         This can be done in the device settings under the Accounts section.
     </string>
     <string name="iodine_cookie_auth_token_label">TJHSST Iodine Account</string>
+    <string name="ion_oauth2_auth_token_label">TJHSST Ion Account (OAuth)</string>
 </resources>

@@ -10,4 +10,5 @@
 
     <!-- Warning: sync account types also declared in IodineAuthenticator -->
     <string name="iodine_account_type" translatable="false">iodine.thyroxine.desklampstudios.com</string>
+    <string name="ion_account_type" translatable="false">ion.tjhsst.edu</string>
 </resources>

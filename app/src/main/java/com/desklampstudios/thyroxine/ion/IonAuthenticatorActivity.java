@@ -13,6 +13,8 @@ import android.net.UrlQuerySanitizer;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -21,8 +23,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.desklampstudios.thyroxine.BetterAsyncTask;
 import com.desklampstudios.thyroxine.R;
 import com.desklampstudios.thyroxine.external.AccountAuthenticatorActivity;
+
+import java.util.UUID;
 
 /**
  * A login screen that offers login via username/password.
@@ -36,8 +41,9 @@ public class IonAuthenticatorActivity extends AccountAuthenticatorActivity {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    //@Nullable
-    //private UserLoginTask mAuthTask = null;
+    @Nullable
+    private GetTokenTask mAuthTask = null;
+    private String mState = null;
 
     // UI references
     private View mProgressView;
@@ -59,8 +65,13 @@ public class IonAuthenticatorActivity extends AccountAuthenticatorActivity {
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new OAuthWebViewClient());
 
+        // TODO: lol fix this
         // Ignore account / auth token types passed in intent
         // This activity handles only one combination
+
+        mState = UUID.randomUUID().toString();
+        String url = IonApiHelper.makeAuthURL(mState);
+        mWebView.loadUrl(url);
     }
 
     private void handleOnComplete(Uri uri) {
@@ -82,16 +93,56 @@ public class IonAuthenticatorActivity extends AccountAuthenticatorActivity {
             Toast.makeText(this, "Invalid query string: " + query, Toast.LENGTH_LONG).show();
             Log.e(TAG, String.format("Invalid query string: %s (%s, %s, %s)", query, code, state, error));
             setResult(Activity.RESULT_CANCELED);
-        }
-        else {
-            Intent data = new Intent();
-            data.putExtra("code", code);
-            data.putExtra("state", state);
-            data.putExtra("error", error);
-            setResult(Activity.RESULT_OK, data);
+            finish();
+            return;
         }
 
-        finish();
+        // begin code from handleOAuthResponse
+        Log.d(TAG, "handleOAuthResponse: code=" + code + ", state=" + state + ", error=" + error);
+
+        if (error != null) {
+            Toast.makeText(this, "Error: " + error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Error: " + error);
+            return;
+        }
+        if (!state.equals(mState)) {
+            Toast.makeText(this, "Invalid state: " + state, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Invalid state: " + state);
+            return;
+        }
+
+        Toast.makeText(this, "Got authorization code: " + code, Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "Got authorization code: " + code);
+
+        mAuthTask = new GetTokenTask(new BetterAsyncTask.ResultListener<Pair<String,String>>() {
+
+            @Override
+            public void onSuccess(Pair<String, String> tokens) {
+                final String accessToken = tokens.first;
+                final String refreshToken = tokens.second;
+
+                Toast.makeText(IonAuthenticatorActivity.this,
+                        "Got tokens: " + accessToken + ", " + refreshToken,
+                        Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Got access token: " + accessToken + " and refresh token: " + refreshToken);
+
+                // TODO: get username rip
+                final Intent res = new Intent();
+                res.putExtra(AccountManager.KEY_ACCOUNT_NAME, "unknown_username");
+                res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, IonAuthenticator.ACCOUNT_TYPE);
+                res.putExtra(AccountManager.KEY_AUTHTOKEN, accessToken);
+                res.putExtra(AccountManager.KEY_PASSWORD, refreshToken);
+                finishLogin(res);
+                finish();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(IonAuthenticatorActivity.this, "Error: " + e, Toast.LENGTH_LONG).show();
+            }
+
+        });
+        mAuthTask.execute(code);
     }
 
     private void finishLogin(@NonNull Intent intent) {

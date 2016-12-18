@@ -5,6 +5,7 @@
     <style name="ViewAreaTheme">
         <item name="android:background">@color/background</item>
     </style>
+
     <style name="ToolbarTheme">
         <item name="android:elevation">4dp</item>
     </style>

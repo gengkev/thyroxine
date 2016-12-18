@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.desklampstudios.thyroxine" >
+    package="com.desklampstudios.thyroxine">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -18,88 +18,117 @@
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
     <!-- Permission to protect SyncAdapters -->
-    <permission android:name="com.desklampstudios.thyroxine.auth.SYNC_ADAPTER"
+    <permission
+        android:name="com.desklampstudios.thyroxine.auth.SYNC_ADAPTER"
         android:protectionLevel="signature" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".Main2Activity"
             android:label="@string/app_name"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".iodine.IodineAuthenticatorActivity"
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".iodine.IodineAuthenticatorActivity"
             android:label="@string/title_activity_iodine_login"
             android:windowSoftInputMode="adjustResize|stateVisible" />
-        <activity android:name=".ion.IonAuthenticatorActivity"
+        <activity
+            android:name=".ion.IonAuthenticatorActivity"
             android:label="@string/title_activity_iodine_login"
             android:windowSoftInputMode="adjustResize|stateVisible" />
-        <activity android:name=".news.ui.NewsDetailActivity"
+        <activity
+            android:name=".news.ui.NewsDetailActivity"
             android:label="@string/title_activity_entry_detail"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".eighth.ui.DayActivity"
+        <activity
+            android:name=".eighth.ui.DayActivity"
             android:label="@string/title_activity_day"
             android:parentActivityName=".MainActivity" />
 
         <!-- News content provider -->
-        <provider android:name=".news.provider.NewsProvider"
+        <provider
+            android:name=".news.provider.NewsProvider"
             android:authorities="@string/news_content_authority"
             android:exported="false"
-            android:syncable="true"
-            android:label="@string/news_provider_name" />
+            android:label="@string/news_provider_name"
+            android:syncable="true" />
 
         <!-- Eighth content provider -->
-        <provider android:name=".eighth.provider.EighthProvider"
+        <provider
+            android:name=".eighth.provider.EighthProvider"
             android:authorities="@string/eighth_content_authority"
             android:exported="false"
-            android:syncable="true"
-            android:label="@string/eighth_provider_name" />
+            android:label="@string/eighth_provider_name"
+            android:syncable="true" />
 
         <!-- Authenticator service for Iodine login -->
-        <service android:name=".iodine.IodineAuthenticatorService"
+        <service
+            android:name=".iodine.IodineAuthenticatorService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/iodine_authenticator" />
         </service>
+        <service
+            android:name=".ion.IonAuthenticatorService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/ion_authenticator" />
+        </service>
 
         <!-- SyncAdapter service for News -->
-        <service android:name=".news.sync.NewsSyncService"
+        <service
+            android:name=".news.sync.NewsSyncService"
             android:exported="true"
-            android:process=":sync"
-            android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER">
+            android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER"
+            android:process=":sync">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
+
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/news_syncadapter" />
         </service>
 
         <!-- SyncAdapter service for Eighth -->
-        <service android:name=".eighth.sync.EighthSyncService"
+        <service
+            android:name=".eighth.sync.EighthSyncService"
             android:exported="true"
-            android:process=":sync"
-            android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER">
+            android:permission="com.desklampstudios.thyroxine.sync.SYNC_ADAPTER"
+            android:process=":sync">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
+
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/eighth_syncadapter" />
         </service>
 
     </application>
+
 </manifest>

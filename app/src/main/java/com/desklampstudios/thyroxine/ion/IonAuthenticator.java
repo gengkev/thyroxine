@@ -20,9 +20,8 @@ import java.util.Arrays;
 
 public class IonAuthenticator extends AbstractAccountAuthenticator {
     private static final String TAG = IonAuthenticator.class.getSimpleName();
-    public static final String ACCOUNT_TYPE = "ion.thyroxine.desklampstudios.com";
+    public static final String ACCOUNT_TYPE = "ion.tjhsst.edu";
     public static final String ION_OAUTH2_TOKEN = "ion-oauth2";
-    public static final String ION_OAUTH2_CLIENT_ID = "n0UIi7wEifvoqyUy0FkCWYF72BpwIBrqalQ8qd6P";
 
     private final Context mContext;
     private final Handler handler = new Handler();
@@ -132,12 +131,15 @@ public class IonAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public String getAuthTokenLabel(String authTokenType) {
-        return null;
+        if (ION_OAUTH2_TOKEN.equals(authTokenType)) {
+            return mContext.getString(R.string.ion_oauth2_auth_token_label);
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -149,6 +151,6 @@ public class IonAuthenticator extends AbstractAccountAuthenticator {
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account,
                               String[] features) throws NetworkErrorException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }

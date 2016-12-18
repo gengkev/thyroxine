@@ -1,7 +1,6 @@
 <resources>
 
-    <style name="AppTheme" parent="AppTheme.Base">
-    </style>
+    <style name="AppTheme" parent="AppTheme.Base"></style>
 
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
@@ -15,7 +14,11 @@
         <item name="android:background">@color/background</item>
         <item name="android:foreground">?android:windowContentOverlay</item>
     </style>
-    <style name="ToolbarTheme">
-    </style>
+
+    <style name="ToolbarTheme"></style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>
